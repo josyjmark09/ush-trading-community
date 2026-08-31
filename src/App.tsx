@@ -10,6 +10,7 @@ import { ContactModal } from './components/ContactModal';
 import { AdminModal } from './components/AdminModal';
 
 function MainApp() {
+  const { settings } = useSite();
   const [activeTab, setActiveTab] = useState<NavTab>('home');
   const [isTelegramModalOpen, setIsTelegramModalOpen] = useState(false);
   const [isBrokerModalOpen, setIsBrokerModalOpen] = useState(false);
@@ -20,6 +21,18 @@ function MainApp() {
     isOpen: false,
     type: 'contact',
   });
+
+  // Sync website favicon with custom branding logo if set
+  useEffect(() => {
+    const faviconHref = settings.branding.logoUrl || '/favicon.svg';
+    let iconLink = document.querySelector("link[rel~='icon']") as HTMLLinkElement | null;
+    if (!iconLink) {
+      iconLink = document.createElement('link');
+      iconLink.rel = 'icon';
+      document.head.appendChild(iconLink);
+    }
+    iconLink.href = faviconHref;
+  }, [settings.branding.logoUrl]);
 
   const handleTabChange = (tab: NavTab) => {
     setActiveTab(tab);
