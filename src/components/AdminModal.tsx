@@ -6,8 +6,6 @@ import {
   RotateCcw, 
   Upload, 
   Link as LinkIcon, 
-  Image as ImageIcon, 
-  CheckCircle, 
   CheckCircle2, 
   XCircle, 
   Trash2, 
@@ -16,29 +14,20 @@ import {
   Star, 
   ShieldCheck, 
   Send, 
-  Globe, 
-  Settings, 
-  MessageSquare, 
-  TrendingUp, 
   Sliders, 
-  Download, 
   FileJson, 
   HelpCircle, 
-  Info,
-  Check,
-  AlertCircle,
-  Palette,
-  Layers,
-  Users,
-  BookOpen,
-  Database,
+  Palette, 
+  Layers, 
+  Users, 
+  BookOpen, 
+  Database, 
   Sparkles,
-  Zap,
-  Clock
+  MessageSquare
 } from 'lucide-react';
-import { ReviewItem, FAQItem, FeatureItem } from '../types';
+import { ReviewItem, FAQItem } from '../types';
 
-const COUNTRIES_LIST = [
+const COUNTRIES_LIST不易 = [
   { name: 'United Kingdom', code: 'gb' },
   { name: 'United States', code: 'us' },
   { name: 'Nigeria', code: 'ng' },
@@ -71,7 +60,6 @@ export const AdminModal: React.FC = () => {
     addReview,
     updateReview,
     toggleAutoApproveReviews,
-    exportSettingsJson,
     importSettingsJson,
   } = useSite();
 
@@ -93,7 +81,7 @@ export const AdminModal: React.FC = () => {
   
   // New/Edit Review Form Fields
   const [revName, setRevName] = useState('');
-  const [revCountry, setRevCountry] = useState(COUNTRIES_LIST[0]);
+  const [revCountry, setRevCountry] = useState(COUNTRIES_LIST不易[0]);
   const [revRating, setRevRating] = useState(5);
   const [revContent, setRevContent] = useState('');
   const [revStatus, setRevStatus] = useState<'approved' | 'pending' | 'rejected'>('approved');
@@ -119,16 +107,16 @@ export const AdminModal: React.FC = () => {
   };
 
   const handleImageFileUpload = (e: React.ChangeEvent<HTMLInputElement>, targetField: 'logo' | 'heroChart' | 'communityChart') => {
-    const file不易 = e.target.files?.[0];
-    if (!file不易) return;
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-    if (file不易.size > 5 * 1024 * 1024) {
+    if (file.size > 5 * 1024 * 1024) {
       alert('File is larger than 5MB. Please choose a smaller image.');
       return;
     }
 
-    const reader不易 = new FileReader();
-    reader不易.onload = (loadEvent) => {
+    const reader = new FileReader();
+    reader.onload = (loadEvent) => {
       const result = loadEvent.target?.result as string;
       if (result) {
         if (targetField === 'logo') {
@@ -163,10 +151,10 @@ export const AdminModal: React.FC = () => {
         setTimeout(() => setSaveSuccessToast(false), 2000);
       }
     };
-    reader不易.readAsDataURL(file不易);
+    reader.readAsDataURL(file);
   };
 
-  const handleSaveNewReview = (e: React.FormEvent) => {
+  const handleSaveNewReview紧 = (e: React.FormEvent) => {
     e.preventDefault();
     if (!revName.trim() || !revContent.trim()) return;
 
@@ -203,7 +191,7 @@ export const AdminModal: React.FC = () => {
     setEditingReviewId(item.id);
     setIsAddingReview(true);
     setRevName(item.name);
-    const c = COUNTRIES_LIST.find((x) => x.code === item.countryCode || x.name === item.country) || COUNTRIES_LIST[0];
+    const c = COUNTRIES_LIST不易.find((x) => x.code === item.countryCode || x.name === item.country) || COUNTRIES_LIST不易[0];
     setRevCountry(c);
     setRevRating(item.rating);
     setRevContent(item.content);
@@ -264,8 +252,8 @@ export const AdminModal: React.FC = () => {
     }
   };
 
-  const pendingCount不易 = reviews.filter((r) => r.status === 'pending').length;
-  const approvedCount不易 = reviews.filter((r) => r.status === 'approved').length;
+  const pendingCount = reviews.filter((r) => r.status === 'pending').length;
+  const approvedCount = reviews.filter((r) => r.status === 'approved').length;
 
   const filteredReviews = reviews.filter((r) => {
     if (reviewFilter === 'all') return true;
@@ -273,66 +261,67 @@ export const AdminModal: React.FC = () => {
   });
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/80 backdrop-blur-md p-2 sm:p-4 overflow-y-auto animate-in fade-in">
-      <div className="relative w-full max-w-5xl bg-white rounded-2xl sm:rounded-3xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[92vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-md p-0 sm:p-4 overflow-hidden animate-in fade-in">
+      <div className="relative w-full h-full sm:h-auto sm:max-h-[92vh] sm:max-w-5xl bg-white sm:rounded-3xl shadow-2xl border-0 sm:border border-slate-200 overflow-hidden flex flex-col">
         
-        {/* Admin Header Bar */}
-        <div className="bg-gradient-to-r from-[#091C35] via-[#003B94] to-[#0053CF] text-white px-5 sm:px-8 py-4 sm:py-5 flex items-center justify-between shrink-0 shadow-md">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-white/10 backdrop-blur-xs flex items-center justify-center border border-white/20">
-              <Sliders className="w-5 h-5 text-sky-300" />
+        {/* 1. Admin Header Bar */}
+        <div className="bg-gradient-to-r from-[#091C35] via-[#003B94] to-[#0053CF] text-white px-3.5 sm:px-8 py-3 sm:py-4 flex items-center justify-between shrink-0 shadow-md">
+          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-white/10 backdrop-blur-xs flex items-center justify-center border border-white/20 shrink-0">
+              <Sliders className="w-4 h-4 sm:w-5 sm:h-5 text-sky-300" />
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h2 className="font-manrope text-[18px] sm:text-[20px] font-extrabold tracking-tight">
-                  USH Management & CMS Control Panel
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                <h2 className="font-manrope text-[14px] sm:text-[18px] font-extrabold tracking-tight truncate">
+                  USH Management CMS
                 </h2>
-                <span className="bg-sky-400/20 text-sky-200 text-[10px] uppercase font-bold px-2 py-0.5 rounded-full border border-sky-300/30">
+                <span className="bg-sky-400/20 text-sky-200 text-[9px] sm:text-[10px] uppercase font-bold px-1.5 sm:px-2 py-0.5 rounded-full border border-sky-300/30 shrink-0">
                   Live Admin
                 </span>
               </div>
-              <p className="text-slate-300 text-[12px] font-inter">
-                Edit branding, texts, images, CTA links, and moderate trader reviews in real-time.
+              <p className="text-slate-300 text-[11px] sm:text-[12px] font-inter hidden xs:block truncate">
+                Edit branding, CTAs, links & moderate trader reviews in real-time.
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             <button
               onClick={handleSaveAll}
-              className="hidden sm:flex items-center gap-1.5 bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2 rounded-xl text-[13px] font-bold shadow-md transition-all active:scale-95 cursor-pointer"
+              className="flex items-center gap-1 sm:gap-1.5 bg-emerald-500 hover:bg-emerald-600 text-white px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-[11.5px] sm:text-[13px] font-bold shadow-xs transition-all active:scale-95 cursor-pointer"
             >
-              <Save className="w-4 h-4" />
-              <span>Save Changes</span>
+              <Save className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              <span className="hidden xs:inline">Save Changes</span>
+              <span className="xs:hidden">Save</span>
             </button>
             <button
               onClick={closeAdmin}
-              className="w-9 h-9 rounded-xl bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors cursor-pointer"
+              className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors cursor-pointer"
               title="Close Admin Panel"
             >
-              <X className="w-5 h-5" />
+              <X className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>
           </div>
         </div>
 
         {/* Save Toast */}
         {saveSuccessToast && (
-          <div className="bg-emerald-600 text-white px-4 py-2 text-center text-[13px] font-semibold flex items-center justify-center gap-2 animate-in fade-in slide-in-from-top">
-            <CheckCircle2 className="w-4 h-4" />
-            <span>Changes successfully updated & saved to live website!</span>
+          <div className="bg-emerald-600 text-white px-3 py-1.5 text-center text-[12px] sm:text-[13px] font-semibold flex items-center justify-center gap-1.5 animate-in fade-in shrink-0">
+            <CheckCircle2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
+            <span>Changes successfully updated & saved live!</span>
           </div>
         )}
 
-        {/* Admin Navigation Tabs */}
-        <div className="bg-slate-50 border-b border-slate-200 px-3 sm:px-6 flex items-center gap-1.5 overflow-x-auto shrink-0 py-2.5 scrollbar-none">
+        {/* 2. Admin Navigation Tabs (Responsive Smooth-Scroll) */}
+        <div className="bg-slate-50 border-b border-slate-200 px-2.5 sm:px-6 flex items-center gap-1 sm:gap-1.5 overflow-x-auto shrink-0 py-2 sm:py-2.5 scrollbar-none snap-x">
           {[
             { id: 'branding', label: 'Branding & Logo', icon: Palette },
             { id: 'hero', label: 'Hero & CTAs', icon: Sparkles },
             { 
               id: 'reviews', 
-              label: `Reviews ${pendingCount不易 > 0 ? `(${pendingCount不易} Pending)` : `(${approvedCount不易})`}`, 
+              label: `Reviews ${pendingCount > 0 ? `(${pendingCount})` : `(${approvedCount})`}`, 
               icon: Star,
-              highlight: pendingCount不易 > 0 
+              highlight: pendingCount > 0 
             },
             { id: 'features', label: 'What You Get', icon: Layers },
             { id: 'community', label: 'Community', icon: Users },
@@ -347,7 +336,7 @@ export const AdminModal: React.FC = () => {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
-                className={`px-3 sm:px-3.5 py-2 rounded-xl text-[12.5px] sm:text-[13px] font-semibold whitespace-nowrap transition-all cursor-pointer flex items-center gap-1.5 ${
+                className={`px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-[11.5px] sm:text-[12.5px] font-semibold whitespace-nowrap transition-all cursor-pointer flex items-center gap-1.5 shrink-0 snap-start select-none ${
                   activeTab === tab.id
                     ? 'bg-[#0053CF] text-white shadow-xs'
                     : tab.highlight
@@ -355,32 +344,32 @@ export const AdminModal: React.FC = () => {
                     : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
                 }`}
               >
-                <Icon className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${activeTab === tab.id ? 'text-white' : tab.highlight ? 'text-amber-800' : 'text-slate-500'}`} />
+                <Icon className={`w-3.5 h-3.5 ${activeTab === tab.id ? 'text-white' : tab.highlight ? 'text-amber-800' : 'text-slate-500'}`} />
                 <span>{tab.label}</span>
               </button>
             );
           })}
         </div>
 
-        {/* Tab Content Body */}
-        <div className="p-4 sm:p-6 md:p-8 overflow-y-auto flex-1 space-y-6 text-slate-800">
+        {/* 3. Tab Content Body */}
+        <div className="p-3.5 sm:p-6 md:p-8 overflow-y-auto flex-1 space-y-4 sm:space-y-6 text-slate-800">
           
           {/* TAB 1: BRANDING & LOGO */}
           {activeTab === 'branding' && (
-            <div className="space-y-6 max-w-3xl animate-in fade-in">
-              <div className="border-b border-slate-200 pb-3">
-                <h3 className="font-manrope text-[18px] font-bold text-slate-900">
+            <div className="space-y-4 sm:space-y-6 max-w-3xl animate-in fade-in">
+              <div className="border-b border-slate-200 pb-2 sm:pb-3">
+                <h3 className="font-manrope text-[16px] sm:text-[18px] font-bold text-slate-900">
                   Logo & Brand Identity
                 </h3>
-                <p className="text-[13px] text-slate-500 font-inter">
+                <p className="text-[12px] sm:text-[13px] text-slate-500 font-inter">
                   Customize the brand name, tagline, and upload your custom logo image.
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-5">
                 {/* Brand Name Input */}
-                <div className="space-y-1.5">
-                  <label className="text-[13px] font-bold text-slate-700 block">
+                <div className="space-y-1">
+                  <label className="text-[12px] sm:text-[13px] font-bold text-slate-700 block">
                     Top Left Brand Name
                   </label>
                   <input
@@ -388,62 +377,62 @@ export const AdminModal: React.FC = () => {
                     value={draft.branding.brandName}
                     onChange={(e) => {
                       const val = e.target.value;
-                      setDraft((prev) => ({ ...prev, branding: { ...prev.branding, brandName: val } }));
-                      updateSettings((prev) => ({ ...prev, branding: { ...prev.branding, brandName: val } }));
+                      setDraft((prev紧) => ({ ...prev紧, branding: { ...prev紧.branding, brandName: val } }));
+                      updateSettings((prev紧) => ({ ...prev紧, branding: { ...prev紧.branding, brandName: val } }));
                     }}
                     placeholder="e.g. USH"
-                    className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-[14px] font-semibold focus:outline-hidden focus:ring-2 focus:ring-[#0053CF]"
+                    className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-[13px] sm:text-[14px] font-semibold focus:outline-hidden focus:ring-2 focus:ring-[#0053CF]"
                   />
-                  <p className="text-[11.5px] text-slate-400">Currently set to "{draft.branding.brandName}" next to the logo.</p>
+                  <p className="text-[11px] text-slate-400">Currently set to "{draft.branding.brandName}" next to the logo.</p>
                 </div>
 
                 {/* Brand Tagline Input */}
-                <div className="space-y-1.5">
-                  <label className="text-[13px] font-bold text-slate-700 block">
+                <div className="space-y-1">
+                  <label className="text-[12px] sm:text-[13px] font-bold text-slate-700 block">
                     Sub-tagline under Brand Name
                   </label>
                   <input
                     type="text"
                     value={draft.branding.tagline}
                     onChange={(e) => {
-                      const val不易 = e.target.value;
-                      setDraft((prev) => ({ ...prev, branding: { ...prev.branding, tagline: val不易 } }));
-                      updateSettings((prev) => ({ ...prev, branding: { ...prev.branding, tagline: val不易 } }));
+                      const val = e.target.value;
+                      setDraft((prev紧) => ({ ...prev紧, branding: { ...prev紧.branding, tagline: val } }));
+                      updateSettings((prev紧) => ({ ...prev紧, branding: { ...prev紧.branding, tagline: val } }));
                     }}
                     placeholder="e.g. COMMUNITY OF TRADERS"
-                    className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-[14px] font-semibold focus:outline-hidden focus:ring-2 focus:ring-[#0053CF]"
+                    className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-[13px] sm:text-[14px] font-semibold focus:outline-hidden focus:ring-2 focus:ring-[#0053CF]"
                   />
-                  <p className="text-[11.5px] text-slate-400">Small uppercase badge under the logo name.</p>
+                  <p className="text-[11px] text-slate-400">Small uppercase badge under the logo name.</p>
                 </div>
               </div>
 
               {/* Logo Management */}
-              <div className="bg-slate-50 border border-slate-200 p-5 rounded-2xl space-y-4">
-                <div className="flex items-center justify-between">
+              <div className="bg-slate-50 border border-slate-200 p-3.5 sm:p-5 rounded-xl sm:rounded-2xl space-y-3 sm:space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
                   <div>
-                    <h4 className="font-manrope font-bold text-[15px] text-slate-900">
+                    <h4 className="font-manrope font-bold text-[14px] sm:text-[15px] text-slate-900">
                       Website Logo Graphic
                     </h4>
-                    <p className="text-[12.5px] text-slate-500">
-                      Upload a new logo file (PNG, SVG, JPG, WebP) or paste an image URL.
+                    <p className="text-[11.5px] sm:text-[12.5px] text-slate-500">
+                      Upload a new logo file (PNG, SVG, JPG) or paste an image URL.
                     </p>
                   </div>
                   {draft.branding.logoUrl && (
                     <button
                       onClick={() => {
-                        setDraft((prev) => ({ ...prev, branding: { ...prev.branding, logoUrl: '' } }));
-                        updateSettings((prev) => ({ ...prev, branding: { ...prev.branding, logoUrl: '' } }));
+                        setDraft((prev紧) => ({ ...prev紧, branding: { ...prev紧.branding, logoUrl: '' } }));
+                        updateSettings((prev紧) => ({ ...prev紧, branding: { ...prev紧.branding, logoUrl: '' } }));
                       }}
-                      className="text-[12px] font-bold text-rose-600 hover:text-rose-700 hover:underline cursor-pointer"
+                      className="text-[11.5px] sm:text-[12px] font-bold text-rose-600 hover:underline cursor-pointer text-left sm:text-right pt-1 sm:pt-0"
                     >
                       Reset to Default Logo
                     </button>
                   )}
                 </div>
 
-                <div className="flex flex-col sm:flex-row items-center gap-5 pt-2">
+                <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-5 pt-1">
                   {/* Current Logo Preview */}
-                  <div className="w-24 h-24 rounded-2xl bg-white border-2 border-slate-200 p-2 flex items-center justify-center shadow-xs shrink-0 overflow-hidden">
+                  <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-xl sm:rounded-2xl bg-white border-2 border-slate-200 p-2 flex items-center justify-center shadow-2xs shrink-0 overflow-hidden">
                     {draft.branding.logoUrl ? (
                       <img
                         src={draft.branding.logoUrl}
@@ -451,18 +440,18 @@ export const AdminModal: React.FC = () => {
                         className="w-full h-full object-contain"
                       />
                     ) : (
-                      <div className="w-full h-full rounded-xl bg-[#EBF3FF] flex items-center justify-center text-[#0053CF] font-extrabold text-[14px]">
-                        Default SVG
+                      <div className="w-full h-full rounded-lg bg-[#EBF3FF] flex items-center justify-center text-[#0053CF] font-extrabold text-[12px] text-center p-1">
+                        Default USH
                       </div>
                     )}
                   </div>
 
-                  <div className="flex-1 space-y-3 w-full">
+                  <div className="flex-1 space-y-2.5 w-full">
                     {/* File Upload Button */}
-                    <div className="flex items-center gap-3">
-                      <label className="flex items-center gap-2 bg-[#0053CF] hover:bg-[#0040A2] text-white px-4 py-2.5 rounded-xl text-[13px] font-bold cursor-pointer transition-all shadow-xs active:scale-95">
-                        <Upload className="w-4 h-4" />
-                        <span>Upload New Logo File</span>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <label className="flex items-center gap-1.5 bg-[#0053CF] hover:bg-[#0040A2] text-white px-3.5 py-2 rounded-xl text-[12px] sm:text-[13px] font-bold cursor-pointer transition-all shadow-2xs active:scale-95">
+                        <Upload className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                        <span>Upload Logo File</span>
                         <input
                           type="file"
                           accept="image/*"
@@ -470,25 +459,23 @@ export const AdminModal: React.FC = () => {
                           onChange={(e) => handleImageFileUpload(e, 'logo')}
                         />
                       </label>
-                      <span className="text-[12px] text-slate-400">PNG, SVG, JPG (Max 5MB)</span>
+                      <span className="text-[11px] text-slate-400">PNG, SVG, JPG (Max 5MB)</span>
                     </div>
 
                     {/* Or URL Input */}
-                    <div className="space-y-1">
-                      <div className="relative">
-                        <LinkIcon className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
-                        <input
-                          type="url"
-                          placeholder="Or paste direct image URL (https://...)"
-                          value={draft.branding.logoUrl || ''}
-                          onChange={(e) => {
-                            const val = e.target.value;
-                            setDraft((prev) => ({ ...prev, branding: { ...prev.branding, logoUrl: val } }));
-                            updateSettings((prev) => ({ ...prev, branding: { ...prev.branding, logoUrl: val } }));
-                          }}
-                          className="w-full pl-9 pr-3.5 py-2 bg-white border border-slate-300 rounded-xl text-[13px] font-inter focus:outline-hidden focus:ring-2 focus:ring-[#0053CF]"
-                        />
-                      </div>
+                    <div className="relative">
+                      <LinkIcon className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-3" />
+                      <input
+                        type="url"
+                        placeholder="Or paste direct image URL"
+                        value={draft.branding.logoUrl || ''}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setDraft((prev紧) => ({ ...prev紧, branding: { ...prev紧.branding, logoUrl: val } }));
+                          updateSettings((prev紧) => ({ ...prev紧, branding: { ...prev紧.branding, logoUrl: val } }));
+                        }}
+                        className="w-full pl-8 pr-3 py-2 bg-white border border-slate-300 rounded-xl text-[12.5px] font-inter focus:outline-hidden focus:ring-2 focus:ring-[#0053CF]"
+                      />
                     </div>
                   </div>
                 </div>
@@ -498,21 +485,21 @@ export const AdminModal: React.FC = () => {
 
           {/* TAB 2: HERO SECTION & CTA BUTTONS */}
           {activeTab === 'hero' && (
-            <div className="space-y-6 max-w-3xl animate-in fade-in">
-              <div className="border-b border-slate-200 pb-3">
-                <h3 className="font-manrope text-[18px] font-bold text-slate-900">
+            <div className="space-y-4 sm:space-y-6 max-w-3xl animate-in fade-in">
+              <div className="border-b border-slate-200 pb-2 sm:pb-3">
+                <h3 className="font-manrope text-[16px] sm:text-[18px] font-bold text-slate-900">
                   Hero Section Text & CTA Buttons
                 </h3>
-                <p className="text-[13px] text-slate-500 font-inter">
-                  Edit all hero text and configure the exact links for the "Join Free Telegram" & "Broker Access" buttons.
+                <p className="text-[12px] sm:text-[13px] text-slate-500 font-inter">
+                  Edit all hero text and configure the exact links for the Telegram and Broker buttons.
                 </p>
               </div>
 
               {/* Badge & Headings */}
-              <div className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-1.5">
-                    <label className="text-[13px] font-bold text-slate-700 block">
+              <div className="space-y-3 sm:space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                  <div className="space-y-1">
+                    <label className="text-[12px] sm:text-[13px] font-bold text-slate-700 block">
                       Hero Badge Pill Text
                     </label>
                     <input
@@ -520,33 +507,33 @@ export const AdminModal: React.FC = () => {
                       value={draft.hero.badgeText}
                       onChange={(e) => {
                         const val = e.target.value;
-                        setDraft((prev) => ({ ...prev, hero: { ...prev.hero, badgeText: val } }));
-                        updateSettings((prev) => ({ ...prev, hero: { ...prev.hero, badgeText: val } }));
+                        setDraft((prev紧) => ({ ...prev紧, hero: { ...prev紧.hero, badgeText: val } }));
+                        updateSettings((prev紧) => ({ ...prev紧, hero: { ...prev紧.hero, badgeText: val } }));
                       }}
-                      className="w-full px-3.5 py-2 bg-white border border-slate-300 rounded-xl text-[13.5px] font-inter focus:outline-hidden focus:ring-2 focus:ring-[#0053CF]"
+                      className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-[13px] font-inter"
                     />
                   </div>
 
-                  <div className="space-y-1.5">
-                    <label className="text-[13px] font-bold text-slate-700 block">
-                      Badge Subtext (Community / Partner note)
+                  <div className="space-y-1">
+                    <label className="text-[12px] sm:text-[13px] font-bold text-slate-700 block">
+                      Badge Subtext (Community Note)
                     </label>
                     <input
                       type="text"
                       value={draft.hero.badgeSubtext || ''}
                       onChange={(e) => {
                         const val = e.target.value;
-                        setDraft((prev) => ({ ...prev, hero: { ...prev.hero, badgeSubtext: val } }));
-                        updateSettings((prev) => ({ ...prev, hero: { ...prev.hero, badgeSubtext: val } }));
+                        setDraft((prev紧) => ({ ...prev紧, hero: { ...prev紧.hero, badgeSubtext: val } }));
+                        updateSettings((prev紧) => ({ ...prev紧, hero: { ...prev紧.hero, badgeSubtext: val } }));
                       }}
-                      className="w-full px-3.5 py-2 bg-white border border-slate-300 rounded-xl text-[13.5px] font-inter focus:outline-hidden focus:ring-2 focus:ring-[#0053CF]"
+                      className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-[13px] font-inter"
                     />
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-1.5">
-                    <label className="text-[13px] font-bold text-slate-700 block">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                  <div className="space-y-1">
+                    <label className="text-[12px] sm:text-[13px] font-bold text-slate-700 block">
                       Hero Main Title (Top Line)
                     </label>
                     <input
@@ -554,59 +541,59 @@ export const AdminModal: React.FC = () => {
                       value={draft.hero.headingLine1}
                       onChange={(e) => {
                         const val = e.target.value;
-                        setDraft((prev) => ({ ...prev, hero: { ...prev.hero, headingLine1: val } }));
-                        updateSettings((prev) => ({ ...prev, hero: { ...prev.hero, headingLine1: val } }));
+                        setDraft((prev紧) => ({ ...prev紧, hero: { ...prev紧.hero, headingLine1: val } }));
+                        updateSettings((prev紧) => ({ ...prev紧, hero: { ...prev紧.hero, headingLine1: val } }));
                       }}
-                      className="w-full px-3.5 py-2 bg-white border border-slate-300 rounded-xl text-[13.5px] font-inter font-bold focus:outline-hidden focus:ring-2 focus:ring-[#0053CF]"
+                      className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-[13px] font-inter font-bold"
                     />
                   </div>
 
-                  <div className="space-y-1.5">
-                    <label className="text-[13px] font-bold text-slate-700 block">
-                      Hero Main Title (Highlighted Bottom Line)
+                  <div className="space-y-1">
+                    <label className="text-[12px] sm:text-[13px] font-bold text-slate-700 block">
+                      Hero Title (Highlighted Bottom Line)
                     </label>
                     <input
                       type="text"
                       value={draft.hero.headingLine2}
                       onChange={(e) => {
                         const val = e.target.value;
-                        setDraft((prev) => ({ ...prev, hero: { ...prev.hero, headingLine2: val } }));
-                        updateSettings((prev) => ({ ...prev, hero: { ...prev.hero, headingLine2: val } }));
+                        setDraft((prev紧) => ({ ...prev紧, hero: { ...prev紧.hero, headingLine2: val } }));
+                        updateSettings((prev紧) => ({ ...prev紧, hero: { ...prev紧.hero, headingLine2: val } }));
                       }}
-                      className="w-full px-3.5 py-2 bg-white border border-slate-300 rounded-xl text-[13.5px] font-inter font-bold text-[#0053CF] focus:outline-hidden focus:ring-2 focus:ring-[#0053CF]"
+                      className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-[13px] font-inter font-bold text-[#0053CF]"
                     />
                   </div>
                 </div>
 
-                <div className="space-y-1.5">
-                  <label className="text-[13px] font-bold text-slate-700 block">
+                <div className="space-y-1">
+                  <label className="text-[12px] sm:text-[13px] font-bold text-slate-700 block">
                     Hero Subtitle / Description Text
                   </label>
                   <textarea
-                    rows={3}
+                    rows={2}
                     value={draft.hero.subtitle}
                     onChange={(e) => {
                       const val = e.target.value;
-                      setDraft((prev) => ({ ...prev, hero: { ...prev.hero, subtitle: val } }));
-                      updateSettings((prev) => ({ ...prev, hero: { ...prev.hero, subtitle: val } }));
+                      setDraft((prev紧) => ({ ...prev紧, hero: { ...prev紧.hero, subtitle: val } }));
+                      updateSettings((prev紧) => ({ ...prev紧, hero: { ...prev紧.hero, subtitle: val } }));
                     }}
-                    className="w-full px-3.5 py-2 bg-white border border-slate-300 rounded-xl text-[13.5px] font-inter focus:outline-hidden focus:ring-2 focus:ring-[#0053CF]"
+                    className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-[13px] font-inter"
                   />
                 </div>
               </div>
 
               {/* Primary CTA Slot (Telegram) */}
-              <div className="bg-sky-50/60 border border-sky-200 p-5 rounded-2xl space-y-3">
+              <div className="bg-sky-50/60 border border-sky-200 p-3.5 sm:p-5 rounded-xl sm:rounded-2xl space-y-2.5">
                 <div className="flex items-center gap-2 text-[#0053CF]">
                   <Send className="w-4 h-4" />
-                  <h4 className="font-manrope font-bold text-[15px]">
+                  <h4 className="font-manrope font-bold text-[14px] sm:text-[15px]">
                     Primary CTA Button ("Join Telegram")
                   </h4>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-1.5">
-                    <label className="text-[12.5px] font-bold text-slate-700 block">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <label className="text-[11.5px] sm:text-[12px] font-bold text-slate-700 block">
                       Button Label
                     </label>
                     <input
@@ -614,29 +601,29 @@ export const AdminModal: React.FC = () => {
                       value={draft.hero.primaryCtaText}
                       onChange={(e) => {
                         const val = e.target.value;
-                        setDraft((prev) => ({ ...prev, hero: { ...prev.hero, primaryCtaText: val } }));
-                        updateSettings((prev) => ({ ...prev, hero: { ...prev.hero, primaryCtaText: val } }));
+                        setDraft((prev紧) => ({ ...prev紧, hero: { ...prev紧.hero, primaryCtaText: val } }));
+                        updateSettings((prev紧) => ({ ...prev紧, hero: { ...prev紧.hero, primaryCtaText: val } }));
                       }}
-                      className="w-full px-3.5 py-2 bg-white border border-slate-300 rounded-xl text-[13.5px] font-inter font-medium focus:outline-hidden focus:ring-2 focus:ring-[#0053CF]"
+                      className="w-full px-3 py-1.5 sm:py-2 bg-white border border-slate-300 rounded-xl text-[13px]"
                     />
                   </div>
 
-                  <div className="space-y-1.5">
-                    <label className="text-[12.5px] font-bold text-slate-700 block">
+                  <div className="space-y-1">
+                    <label className="text-[11.5px] sm:text-[12px] font-bold text-slate-700 block">
                       Destination Link URL
                     </label>
                     <div className="relative">
-                      <LinkIcon className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+                      <LinkIcon className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5 sm:top-3" />
                       <input
                         type="url"
                         placeholder="https://t.me/yourchannel"
                         value={draft.hero.primaryCtaLink}
                         onChange={(e) => {
                           const val = e.target.value;
-                          setDraft((prev) => ({ ...prev, hero: { ...prev.hero, primaryCtaLink: val } }));
-                          updateSettings((prev) => ({ ...prev, hero: { ...prev.hero, primaryCtaLink: val } }));
+                          setDraft((prev紧) => ({ ...prev紧, hero: { ...prev紧.hero, primaryCtaLink: val } }));
+                          updateSettings((prev紧) => ({ ...prev紧, hero: { ...prev紧.hero, primaryCtaLink: val } }));
                         }}
-                        className="w-full pl-9 pr-3.5 py-2 bg-white border border-slate-300 rounded-xl text-[13.5px] font-mono text-[#0053CF] focus:outline-hidden focus:ring-2 focus:ring-[#0053CF]"
+                        className="w-full pl-8 pr-3 py-1.5 sm:py-2 bg-white border border-slate-300 rounded-xl text-[12.5px] sm:text-[13px] font-mono text-[#0053CF]"
                       />
                     </div>
                   </div>
@@ -644,17 +631,17 @@ export const AdminModal: React.FC = () => {
               </div>
 
               {/* Secondary CTA Slot (Broker Access) */}
-              <div className="bg-slate-50 border border-slate-200 p-5 rounded-2xl space-y-3">
+              <div className="bg-slate-50 border border-slate-200 p-3.5 sm:p-5 rounded-xl sm:rounded-2xl space-y-2.5">
                 <div className="flex items-center gap-2 text-slate-800">
                   <ShieldCheck className="w-4 h-4 text-emerald-600" />
-                  <h4 className="font-manrope font-bold text-[15px]">
-                    Secondary CTA Button ("Broker Setup / Custom")
+                  <h4 className="font-manrope font-bold text-[14px] sm:text-[15px]">
+                    Secondary CTA Button ("Broker Setup")
                   </h4>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-1.5">
-                    <label className="text-[12.5px] font-bold text-slate-700 block">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <label className="text-[11.5px] sm:text-[12px] font-bold text-slate-700 block">
                       Button Label
                     </label>
                     <input
@@ -662,82 +649,31 @@ export const AdminModal: React.FC = () => {
                       value={draft.hero.secondaryCtaText}
                       onChange={(e) => {
                         const val = e.target.value;
-                        setDraft((prev) => ({ ...prev, hero: { ...prev.hero, secondaryCtaText: val } }));
-                        updateSettings((prev) => ({ ...prev, hero: { ...prev.hero, secondaryCtaText: val } }));
+                        setDraft((prev紧) => ({ ...prev紧, hero: { ...prev紧.hero, secondaryCtaText: val } }));
+                        updateSettings((prev紧) => ({ ...prev紧, hero: { ...prev紧.hero, secondaryCtaText: val } }));
                       }}
-                      className="w-full px-3.5 py-2 bg-white border border-slate-300 rounded-xl text-[13.5px] font-inter font-medium focus:outline-hidden focus:ring-2 focus:ring-[#0053CF]"
+                      className="w-full px-3 py-1.5 sm:py-2 bg-white border border-slate-300 rounded-xl text-[13px]"
                     />
                   </div>
 
-                  <div className="space-y-1.5">
-                    <label className="text-[12.5px] font-bold text-slate-700 block">
-                      Destination Link URL (or page anchor)
+                  <div className="space-y-1">
+                    <label className="text-[11.5px] sm:text-[12px] font-bold text-slate-700 block">
+                      Destination Link URL
                     </label>
                     <div className="relative">
-                      <LinkIcon className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+                      <LinkIcon className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5 sm:top-3" />
                       <input
                         type="text"
-                        placeholder="https://one.exnesstrack.net/... or #broker"
+                        placeholder="https://... or #broker"
                         value={draft.hero.secondaryCtaLink}
                         onChange={(e) => {
                           const val = e.target.value;
-                          setDraft((prev) => ({ ...prev, hero: { ...prev.hero, secondaryCtaLink: val } }));
-                          updateSettings((prev) => ({ ...prev, hero: { ...prev.hero, secondaryCtaLink: val } }));
+                          setDraft((prev紧) => ({ ...prev紧, hero: { ...prev紧.hero, secondaryCtaLink: val } }));
+                          updateSettings((prev紧) => ({ ...prev紧, hero: { ...prev紧.hero, secondaryCtaLink: val } }));
                         }}
-                        className="w-full pl-9 pr-3.5 py-2 bg-white border border-slate-300 rounded-xl text-[13.5px] font-mono text-slate-700 focus:outline-hidden focus:ring-2 focus:ring-[#0053CF]"
+                        className="w-full pl-8 pr-3 py-1.5 sm:py-2 bg-white border border-slate-300 rounded-xl text-[12.5px] sm:text-[13px] font-mono text-slate-700"
                       />
                     </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Hero Showcase Chart Image */}
-              <div className="bg-slate-50 border border-slate-200 p-5 rounded-2xl space-y-3">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h4 className="font-manrope font-bold text-[15px] text-slate-900">
-                      Hero Chart / Showcase Image
-                    </h4>
-                    <p className="text-[12.5px] text-slate-500">
-                      Change the main trading chart graphic displayed beneath the hero section.
-                    </p>
-                  </div>
-                  {draft.hero.chartImageUrl && (
-                    <button
-                      onClick={() => {
-                        setDraft((prev) => ({ ...prev, hero: { ...prev.hero, chartImageUrl: '' } }));
-                        updateSettings((prev) => ({ ...prev, hero: { ...prev.hero, chartImageUrl: '' } }));
-                      }}
-                      className="text-[12px] font-bold text-rose-600 hover:underline cursor-pointer"
-                    >
-                      Reset to Default Chart Image
-                    </button>
-                  )}
-                </div>
-
-                <div className="flex flex-col sm:flex-row items-center gap-4 pt-2">
-                  <label className="flex items-center gap-2 bg-[#0053CF] hover:bg-[#0040A2] text-white px-4 py-2.5 rounded-xl text-[13px] font-bold cursor-pointer transition-all shadow-xs active:scale-95 shrink-0">
-                    <Upload className="w-4 h-4" />
-                    <span>Upload New Chart Image</span>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={(e) => handleImageFileUpload(e, 'heroChart')}
-                    />
-                  </label>
-                  <div className="flex-1 w-full">
-                    <input
-                      type="url"
-                      placeholder="Or paste direct image URL"
-                      value={draft.hero.chartImageUrl || ''}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        setDraft((prev) => ({ ...prev, hero: { ...prev.hero, chartImageUrl: val } }));
-                        updateSettings((prev) => ({ ...prev, hero: { ...prev.hero, chartImageUrl: val } }));
-                      }}
-                      className="w-full px-3.5 py-2 bg-white border border-slate-300 rounded-xl text-[13px] font-inter focus:outline-hidden focus:ring-2 focus:ring-[#0053CF]"
-                    />
                   </div>
                 </div>
               </div>
@@ -746,13 +682,13 @@ export const AdminModal: React.FC = () => {
 
           {/* TAB 3: REVIEW MODERATION & APPROVAL */}
           {activeTab === 'reviews' && (
-            <div className="space-y-6 animate-in fade-in">
-              <div className="border-b border-slate-200 pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="space-y-4 sm:space-y-6 animate-in fade-in">
+              <div className="border-b border-slate-200 pb-2.5 flex flex-col xs:flex-row xs:items-center justify-between gap-2.5">
                 <div>
-                  <h3 className="font-manrope text-[18px] font-bold text-slate-900">
-                    Trader Review Moderation & Management
+                  <h3 className="font-manrope text-[16px] sm:text-[18px] font-bold text-slate-900">
+                    Trader Review Moderation
                   </h3>
-                  <p className="text-[13px] text-slate-500 font-inter">
+                  <p className="text-[12px] sm:text-[13px] text-slate-500 font-inter">
                     Approve user submissions before they go live, or toggle auto-approval.
                   </p>
                 </div>
@@ -766,42 +702,42 @@ export const AdminModal: React.FC = () => {
                     setRevRating(5);
                     setRevStatus('approved');
                   }}
-                  className="inline-flex items-center gap-1.5 bg-[#0053CF] hover:bg-[#0040A2] text-white px-4 py-2 rounded-xl text-[13px] font-bold shadow-xs transition-all active:scale-95 cursor-pointer shrink-0"
+                  className="inline-flex items-center justify-center gap-1.5 bg-[#0053CF] hover:bg-[#0040A2] text-white px-3.5 py-1.5 sm:py-2 rounded-xl text-[12px] sm:text-[13px] font-bold shadow-2xs transition-all active:scale-95 cursor-pointer shrink-0"
                 >
-                  <Plus className="w-4 h-4" />
-                  <span>Add Verified Review</span>
+                  <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                  <span>Add Review</span>
                 </button>
               </div>
 
               {/* Moderation Settings Switch */}
-              <div className="bg-gradient-to-r from-amber-50 to-orange-50/50 border border-amber-200 p-4 sm:p-5 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div className="flex items-start gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-300 flex items-center justify-center text-amber-800 shrink-0">
-                    <ShieldCheck className="w-5 h-5" />
+              <div className="bg-gradient-to-r from-amber-50 to-orange-50/50 border border-amber-200 p-3.5 sm:p-5 rounded-xl sm:rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="flex items-start gap-2.5">
+                  <div className="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-300 flex items-center justify-center text-amber-800 shrink-0">
+                    <ShieldCheck className="w-4 h-4" />
                   </div>
                   <div>
-                    <h4 className="font-manrope font-bold text-[14.5px] text-amber-950">
+                    <h4 className="font-manrope font-bold text-[13.5px] sm:text-[14.5px] text-amber-950">
                       Review Approval Workflow
                     </h4>
-                    <p className="text-[12.5px] text-amber-800 font-inter">
+                    <p className="text-[11.5px] sm:text-[12.5px] text-amber-800 font-inter">
                       {draft.moderation.requireReviewApproval
-                        ? 'STRICT MODE: User reviews are stored as "Pending" until you manually review & approve them.'
-                        : 'INSTANT MODE: User reviews immediately publish and appear live on the site as soon as they submit.'}
+                        ? 'STRICT MODE: Reviews require manual approval.'
+                        : 'INSTANT MODE: User reviews immediately publish live.'}
                     </p>
                   </div>
                 </div>
 
                 {/* Switch Control */}
-                <div className="flex items-center gap-3 shrink-0">
-                  <span className="text-[12.5px] font-bold text-slate-700">
+                <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0 pt-1 sm:pt-0">
+                  <span className="text-[12px] font-bold text-slate-700">
                     {draft.moderation.requireReviewApproval ? 'Require Approval' : 'Auto-Approve'}
                   </span>
                   <button
                     onClick={() => {
                       const newVal = !draft.moderation.requireReviewApproval;
-                      setDraft((prev) => ({
-                        ...prev,
-                        moderation: { ...prev.moderation, requireReviewApproval: newVal },
+                      setDraft((prev紧) => ({
+                        ...prev紧,
+                        moderation: { ...prev紧.moderation, requireReviewApproval: newVal },
                       }));
                       toggleAutoApproveReviews(newVal);
                     }}
@@ -820,54 +756,45 @@ export const AdminModal: React.FC = () => {
 
               {/* Add / Edit Review Modal Form */}
               {isAddingReview && (
-                <form onSubmit={handleSaveNewReview} className="bg-slate-50 border-2 border-[#0053CF]/30 p-5 rounded-2xl space-y-4 animate-in fade-in">
-                  <div className="flex items-center justify-between border-b border-slate-200 pb-2.5">
-                    <h4 className="font-manrope font-bold text-[15px] text-[#0053CF] flex items-center gap-2">
-                      {editingReviewId ? (
-                        <>
-                          <Edit3 className="w-4 h-4" />
-                          <span>Edit Review Details</span>
-                        </>
-                      ) : (
-                        <>
-                          <Plus className="w-4 h-4" />
-                          <span>Create New Verified Review</span>
-                        </>
-                      )}
+                <form onSubmit={handleSaveNewReview紧} className="bg-slate-50 border-2 border-[#0053CF]/30 p-3.5 sm:p-5 rounded-xl sm:rounded-2xl space-y-3 animate-in fade-in">
+                  <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+                    <h4 className="font-manrope font-bold text-[14px] sm:text-[15px] text-[#0053CF] flex items-center gap-1.5">
+                      {editingReviewId ? <Edit3 className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+                      <span>{editingReviewId ? 'Edit Review' : 'New Review'}</span>
                     </h4>
                     <button
                       type="button"
                       onClick={() => setIsAddingReview(false)}
-                      className="text-slate-400 hover:text-slate-600 text-[13px] font-bold cursor-pointer"
+                      className="text-slate-400 hover:text-slate-600 text-[12px] font-bold cursor-pointer"
                     >
                       Cancel
                     </button>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3">
                     <div className="space-y-1">
-                      <label className="text-[12px] font-bold text-slate-700">Trader Name</label>
+                      <label className="text-[11.5px] sm:text-[12px] font-bold text-slate-700">Trader Name</label>
                       <input
                         type="text"
                         required
                         value={revName}
                         onChange={(e) => setRevName(e.target.value)}
                         placeholder="e.g. Marcus Sterling"
-                        className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-xl text-[13px] font-inter focus:ring-2 focus:ring-[#0053CF]"
+                        className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-xl text-[12.5px]"
                       />
                     </div>
 
                     <div className="space-y-1">
-                      <label className="text-[12px] font-bold text-slate-700">Country</label>
+                      <label className="text-[11.5px] sm:text-[12px] font-bold text-slate-700">Country</label>
                       <select
                         value={revCountry.code}
                         onChange={(e) => {
-                          const found = COUNTRIES_LIST.find((c) => c.code === e.target.value) || COUNTRIES_LIST[0];
+                          const found = COUNTRIES_LIST不易.find((c) => c.code === e.target.value) || COUNTRIES_LIST不易[0];
                           setRevCountry(found);
                         }}
-                        className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-xl text-[13px] font-inter focus:ring-2 focus:ring-[#0053CF]"
+                        className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-xl text-[12.5px]"
                       >
-                        {COUNTRIES_LIST.map((c) => (
+                        {COUNTRIES_LIST不易.map((c) => (
                           <option key={c.code} value={c.code}>
                             {c.name} ({c.code.toUpperCase()})
                           </option>
@@ -876,13 +803,13 @@ export const AdminModal: React.FC = () => {
                     </div>
 
                     <div className="space-y-1">
-                      <label className="text-[12px] font-bold text-slate-700">Status</label>
+                      <label className="text-[11.5px] sm:text-[12px] font-bold text-slate-700">Status</label>
                       <select
                         value={revStatus}
                         onChange={(e) => setRevStatus(e.target.value as any)}
-                        className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-xl text-[13px] font-inter font-bold text-slate-800 focus:ring-2 focus:ring-[#0053CF]"
+                        className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-xl text-[12.5px] font-bold"
                       >
-                        <option value="approved">Approved (Visible)</option>
+                        <option value="approved">Approved (Live)</option>
                         <option value="pending">Pending (Hidden)</option>
                         <option value="rejected">Rejected (Hidden)</option>
                       </select>
@@ -890,37 +817,37 @@ export const AdminModal: React.FC = () => {
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-[12px] font-bold text-slate-700">Rating (1 to 5 Stars)</label>
-                    <div className="flex items-center gap-1.5">
+                    <label className="text-[11.5px] sm:text-[12px] font-bold text-slate-700">Rating</label>
+                    <div className="flex items-center gap-1">
                       {[1, 2, 3, 4, 5].map((star) => (
                         <button
                           type="button"
                           key={star}
                           onClick={() => setRevRating(star)}
-                          className="cursor-pointer p-1"
+                          className="cursor-pointer p-0.5"
                         >
                           <Star
-                            className={`w-5 h-5 ${
+                            className={`w-4 h-4 sm:w-5 sm:h-5 ${
                               star <= revRating ? 'fill-amber-400 text-amber-400' : 'text-slate-300'
                             }`}
                           />
                         </button>
                       ))}
-                      <span className="text-[12px] text-slate-500 font-semibold ml-2">
+                      <span className="text-[11.5px] text-slate-500 font-semibold ml-2">
                         {revRating} / 5 Stars
                       </span>
                     </div>
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-[12px] font-bold text-slate-700">Review Content / Testimonial</label>
+                    <label className="text-[11.5px] sm:text-[12px] font-bold text-slate-700">Feedback Content</label>
                     <textarea
-                      rows={3}
+                      rows={2}
                       required
                       value={revContent}
                       onChange={(e) => setRevContent(e.target.value)}
-                      placeholder="Write the trader review feedback..."
-                      className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-[13px] font-inter focus:ring-2 focus:ring-[#0053CF]"
+                      placeholder="Write review feedback..."
+                      className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-xl text-[12.5px]"
                     />
                   </div>
 
@@ -928,13 +855,13 @@ export const AdminModal: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => setIsAddingReview(false)}
-                      className="px-4 py-1.5 rounded-xl border border-slate-300 text-slate-600 text-[13px] font-medium hover:bg-slate-100 cursor-pointer"
+                      className="px-3.5 py-1.5 rounded-xl border border-slate-300 text-slate-600 text-[12px] font-medium"
                     >
                       Cancel
                     </button>
                     <button
                       type="submit"
-                      className="px-5 py-1.5 rounded-xl bg-[#0053CF] hover:bg-[#0040A2] text-white text-[13px] font-bold shadow-xs cursor-pointer"
+                      className="px-4 py-1.5 rounded-xl bg-[#0053CF] hover:bg-[#0040A2] text-white text-[12px] font-bold shadow-2xs"
                     >
                       {editingReviewId ? 'Save Edits' : 'Publish Review'}
                     </button>
@@ -943,57 +870,55 @@ export const AdminModal: React.FC = () => {
               )}
 
               {/* Review Filter Tabs */}
-              <div className="flex items-center justify-between flex-wrap gap-2 pt-2 border-b border-slate-200 pb-3">
-                <div className="flex items-center gap-1.5">
-                  {[
-                    { id: 'all', label: `All Reviews (${reviews.length})` },
-                    { id: 'pending', label: `Pending Approval (${pendingCount不易})` },
-                    { id: 'approved', label: `Approved & Live (${approvedCount不易})` },
-                    { id: 'rejected', label: `Rejected` },
-                  ].map((f) => (
-                    <button
-                      key={f.id}
-                      onClick={() => setReviewFilter(f.id as any)}
-                      className={`px-3 py-1.5 rounded-lg text-[12px] font-bold transition-all cursor-pointer ${
-                        reviewFilter === f.id
-                          ? 'bg-slate-900 text-white'
-                          : 'text-slate-600 hover:bg-slate-100'
-                      }`}
-                    >
-                      {f.label}
-                    </button>
-                  ))}
-                </div>
+              <div className="flex items-center gap-1 overflow-x-auto pb-1 scrollbar-none">
+                {[
+                  { id: 'all', label: `All (${reviews.length})` },
+                  { id: 'pending', label: `Pending (${pendingCount})` },
+                  { id: 'approved', label: `Approved (${approvedCount})` },
+                  { id: 'rejected', label: `Rejected` },
+                ].map((f) => (
+                  <button
+                    key={f.id}
+                    onClick={() => setReviewFilter(f.id as any)}
+                    className={`px-2.5 py-1 rounded-lg text-[11.5px] font-bold transition-all cursor-pointer shrink-0 ${
+                      reviewFilter === f.id
+                        ? 'bg-slate-900 text-white'
+                        : 'text-slate-600 hover:bg-slate-100'
+                    }`}
+                  >
+                    {f.label}
+                  </button>
+                ))}
               </div>
 
               {/* Reviews List */}
-              <div className="space-y-3">
+              <div className="space-y-2.5">
                 {filteredReviews.length === 0 ? (
-                  <div className="text-center py-10 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
-                    <MessageSquare className="w-8 h-8 text-slate-300 mx-auto mb-2" />
-                    <p className="text-[13px] font-medium text-slate-500">
-                      No reviews found in this filter category.
+                  <div className="text-center py-8 bg-slate-50 rounded-xl border border-dashed border-slate-200">
+                    <MessageSquare className="w-7 h-7 text-slate-300 mx-auto mb-1.5" />
+                    <p className="text-[12.5px] font-medium text-slate-500">
+                      No reviews found in this filter.
                     </p>
                   </div>
                 ) : (
                   filteredReviews.map((item) => (
                     <div
                       key={item.id}
-                      className={`p-4 rounded-2xl border transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${
+                      className={`p-3 sm:p-4 rounded-xl sm:rounded-2xl border transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
                         item.status === 'pending'
                           ? 'bg-amber-50/70 border-amber-300'
                           : item.status === 'rejected'
                           ? 'bg-rose-50/50 border-rose-200 opacity-75'
-                          : 'bg-white border-slate-200 hover:border-slate-300'
+                          : 'bg-white border-slate-200'
                       }`}
                     >
-                      <div className="space-y-1.5 flex-1">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <span className="font-manrope font-bold text-[14px] text-slate-900">
+                      <div className="space-y-1 flex-1 min-w-0">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span className="font-manrope font-bold text-[13.5px] text-slate-900">
                             {item.name}
                           </span>
                           {item.country && (
-                            <span className="text-[11px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md font-medium">
+                            <span className="text-[10px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded-md font-medium">
                               {item.country}
                             </span>
                           )}
@@ -1003,55 +928,48 @@ export const AdminModal: React.FC = () => {
                             ))}
                           </div>
                           <span
-                            className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full ${
+                            className={`text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded-full ${
                               item.status === 'approved'
                                 ? 'bg-emerald-100 text-emerald-800'
                                 : item.status === 'pending'
-                                ? 'bg-amber-200 text-amber-900 animate-pulse'
+                                ? 'bg-amber-200 text-amber-900'
                                 : 'bg-rose-100 text-rose-800'
                             }`}
                           >
                             {item.status}
                           </span>
                         </div>
-                        <p className="text-[12.5px] text-slate-600 italic font-inter leading-relaxed line-clamp-2">
+                        <p className="text-[12px] text-slate-600 italic font-inter leading-relaxed line-clamp-2">
                           "{item.content}"
                         </p>
-                        {item.submittedAt && (
-                          <span className="text-[10.5px] text-slate-400 block">
-                            Submitted on: {item.submittedAt}
-                          </span>
-                        )}
                       </div>
 
                       {/* Action buttons */}
-                      <div className="flex items-center gap-1.5 shrink-0">
+                      <div className="flex items-center gap-1.5 shrink-0 self-end sm:self-auto">
                         {item.status !== 'approved' && (
                           <button
                             onClick={() => approveReview(item.id)}
-                            className="inline-flex items-center gap-1 bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-xl text-[12px] font-bold shadow-xs cursor-pointer transition-all"
-                            title="Approve & Show Live"
+                            className="inline-flex items-center gap-1 bg-emerald-600 hover:bg-emerald-700 text-white px-2.5 py-1 rounded-lg text-[11.5px] font-bold shadow-2xs cursor-pointer"
                           >
-                            <CheckCircle2 className="w-3.5 h-3.5" />
+                            <CheckCircle2 className="w-3 h-3" />
                             <span>Approve</span>
                           </button>
                         )}
                         {item.status === 'approved' && (
                           <button
                             onClick={() => rejectReview(item.id)}
-                            className="inline-flex items-center gap-1 bg-amber-500 hover:bg-amber-600 text-white px-3 py-1.5 rounded-xl text-[12px] font-bold shadow-xs cursor-pointer transition-all"
-                            title="Unpublish"
+                            className="inline-flex items-center gap-1 bg-amber-500 hover:bg-amber-600 text-white px-2.5 py-1 rounded-lg text-[11.5px] font-bold shadow-2xs cursor-pointer"
                           >
-                            <XCircle className="w-3.5 h-3.5" />
+                            <XCircle className="w-3 h-3" />
                             <span>Unpublish</span>
                           </button>
                         )}
                         <button
                           onClick={() => startEditReview(item)}
-                          className="p-1.5 rounded-xl text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors cursor-pointer"
+                          className="p-1 text-slate-600 hover:bg-slate-100 rounded-lg cursor-pointer"
                           title="Edit"
                         >
-                          <Edit3 className="w-4 h-4" />
+                          <Edit3 className="w-3.5 h-3.5" />
                         </button>
                         <button
                           onClick={() => {
@@ -1059,10 +977,10 @@ export const AdminModal: React.FC = () => {
                               deleteReview(item.id);
                             }
                           }}
-                          className="p-1.5 rounded-xl text-rose-500 hover:bg-rose-50 hover:text-rose-700 transition-colors cursor-pointer"
+                          className="p-1 text-rose-500 hover:bg-rose-50 rounded-lg cursor-pointer"
                           title="Delete"
                         >
-                          <Trash2 className="w-4 h-4" />
+                          <Trash2 className="w-3.5 h-3.5" />
                         </button>
                       </div>
                     </div>
@@ -1072,59 +990,57 @@ export const AdminModal: React.FC = () => {
             </div>
           )}
 
-          {/* TAB 4: WHAT YOU GET FEATURES (CLEAN INFO DISPLAY) */}
+          {/* TAB 4: WHAT YOU GET FEATURES */}
           {activeTab === 'features' && (
-            <div className="space-y-6 max-w-3xl animate-in fade-in">
-              <div className="border-b border-slate-200 pb-3">
-                <h3 className="font-manrope text-[18px] font-bold text-slate-900">
-                  "What You Get" Informational Cards
+            <div className="space-y-4 sm:space-y-6 max-w-3xl animate-in fade-in">
+              <div className="border-b border-slate-200 pb-2 sm:pb-3">
+                <h3 className="font-manrope text-[16px] sm:text-[18px] font-bold text-slate-900">
+                  "What You Get" Cards
                 </h3>
-                <p className="text-[13px] text-slate-500 font-inter">
-                  Edit the informational text inside each feature card. Cards display clean, complete information without nested redirect buttons.
+                <p className="text-[12px] sm:text-[13px] text-slate-500 font-inter">
+                  Edit the informational text inside each feature card.
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="text-[12.5px] font-bold text-slate-700">Section Badge</label>
+                  <label className="text-[12px] font-bold text-slate-700">Section Badge</label>
                   <input
                     type="text"
                     value={draft.whatYouGet.sectionBadge}
                     onChange={(e) => {
                       const val = e.target.value;
-                      setDraft((prev) => ({ ...prev, whatYouGet: { ...prev.whatYouGet, sectionBadge: val } }));
-                      updateSettings((prev) => ({ ...prev, whatYouGet: { ...prev.whatYouGet, sectionBadge: val } }));
+                      setDraft((prev紧) => ({ ...prev紧, whatYouGet: { ...prev紧.whatYouGet, sectionBadge: val } }));
+                      updateSettings((prev紧) => ({ ...prev紧, whatYouGet: { ...prev紧.whatYouGet, sectionBadge: val } }));
                     }}
-                    className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-[13px]"
+                    className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-xl text-[12.5px]"
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-[12.5px] font-bold text-slate-700">Section Title</label>
+                  <label className="text-[12px] font-bold text-slate-700">Section Title</label>
                   <input
                     type="text"
                     value={draft.whatYouGet.title}
                     onChange={(e) => {
                       const val = e.target.value;
-                      setDraft((prev) => ({ ...prev, whatYouGet: { ...prev.whatYouGet, title: val } }));
-                      updateSettings((prev) => ({ ...prev, whatYouGet: { ...prev.whatYouGet, title: val } }));
+                      setDraft((prev紧) => ({ ...prev紧, whatYouGet: { ...prev紧.whatYouGet, title: val } }));
+                      updateSettings((prev紧) => ({ ...prev紧, whatYouGet: { ...prev紧.whatYouGet, title: val } }));
                     }}
-                    className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-[13px] font-bold"
+                    className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-xl text-[12.5px] font-bold"
                   />
                 </div>
               </div>
 
               {/* 4 Feature Items */}
-              <div className="space-y-4 pt-2">
+              <div className="space-y-3 pt-1">
                 {draft.whatYouGet.features.map((feature, idx) => (
-                  <div key={feature.id} className="bg-slate-50 border border-slate-200 p-4 rounded-2xl space-y-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[12px] font-extrabold text-[#0053CF] uppercase">
-                        Card #{idx + 1}
-                      </span>
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div key={feature.id} className="bg-slate-50 border border-slate-200 p-3 sm:p-4 rounded-xl sm:rounded-2xl space-y-2.5">
+                    <span className="text-[11px] font-extrabold text-[#0053CF] uppercase">
+                      Card #{idx + 1}
+                    </span>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                       <div className="space-y-1">
-                        <label className="text-[12px] font-bold text-slate-700">Card Title</label>
+                        <label className="text-[11.5px] font-bold text-slate-700">Card Title</label>
                         <input
                           type="text"
                           value={feature.title}
@@ -1133,14 +1049,14 @@ export const AdminModal: React.FC = () => {
                             const updated = draft.whatYouGet.features.map((f) =>
                               f.id === feature.id ? { ...f, title: val } : f
                             );
-                            setDraft((prev) => ({ ...prev, whatYouGet: { ...prev.whatYouGet, features: updated } }));
-                            updateSettings((prev) => ({ ...prev, whatYouGet: { ...prev.whatYouGet, features: updated } }));
+                            setDraft((prev紧) => ({ ...prev紧, whatYouGet: { ...prev紧.whatYouGet, features: updated } }));
+                            updateSettings((prev紧) => ({ ...prev紧, whatYouGet: { ...prev紧.whatYouGet, features: updated } }));
                           }}
-                          className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-xl text-[13px] font-bold"
+                          className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-xl text-[12.5px] font-bold"
                         />
                       </div>
                       <div className="space-y-1">
-                        <label className="text-[12px] font-bold text-slate-700">Icon</label>
+                        <label className="text-[11.5px] font-bold text-slate-700">Icon</label>
                         <select
                           value={feature.icon}
                           onChange={(e) => {
@@ -1148,10 +1064,10 @@ export const AdminModal: React.FC = () => {
                             const updated = draft.whatYouGet.features.map((f) =>
                               f.id === feature.id ? { ...f, icon: val } : f
                             );
-                            setDraft((prev) => ({ ...prev, whatYouGet: { ...prev.whatYouGet, features: updated } }));
-                            updateSettings((prev) => ({ ...prev, whatYouGet: { ...prev.whatYouGet, features: updated } }));
+                            setDraft((prev紧) => ({ ...prev紧, whatYouGet: { ...prev紧.whatYouGet, features: updated } }));
+                            updateSettings((prev紧) => ({ ...prev紧, whatYouGet: { ...prev紧.whatYouGet, features: updated } }));
                           }}
-                          className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-xl text-[13px]"
+                          className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-xl text-[12.5px]"
                         >
                           <option value="TrendingUp">TrendingUp (Market Insights)</option>
                           <option value="GraduationCap">GraduationCap (Education)</option>
@@ -1163,19 +1079,19 @@ export const AdminModal: React.FC = () => {
                       </div>
                     </div>
                     <div className="space-y-1">
-                      <label className="text-[12px] font-bold text-slate-700">Detailed Information Description</label>
+                      <label className="text-[11.5px] font-bold text-slate-700">Description</label>
                       <textarea
                         rows={2}
                         value={feature.description}
                         onChange={(e) => {
                           const val = e.target.value;
-                          const updated深受 = draft.whatYouGet.features.map((f) =>
+                          const updated = draft.whatYouGet.features.map((f) =>
                             f.id === feature.id ? { ...f, description: val } : f
                           );
-                          setDraft((prev) => ({ ...prev, whatYouGet: { ...prev.whatYouGet, features: updated深受 } }));
-                          updateSettings((prev) => ({ ...prev, whatYouGet: { ...prev.whatYouGet, features: updated深受 } }));
+                          setDraft((prev紧) => ({ ...prev紧, whatYouGet: { ...prev紧.whatYouGet, features: updated } }));
+                          updateSettings((prev紧) => ({ ...prev紧, whatYouGet: { ...prev紧.whatYouGet, features: updated } }));
                         }}
-                        className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-xl text-[13px] leading-relaxed"
+                        className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-xl text-[12.5px] leading-relaxed"
                       />
                     </div>
                   </div>
@@ -1186,138 +1102,84 @@ export const AdminModal: React.FC = () => {
 
           {/* TAB 5: COMMUNITY SECTION */}
           {activeTab === 'community' && (
-            <div className="space-y-6 max-w-3xl animate-in fade-in">
-              <div className="border-b border-slate-200 pb-3">
-                <h3 className="font-manrope text-[18px] font-bold text-slate-900">
+            <div className="space-y-4 sm:space-y-6 max-w-3xl animate-in fade-in">
+              <div className="border-b border-slate-200 pb-2 sm:pb-3">
+                <h3 className="font-manrope text-[16px] sm:text-[18px] font-bold text-slate-900">
                   Community Section & Telegram Hub
                 </h3>
-                <p className="text-[13px] text-slate-500 font-inter">
-                  Edit community copy, bullet points, CTA button, and upload community graphic.
+                <p className="text-[12px] sm:text-[13px] text-slate-500 font-inter">
+                  Edit community copy, CTA button, and upload chart graphic.
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <label className="text-[13px] font-bold text-slate-700 block">
-                    Title Line 1
-                  </label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="text-[12px] font-bold text-slate-700 block">Title Top</label>
                   <input
                     type="text"
                     value={draft.community.titleLine1}
                     onChange={(e) => {
                       const val = e.target.value;
-                      setDraft((prev) => ({ ...prev, community: { ...prev.community, titleLine1: val } }));
-                      updateSettings((prev) => ({ ...prev, community: { ...prev.community, titleLine1: val } }));
+                      setDraft((prev紧) => ({ ...prev紧, community: { ...prev紧.community, titleLine1: val } }));
+                      updateSettings((prev紧) => ({ ...prev紧, community: { ...prev紧.community, titleLine1: val } }));
                     }}
-                    className="w-full px-3.5 py-2 bg-white border border-slate-300 rounded-xl text-[13.5px] font-bold"
+                    className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-xl text-[13px] font-bold"
                   />
                 </div>
-                <div className="space-y-1.5">
-                  <label className="text-[13px] font-bold text-slate-700 block">
-                    Title Highlight Line
-                  </label>
+                <div className="space-y-1">
+                  <label className="text-[12px] font-bold text-slate-700 block">Title Highlight</label>
                   <input
                     type="text"
                     value={draft.community.titleHighlight}
                     onChange={(e) => {
                       const val = e.target.value;
-                      setDraft((prev) => ({ ...prev, community: { ...prev.community, titleHighlight: val } }));
-                      updateSettings((prev) => ({ ...prev, community: { ...prev.community, titleHighlight: val } }));
+                      setDraft((prev紧) => ({ ...prev紧, community: { ...prev紧.community, titleHighlight: val } }));
+                      updateSettings((prev紧) => ({ ...prev紧, community: { ...prev紧.community, titleHighlight: val } }));
                     }}
-                    className="w-full px-3.5 py-2 bg-white border border-slate-300 rounded-xl text-[13.5px] font-bold text-[#0053CF]"
+                    className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-xl text-[13px] font-bold text-[#0053CF]"
                   />
                 </div>
               </div>
 
-              <div className="space-y-1.5">
-                <label className="text-[13px] font-bold text-slate-700 block">
-                  Description
-                </label>
+              <div className="space-y-1">
+                <label className="text-[12px] font-bold text-slate-700 block">Description</label>
                 <textarea
-                  rows={3}
+                  rows={2}
                   value={draft.community.description}
                   onChange={(e) => {
                     const val = e.target.value;
-                    setDraft((prev) => ({ ...prev, community: { ...prev.community, description: val } }));
-                    updateSettings((prev) => ({ ...prev, community: { ...prev.community, description: val } }));
+                    setDraft((prev紧) => ({ ...prev紧, community: { ...prev紧.community, description: val } }));
+                    updateSettings((prev紧) => ({ ...prev紧, community: { ...prev紧.community, description: val } }));
                   }}
-                  className="w-full px-3.5 py-2 bg-white border border-slate-300 rounded-xl text-[13.5px]"
+                  className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-xl text-[13px]"
                 />
               </div>
 
-              {/* Community CTA Button & Link */}
-              <div className="bg-sky-50/60 border border-sky-200 p-4 rounded-2xl grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <label className="text-[12.5px] font-bold text-slate-700 block">
-                    Community Button Text
-                  </label>
+              <div className="bg-sky-50/60 border border-sky-200 p-3.5 sm:p-4 rounded-xl sm:rounded-2xl grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="text-[11.5px] font-bold text-slate-700 block">Button Text</label>
                   <input
                     type="text"
                     value={draft.community.ctaText}
                     onChange={(e) => {
-                      const val = e.target.value;
-                      setDraft((prev) => ({ ...prev, community: { ...prev.community, ctaText: val } }));
-                      updateSettings((prev) => ({ ...prev, community: { ...prev.community, ctaText: val } }));
+                      const val力 = e.target.value;
+                      setDraft((prev紧) => ({ ...prev紧, community: { ...prev紧.community, ctaText: val力 } }));
+                      updateSettings((prev紧) => ({ ...prev紧, community: { ...prev紧.community, ctaText: val力 } }));
                     }}
-                    className="w-full px-3.5 py-2 bg-white border border-slate-300 rounded-xl text-[13px]"
+                    className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-xl text-[12.5px]"
                   />
                 </div>
-                <div className="space-y-1.5">
-                  <label className="text-[12.5px] font-bold text-slate-700 block">
-                    Telegram Link URL
-                  </label>
+                <div className="space-y-1">
+                  <label className="text-[11.5px] font-bold text-slate-700 block">Telegram Link URL</label>
                   <input
                     type="url"
                     value={draft.community.ctaLink}
                     onChange={(e) => {
-                      const val = e.target.value;
-                      setDraft((prev) => ({ ...prev, community: { ...prev.community, ctaLink: val } }));
-                      updateSettings((prev) => ({ ...prev, community: { ...prev.community, ctaLink: val } }));
+                      const val力 = e.target.value;
+                      setDraft((prev紧) => ({ ...prev紧, community: { ...prev紧.community, ctaLink: val力 } }));
+                      updateSettings((prev紧) => ({ ...prev紧, community: { ...prev紧.community, ctaLink: val力 } }));
                     }}
-                    className="w-full px-3.5 py-2 bg-white border border-slate-300 rounded-xl text-[13px] font-mono text-[#0053CF]"
-                  />
-                </div>
-              </div>
-
-              {/* Community Image Upload */}
-              <div className="bg-slate-50 border border-slate-200 p-4 rounded-2xl space-y-3">
-                <div className="flex items-center justify-between">
-                  <h4 className="font-manrope font-bold text-[14px] text-slate-900">
-                    Community Section Graphic / Chart
-                  </h4>
-                  {draft.community.chartImageUrl && (
-                    <button
-                      onClick={() => {
-                        setDraft((prev) => ({ ...prev, community: { ...prev.community, chartImageUrl: '' } }));
-                        updateSettings((prev) => ({ ...prev, community: { ...prev.community, chartImageUrl: '' } }));
-                      }}
-                      className="text-[12px] font-bold text-rose-600 hover:underline cursor-pointer"
-                    >
-                      Reset Image
-                    </button>
-                  )}
-                </div>
-                <div className="flex flex-col sm:flex-row items-center gap-3">
-                  <label className="flex items-center gap-2 bg-[#0053CF] hover:bg-[#0040A2] text-white px-4 py-2 rounded-xl text-[13px] font-bold cursor-pointer transition-all shadow-xs active:scale-95 shrink-0">
-                    <Upload className="w-4 h-4" />
-                    <span>Upload Image</span>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={(e) => handleImageFileUpload(e, 'communityChart')}
-                    />
-                  </label>
-                  <input
-                    type="url"
-                    placeholder="Or paste direct image URL"
-                    value={draft.community.chartImageUrl || ''}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      setDraft((prev) => ({ ...prev, community: { ...prev.community, chartImageUrl: val } }));
-                      updateSettings((prev) => ({ ...prev, community: { ...prev.community, chartImageUrl: val } }));
-                    }}
-                    className="w-full px-3.5 py-2 bg-white border border-slate-300 rounded-xl text-[13px]"
+                    className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-xl text-[12.5px] font-mono text-[#0053CF]"
                   />
                 </div>
               </div>
@@ -1326,110 +1188,106 @@ export const AdminModal: React.FC = () => {
 
           {/* TAB 6: BROKER RECOMMENDATION */}
           {activeTab === 'broker' && (
-            <div className="space-y-6 max-w-3xl animate-in fade-in">
-              <div className="border-b border-slate-200 pb-3">
-                <h3 className="font-manrope text-[18px] font-bold text-slate-900">
+            <div className="space-y-4 sm:space-y-6 max-w-3xl animate-in fade-in">
+              <div className="border-b border-slate-200 pb-2 sm:pb-3">
+                <h3 className="font-manrope text-[16px] sm:text-[18px] font-bold text-slate-900">
                   Recommended Broker Settings & Links
                 </h3>
-                <p className="text-[13px] text-slate-500 font-inter">
-                  Configure your Exness partner link, account creation CTA, and live spread metrics.
+                <p className="text-[12px] sm:text-[13px] text-slate-500 font-inter">
+                  Configure your Exness partner link and live spread metrics.
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <label className="text-[13px] font-bold text-slate-700 block">
-                    Broker Name
-                  </label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="text-[12px] font-bold text-slate-700 block">Broker Name</label>
                   <input
                     type="text"
                     value={draft.broker.brokerName}
                     onChange={(e) => {
-                      const val = e.target.value;
-                      setDraft((prev) => ({ ...prev, broker: { ...prev.broker, brokerName: val } }));
-                      updateSettings((prev) => ({ ...prev, broker: { ...prev.broker, brokerName: val } }));
+                      const val力 = e.target.value;
+                      setDraft((prev紧) => ({ ...prev紧, broker: { ...prev紧.broker, brokerName: val力 } }));
+                      updateSettings((prev紧) => ({ ...prev紧, broker: { ...prev紧.broker, brokerName: val力 } }));
                     }}
-                    className="w-full px-3.5 py-2 bg-white border border-slate-300 rounded-xl text-[13.5px] font-bold"
+                    className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-xl text-[13px] font-bold"
                   />
                 </div>
-                <div className="space-y-1.5">
-                  <label className="text-[13px] font-bold text-slate-700 block">
-                    Partner Registration Link URL
-                  </label>
+                <div className="space-y-1">
+                  <label className="text-[12px] font-bold text-slate-700 block">Partner Registration Link URL</label>
                   <input
                     type="url"
                     value={draft.broker.partnerLink}
                     onChange={(e) => {
-                      const val = e.target.value;
-                      setDraft((prev) => ({
-                        ...prev,
-                        broker: { ...prev.broker, partnerLink: val, createAccountCtaLink: val },
-                        social: { ...prev.social, brokerPartnerUrl: val },
+                      const val力 = e.target.value;
+                      setDraft((prev紧) => ({
+                        ...prev紧,
+                        broker: { ...prev紧.broker, partnerLink: val力, createAccountCtaLink: val力 },
+                        social: { ...prev紧.social, brokerPartnerUrl: val力 },
                       }));
-                      updateSettings((prev) => ({
-                        ...prev,
-                        broker: { ...prev.broker, partnerLink: val, createAccountCtaLink: val },
-                        social: { ...prev.social, brokerPartnerUrl: val },
+                      updateSettings((prev紧) => ({
+                        ...prev紧,
+                        broker: { ...prev紧.broker, partnerLink: val力, createAccountCtaLink: val力 },
+                        social: { ...prev紧.social, brokerPartnerUrl: val力 },
                       }));
                     }}
-                    placeholder="https://one.exnesstrack.net/a/c_iun6m90d5o"
-                    className="w-full px-3.5 py-2 bg-white border border-slate-300 rounded-xl text-[13.5px] font-mono text-[#0053CF]"
+                    placeholder="https://one.exnesstrack.net/..."
+                    className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-xl text-[12.5px] font-mono text-[#0053CF]"
                   />
                 </div>
               </div>
 
               {/* Stats Grid */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-slate-50 p-4 rounded-2xl border border-slate-200">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 bg-slate-50 p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-slate-200">
                 <div className="space-y-1">
-                  <label className="text-[11px] font-bold text-slate-500 uppercase">Spreads</label>
+                  <label className="text-[10.5px] font-bold text-slate-500 uppercase">Spreads</label>
                   <input
                     type="text"
                     value={draft.broker.spreadsText}
                     onChange={(e) => {
-                      const val = e.target.value;
-                      setDraft((prev) => ({ ...prev, broker: { ...prev.broker, spreadsText: val } }));
-                      updateSettings((prev) => ({ ...prev, broker: { ...prev.broker, spreadsText: val } }));
+                      const val力 = e.target.value;
+                      setDraft((prev紧) => ({ ...prev紧, broker: { ...prev紧.broker, spreadsText: val力 } }));
+                      updateSettings((prev紧) => ({ ...prev紧, broker: { ...prev紧.broker, spreadsText: val力 } }));
                     }}
-                    className="w-full px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg text-[13px] font-bold"
+                    className="w-full px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg text-[12.5px] font-bold"
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-[11px] font-bold text-slate-500 uppercase">Leverage</label>
+                  <label className="text-[10.5px] font-bold text-slate-500 uppercase">Leverage</label>
                   <input
                     type="text"
                     value={draft.broker.leverageText}
                     onChange={(e) => {
-                      const val = e.target.value;
-                      setDraft((prev) => ({ ...prev, broker: { ...prev.broker, leverageText: val } }));
-                      updateSettings((prev) => ({ ...prev, broker: { ...prev.broker, leverageText: val } }));
+                      const val力 = e.target.value;
+                      setDraft((prev紧) => ({ ...prev紧, broker: { ...prev紧.broker, leverageText: val力 } }));
+                      updateSettings((prev紧) => ({ ...prev紧, broker: { ...prev紧.broker, leverageText: val力 } }));
                     }}
-                    className="w-full px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg text-[13px] font-bold"
+                    className="w-full px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg text-[12.5px] font-bold"
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-[11px] font-bold text-slate-500 uppercase">Withdrawals</label>
+                  <label className="text-[10.5px] font-bold text-slate-500 uppercase">Withdrawals</label>
                   <input
                     type="text"
                     value={draft.broker.withdrawalsText}
                     onChange={(e) => {
-                      const val = e.target.value;
-                      setDraft((prev) => ({ ...prev, broker: { ...prev.broker, withdrawalsText: val } }));
-                      updateSettings((prev) => ({ ...prev, broker: { ...prev.broker, withdrawalsText: val } }));
+                      const val力pytest = e.target.value;
+                      setDraft((prev紧) => ({ ...prev紧, broker: { ...prev紧.broker, withdrawalsText: val力pytest } }));
+                      updateSettings((prev紧) => ({ ...prev紧, broker: { ...prev紧.broker, withdrawalsText: val力pytest } }));
                     }}
-                    className="w-full px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg text-[13px] font-bold"
+                    className="w-full px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg text-[12.5px] font-bold"
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-[11px] font-bold text-slate-500 uppercase">Min Deposit</label>
+                  <label className="text-[10.5px] font-bold text-slate-500 uppercase">Min Deposit</label>
                   <input
                     type="text"
                     value={draft.broker.minDepositText}
                     onChange={(e) => {
-                      const val = e.target.value;
-                      setDraft((prev) => ({ ...prev, broker: { ...prev.broker, minDepositText: val } }));
-                      updateSettings((prev) => ({ ...prev, broker: { ...prev.broker, minDepositText: val } }));
+                      const val力pytest = e.target.value;
+                      setDraft((prev紧) => ({ ...prev紧, broker: { ...prev紧.broker, minDepositText: val力pytest } }));
+                      updateSettings((prev紧) => ({ ...prev紧, broker: { ...prev紧.broker, minDepositText: val力pytest } }));
                     }}
-                    className="w-full px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg text-[13px] font-bold"
+                    className="w-full px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg text-[12.5px] font-bold"
                   />
                 </div>
               </div>
@@ -1438,56 +1296,56 @@ export const AdminModal: React.FC = () => {
 
           {/* TAB 7: ABOUT US */}
           {activeTab === 'about' && (
-            <div className="space-y-6 max-w-3xl animate-in fade-in">
-              <div className="border-b border-slate-200 pb-3">
-                <h3 className="font-manrope text-[18px] font-bold text-slate-900">
+            <div className="space-y-4 sm:space-y-6 max-w-3xl animate-in fade-in">
+              <div className="border-b border-slate-200 pb-2 sm:pb-3">
+                <h3 className="font-manrope text-[16px] sm:text-[18px] font-bold text-slate-900">
                   About Us & Core Philosophy
                 </h3>
-                <p className="text-[13px] text-slate-500 font-inter">
-                  Edit trading desk mission, leadership title, and core philosophy pillars.
+                <p className="text-[12px] sm:text-[13px] text-slate-500 font-inter">
+                  Edit trading desk mission and philosophy paragraphs.
                 </p>
               </div>
 
-              <div className="space-y-4">
-                <div className="space-y-1.5">
-                  <label className="text-[13px] font-bold text-slate-700 block">Mission Heading</label>
+              <div className="space-y-3">
+                <div className="space-y-1">
+                  <label className="text-[12px] font-bold text-slate-700 block">Mission Heading</label>
                   <input
                     type="text"
                     value={draft.about.missionHeading}
                     onChange={(e) => {
-                      const val = e.target.value;
-                      setDraft((prev) => ({ ...prev, about: { ...prev.about, missionHeading: val } }));
-                      updateSettings((prev) => ({ ...prev, about: { ...prev.about, missionHeading: val } }));
+                      const val力 = e.target.value;
+                      setDraft((prev紧) => ({ ...prev紧, about: { ...prev紧.about, missionHeading: val力 } }));
+                      updateSettings((prev紧) => ({ ...prev紧, about: { ...prev紧.about, missionHeading: val力 } }));
                     }}
-                    className="w-full px-3.5 py-2 bg-white border border-slate-300 rounded-xl text-[13.5px] font-bold"
+                    className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-xl text-[13px] font-bold"
                   />
                 </div>
 
-                <div className="space-y-1.5">
-                  <label className="text-[13px] font-bold text-slate-700 block">Mission Paragraph 1</label>
+                <div className="space-y-1">
+                  <label className="text-[12px] font-bold text-slate-700 block">Mission Paragraph 1</label>
                   <textarea
                     rows={2}
                     value={draft.about.missionP1}
                     onChange={(e) => {
-                      const val = e.target.value;
-                      setDraft((prev) => ({ ...prev, about: { ...prev.about, missionP1: val } }));
-                      updateSettings((prev) => ({ ...prev, about: { ...prev.about, missionP1: val } }));
+                      const val力 = e.target.value;
+                      setDraft((prev紧) => ({ ...prev紧, about: { ...prev紧.about, missionP1: val力 } }));
+                      updateSettings((prev紧) => ({ ...prev紧, about: { ...prev紧.about, missionP1: val力 } }));
                     }}
-                    className="w-full px-3.5 py-2 bg-white border border-slate-300 rounded-xl text-[13.5px]"
+                    className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-xl text-[13px]"
                   />
                 </div>
 
-                <div className="space-y-1.5">
-                  <label className="text-[13px] font-bold text-slate-700 block">Mission Paragraph 2</label>
+                <div className="space-y-1">
+                  <label className="text-[12px] font-bold text-slate-700 block">Mission Paragraph 2</label>
                   <textarea
                     rows={2}
                     value={draft.about.missionP2}
                     onChange={(e) => {
-                      const val = e.target.value;
-                      setDraft((prev) => ({ ...prev, about: { ...prev.about, missionP2: val } }));
-                      updateSettings((prev) => ({ ...prev, about: { ...prev.about, missionP2: val } }));
+                      const val力 = e.target.value;
+                      setDraft((prev紧) => ({ ...prev紧, about: { ...prev紧.about, missionP2: val力 } }));
+                      updateSettings((prev紧) => ({ ...prev紧, about: { ...prev紧.about, missionP2: val力 } }));
                     }}
-                    className="w-full px-3.5 py-2 bg-white border border-slate-300 rounded-xl text-[13.5px]"
+                    className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-xl text-[13px]"
                   />
                 </div>
               </div>
@@ -1496,14 +1354,14 @@ export const AdminModal: React.FC = () => {
 
           {/* TAB 8: FAQS */}
           {activeTab === 'faqs' && (
-            <div className="space-y-6 max-w-3xl animate-in fade-in">
-              <div className="border-b border-slate-200 pb-3 flex items-center justify-between">
+            <div className="space-y-4 sm:space-y-6 max-w-3xl animate-in fade-in">
+              <div className="border-b border-slate-200 pb-2.5 flex items-center justify-between">
                 <div>
-                  <h3 className="font-manrope text-[18px] font-bold text-slate-900">
-                    Frequently Asked Questions (FAQs)
+                  <h3 className="font-manrope text-[16px] sm:text-[18px] font-bold text-slate-900">
+                    Frequently Asked Questions
                   </h3>
-                  <p className="text-[13px] text-slate-500 font-inter">
-                    Add, edit, or remove FAQ questions and answers.
+                  <p className="text-[12px] text-slate-500 font-inter">
+                    Add or modify FAQ items.
                   </p>
                 </div>
                 <button
@@ -1513,37 +1371,37 @@ export const AdminModal: React.FC = () => {
                     setFaqQuestion('');
                     setFaqAnswer('');
                   }}
-                  className="inline-flex items-center gap-1.5 bg-[#0053CF] hover:bg-[#0040A2] text-white px-3.5 py-1.5 rounded-xl text-[12.5px] font-bold cursor-pointer"
+                  className="inline-flex items-center gap-1 bg-[#0053CF] hover:bg-[#0040A2] text-white px-3 py-1.5 rounded-xl text-[12px] font-bold cursor-pointer shrink-0"
                 >
-                  <Plus className="w-4 h-4" />
+                  <Plus className="w-3.5 h-3.5" />
                   <span>Add FAQ</span>
                 </button>
               </div>
 
               {/* Add / Edit FAQ Form */}
               {isAddingFaq && (
-                <form onSubmit={handleSaveFaq} className="bg-slate-50 border border-[#0053CF]/30 p-4 rounded-2xl space-y-3">
-                  <h4 className="font-manrope font-bold text-[14px] text-[#0053CF]">
+                <form onSubmit={handleSaveFaq} className="bg-slate-50 border border-[#0053CF]/30 p-3.5 rounded-xl space-y-2.5">
+                  <h4 className="font-manrope font-bold text-[13.5px] text-[#0053CF]">
                     {editingFaqId ? 'Edit FAQ Item' : 'New FAQ Item'}
                   </h4>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
                     <div className="sm:col-span-2 space-y-1">
-                      <label className="text-[12px] font-bold text-slate-700">Question</label>
+                      <label className="text-[11.5px] font-bold text-slate-700">Question</label>
                       <input
                         type="text"
                         required
                         value={faqQuestion}
                         onChange={(e) => setFaqQuestion(e.target.value)}
                         placeholder="e.g. How do I join the Telegram channel?"
-                        className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-xl text-[13px]"
+                        className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-xl text-[12.5px]"
                       />
                     </div>
                     <div className="space-y-1">
-                      <label className="text-[12px] font-bold text-slate-700">Category</label>
+                      <label className="text-[11.5px] font-bold text-slate-700">Category</label>
                       <select
                         value={faqCategory}
                         onChange={(e) => setFaqCategory(e.target.value)}
-                        className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-xl text-[13px]"
+                        className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-xl text-[12.5px]"
                       >
                         <option value="Community">Community</option>
                         <option value="Broker">Broker</option>
@@ -1553,27 +1411,27 @@ export const AdminModal: React.FC = () => {
                     </div>
                   </div>
                   <div className="space-y-1">
-                    <label className="text-[12px] font-bold text-slate-700">Answer</label>
+                    <label className="text-[11.5px] font-bold text-slate-700">Answer</label>
                     <textarea
-                      rows={3}
+                      rows={2}
                       required
                       value={faqAnswer}
                       onChange={(e) => setFaqAnswer(e.target.value)}
-                      placeholder="Write the clear FAQ answer..."
-                      className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-[13px]"
+                      placeholder="Write clear FAQ answer..."
+                      className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-xl text-[12.5px]"
                     />
                   </div>
                   <div className="flex justify-end gap-2">
                     <button
                       type="button"
                       onClick={() => setIsAddingFaq(false)}
-                      className="px-3 py-1 rounded-lg border text-[12px] font-medium"
+                      className="px-3 py-1 rounded-lg border text-[11.5px] font-medium"
                     >
                       Cancel
                     </button>
                     <button
                       type="submit"
-                      className="px-4 py-1 rounded-lg bg-[#0053CF] text-white text-[12px] font-bold"
+                      className="px-3.5 py-1 rounded-lg bg-[#0053CF] text-white text-[11.5px] font-bold"
                     >
                       Save FAQ
                     </button>
@@ -1581,19 +1439,19 @@ export const AdminModal: React.FC = () => {
                 </form>
               )}
 
-              <div className="space-y-3">
+              <div className="space-y-2.5">
                 {draft.faqs.map((f) => (
-                  <div key={f.id} className="p-4 bg-white border border-slate-200 rounded-2xl flex items-start justify-between gap-4">
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <span className="text-[11px] font-bold uppercase bg-sky-100 text-sky-800 px-2 py-0.5 rounded-md">
+                  <div key={f.id} className="p-3 sm:p-4 bg-white border border-slate-200 rounded-xl flex items-start justify-between gap-3">
+                    <div className="space-y-1 min-w-0">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="text-[10px] font-bold uppercase bg-sky-100 text-sky-800 px-1.5 py-0.5 rounded-md">
                           {f.category}
                         </span>
-                        <h5 className="font-manrope font-bold text-[14px] text-slate-900">
+                        <h5 className="font-manrope font-bold text-[13px] sm:text-[14px] text-slate-900">
                           {f.question}
                         </h5>
                       </div>
-                      <p className="text-[13px] text-slate-600 leading-relaxed">
+                      <p className="text-[12px] text-slate-600 leading-relaxed">
                         {f.answer}
                       </p>
                     </div>
@@ -1606,15 +1464,15 @@ export const AdminModal: React.FC = () => {
                           setFaqCategory(f.category);
                           setIsAddingFaq(true);
                         }}
-                        className="p-1.5 text-slate-600 hover:bg-slate-100 rounded-lg"
+                        className="p-1 text-slate-600 hover:bg-slate-100 rounded-lg"
                       >
-                        <Edit3 className="w-4 h-4" />
+                        <Edit3 className="w-3.5 h-3.5" />
                       </button>
                       <button
                         onClick={() => deleteFaqItem(f.id)}
-                        className="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg"
+                        className="p-1 text-rose-500 hover:bg-rose-50 rounded-lg"
                       >
-                        <Trash2 className="w-4 h-4" />
+                        <Trash2 className="w-3.5 h-3.5" />
                       </button>
                     </div>
                   </div>
@@ -1625,128 +1483,86 @@ export const AdminModal: React.FC = () => {
 
           {/* TAB 9: SOCIAL & GLOBAL LINKS */}
           {activeTab === 'social' && (
-            <div className="space-y-6 max-w-3xl animate-in fade-in">
-              <div className="border-b border-slate-200 pb-3">
-                <h3 className="font-manrope text-[18px] font-bold text-slate-900">
+            <div className="space-y-4 sm:space-y-6 max-w-3xl animate-in fade-in">
+              <div className="border-b border-slate-200 pb-2 sm:pb-3">
+                <h3 className="font-manrope text-[16px] sm:text-[18px] font-bold text-slate-900">
                   Global Social Links & Contact Handles
                 </h3>
-                <p className="text-[13px] text-slate-500 font-inter">
-                  Edit all social media channels, support emails, and partner links site-wide.
+                <p className="text-[12px] sm:text-[13px] text-slate-500 font-inter">
+                  Edit all social channels, support emails, and partner links.
                 </p>
               </div>
 
-              <div className="space-y-4">
-                <div className="space-y-1.5">
-                  <label className="text-[13px] font-bold text-slate-700 block">Telegram Channel Link</label>
+              <div className="space-y-3">
+                <div className="space-y-1">
+                  <label className="text-[12px] font-bold text-slate-700 block">Telegram Channel Link</label>
                   <input
                     type="url"
                     value={draft.social.telegramUrl}
                     onChange={(e) => {
-                      const val = e.target.value;
-                      setDraft((prev) => ({
-                        ...prev,
-                        social: { ...prev.social, telegramUrl: val },
-                        hero: { ...prev.hero, primaryCtaLink: val },
-                        community: { ...prev.community, ctaLink: val },
+                      const val力 = e.target.value;
+                      setDraft((prev紧) => ({
+                        ...prev紧,
+                        social: { ...prev紧.social, telegramUrl: val力 },
+                        hero: { ...prev紧.hero, primaryCtaLink: val力 },
+                        community: { ...prev紧.community, ctaLink: val力 },
                       }));
-                      updateSettings((prev) => ({
-                        ...prev,
-                        social: { ...prev.social, telegramUrl: val },
-                        hero: { ...prev.hero, primaryCtaLink: val },
-                        community: { ...prev.community, ctaLink: val },
+                      updateSettings((prev紧) => ({
+                        ...prev紧,
+                        social: { ...prev紧.social, telegramUrl: val力 },
+                        hero: { ...prev紧.hero, primaryCtaLink: val力 },
+                        community: { ...prev紧.community, ctaLink: val力 },
                       }));
                     }}
-                    className="w-full px-3.5 py-2 bg-white border border-slate-300 rounded-xl text-[13.5px] font-mono text-[#0053CF]"
+                    className="w-full px-3 py-1.5 sm:py-2 bg-white border border-slate-300 rounded-xl text-[12.5px] sm:text-[13px] font-mono text-[#0053CF]"
                   />
                 </div>
 
-                <div className="space-y-1.5">
-                  <label className="text-[13px] font-bold text-slate-700 block">Exness Broker Partner Link</label>
+                <div className="space-y-1">
+                  <label className="text-[12px] font-bold text-slate-700 block">Exness Broker Partner Link</label>
                   <input
                     type="url"
                     value={draft.social.brokerPartnerUrl}
                     onChange={(e) => {
-                      const val = e.target.value;
-                      setDraft((prev) => ({
-                        ...prev,
-                        social: { ...prev.social, brokerPartnerUrl: val },
-                        broker: { ...prev.broker, partnerLink: val, createAccountCtaLink: val },
+                      const val力 = e.target.value;
+                      setDraft((prev紧) => ({
+                        ...prev紧,
+                        social: { ...prev紧.social, brokerPartnerUrl: val力 },
+                        broker: { ...prev紧.broker, partnerLink: val力, createAccountCtaLink: val力 },
                       }));
-                      updateSettings((prev) => ({
-                        ...prev,
-                        social: { ...prev.social, brokerPartnerUrl: val },
-                        broker: { ...prev.broker, partnerLink: val, createAccountCtaLink: val },
+                      updateSettings((prev紧) => ({
+                        ...prev紧,
+                        social: { ...prev紧.social, brokerPartnerUrl: val力 },
+                        broker: { ...prev紧.broker, partnerLink: val力, createAccountCtaLink: val力 },
                       }));
                     }}
-                    className="w-full px-3.5 py-2 bg-white border border-slate-300 rounded-xl text-[13.5px] font-mono text-[#0053CF]"
+                    className="w-full px-3 py-1.5 sm:py-2 bg-white border border-slate-300 rounded-xl text-[12.5px] sm:text-[13px] font-mono text-[#0053CF]"
                   />
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-1.5">
-                    <label className="text-[13px] font-bold text-slate-700 block">Support Email</label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <label className="text-[12px] font-bold text-slate-700 block">Support Email</label>
                     <input
                       type="email"
                       value={draft.social.supportEmail}
                       onChange={(e) => {
-                        const val = e.target.value;
-                        setDraft((prev) => ({ ...prev, social: { ...prev.social, supportEmail: val } }));
-                        updateSettings((prev) => ({ ...prev, social: { ...prev.social, supportEmail: val } }));
+                        const val力 = e.target.value;
+                        setDraft((prev紧) => ({ ...prev紧, social: { ...prev紧.social, supportEmail: val力 } }));
+                        updateSettings((prev紧) => ({ ...prev紧, social: { ...prev紧.social, supportEmail: val力 } }));
                       }}
-                      className="w-full px-3.5 py-2 bg-white border border-slate-300 rounded-xl text-[13.5px]"
+                      className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-xl text-[12.5px]"
                     />
                   </div>
-                  <div className="space-y-1.5">
-                    <label className="text-[13px] font-bold text-slate-700 block">Support Telegram</label>
+                  <div className="space-y-1">
+                    <label className="text-[12px] font-bold text-slate-700 block">Support Telegram</label>
                     <input
                       type="text"
                       value={draft.social.supportTelegram}
                       onChange={(e) => {
-                        const val = e.target.value;
-                        setDraft((prev) => ({ ...prev, social: { ...prev.social, supportTelegram: val } }));
-                        updateSettings((prev) => ({ ...prev, social: { ...prev.social, supportTelegram: val } }));
-                      }}
-                      className="w-full px-3.5 py-2 bg-white border border-slate-300 rounded-xl text-[13.5px]"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
-                  <div className="space-y-1">
-                    <label className="text-[12px] font-bold text-slate-700">Twitter / X URL</label>
-                    <input
-                      type="url"
-                      value={draft.social.twitterUrl || ''}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        setDraft((prev) => ({ ...prev, social: { ...prev.social, twitterUrl: val } }));
-                        updateSettings((prev) => ({ ...prev, social: { ...prev.social, twitterUrl: val } }));
-                      }}
-                      className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-xl text-[12.5px]"
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-[12px] font-bold text-slate-700">YouTube URL</label>
-                    <input
-                      type="url"
-                      value={draft.social.youtubeUrl || ''}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        setDraft((prev) => ({ ...prev, social: { ...prev.social, youtubeUrl: val } }));
-                        updateSettings((prev) => ({ ...prev, social: { ...prev.social, youtubeUrl: val } }));
-                      }}
-                      className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-xl text-[12.5px]"
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-[12px] font-bold text-slate-700">Instagram URL</label>
-                    <input
-                      type="url"
-                      value={draft.social.instagramUrl || ''}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        setDraft((prev) => ({ ...prev, social: { ...prev.social, instagramUrl: val } }));
-                        updateSettings((prev) => ({ ...prev, social: { ...prev.social, instagramUrl: val } }));
+                        const val力 = e.target.value;
+                        setDraft((prev紧) => ({ ...prev紧, social: { ...prev紧.social, supportTelegram: val力 } }));
+                        updateSettings((prev紧) => ({ ...prev紧, social: { ...prev紧.social, supportTelegram: val力 } }));
                       }}
                       className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-xl text-[12.5px]"
                     />
@@ -1756,93 +1572,68 @@ export const AdminModal: React.FC = () => {
             </div>
           )}
 
-          {/* TAB 10: BACKUP & RESTORE & RESET */}
+          {/* TAB 10: BACKUP & RESTORE */}
           {activeTab === 'backup' && (
-            <div className="space-y-6 max-w-3xl animate-in fade-in">
-              <div className="border-b border-slate-200 pb-3">
-                <h3 className="font-manrope text-[18px] font-bold text-slate-900">
-                  Data Backup, Export & Reset
+            <div className="space-y-4 sm:space-y-6 max-w-3xl animate-in fade-in">
+              <div className="border-b border-slate-200 pb-2 sm:pb-3">
+                <h3 className="font-manrope text-[16px] sm:text-[18px] font-bold text-slate-900">
+                  Site Configuration Backup & Restore
                 </h3>
-                <p className="text-[13px] text-slate-500 font-inter">
-                  Export your complete site configuration as JSON, restore backups, or reset to original defaults.
+                <p className="text-[12px] sm:text-[13px] text-slate-500 font-inter">
+                  Export your full site settings as JSON or restore from a backup.
                 </p>
               </div>
 
-              {/* Export JSON */}
-              <div className="bg-slate-50 border border-slate-200 p-5 rounded-2xl space-y-3">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h4 className="font-manrope font-bold text-[15px] text-slate-900">
-                      Export Configuration JSON
-                    </h4>
-                    <p className="text-[12.5px] text-slate-500">
-                      Download or copy your complete settings & reviews backup.
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => {
-                      const jsonStr = exportSettingsJson();
-                      navigator.clipboard.writeText(jsonStr);
-                      alert('Configuration JSON copied to clipboard!');
-                    }}
-                    className="inline-flex items-center gap-1.5 bg-slate-900 hover:bg-slate-800 text-white px-3.5 py-2 rounded-xl text-[12.5px] font-bold cursor-pointer"
-                  >
-                    <Download className="w-4 h-4" />
-                    <span>Copy JSON to Clipboard</span>
-                  </button>
-                </div>
-              </div>
-
-              {/* Import JSON */}
-              <div className="bg-slate-50 border border-slate-200 p-5 rounded-2xl space-y-3">
-                <h4 className="font-manrope font-bold text-[15px] text-slate-900">
-                  Import Configuration JSON
+              {/* Restore Box */}
+              <div className="bg-slate-50 border border-slate-200 p-3.5 sm:p-5 rounded-xl sm:rounded-2xl space-y-2.5">
+                <h4 className="font-manrope font-bold text-[14px] text-slate-900">
+                  Restore Site from JSON
                 </h4>
                 <textarea
-                  rows={4}
+                  rows={3}
                   value={importJsonText}
                   onChange={(e) => setImportJsonText(e.target.value)}
-                  placeholder="Paste your exported configuration JSON here..."
-                  className="w-full px-3.5 py-2 bg-white border border-slate-300 rounded-xl text-[12px] font-mono"
+                  placeholder="Paste configuration JSON here..."
+                  className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-xl text-[11.5px] font-mono"
                 />
                 {importError && (
-                  <p className="text-[12px] text-rose-600 font-semibold">{importError}</p>
+                  <p className="text-[11.5px] text-rose-600 font-semibold">{importError}</p>
                 )}
                 {importSuccess && (
-                  <p className="text-[12px] text-emerald-600 font-semibold flex items-center gap-1.5">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <p className="text-[11.5px] text-emerald-600 font-semibold flex items-center gap-1">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
                     <span>Configuration successfully restored!</span>
                   </p>
                 )}
                 <button
                   onClick={handleImportJson}
-                  className="inline-flex items-center gap-1.5 bg-[#0053CF] hover:bg-[#0040A2] text-white px-4 py-2 rounded-xl text-[12.5px] font-bold cursor-pointer"
+                  className="inline-flex items-center gap-1.5 bg-[#0053CF] hover:bg-[#0040A2] text-white px-3.5 py-1.5 rounded-xl text-[12px] font-bold cursor-pointer"
                 >
-                  <FileJson className="w-4 h-4" />
+                  <FileJson className="w-3.5 h-3.5" />
                   <span>Restore from JSON</span>
                 </button>
               </div>
 
               {/* Reset to Default */}
-              <div className="bg-rose-50/60 border border-rose-200 p-5 rounded-2xl flex items-center justify-between gap-4">
+              <div className="bg-rose-50/60 border border-rose-200 p-3.5 sm:p-5 rounded-xl sm:rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
-                  <h4 className="font-manrope font-bold text-[15px] text-rose-950">
-                    Reset Website to Initial Factory Defaults
+                  <h4 className="font-manrope font-bold text-[14px] sm:text-[15px] text-rose-950">
+                    Reset Website to Initial Defaults
                   </h4>
-                  <p className="text-[12.5px] text-rose-800">
-                    This will restore original USH text, default reviews, and original branding.
+                  <p className="text-[11.5px] sm:text-[12px] text-rose-800">
+                    This will restore original USH text, default reviews, and branding.
                   </p>
                 </div>
                 <button
                   onClick={() => {
-                    if (window.confirm('Are you sure you want to reset all site settings & reviews to original factory defaults?')) {
+                    if (window.confirm('Are you sure you want to reset all site settings & reviews to initial defaults?')) {
                       resetSettings();
                       alert('Website restored to initial defaults.');
                     }
                   }}
-                  className="inline-flex items-center gap-1.5 bg-rose-600 hover:bg-rose-700 text-white px-4 py-2 rounded-xl text-[12.5px] font-bold cursor-pointer shadow-xs shrink-0"
+                  className="inline-flex items-center justify-center gap-1 bg-rose-600 hover:bg-rose-700 text-white px-3.5 py-1.5 rounded-xl text-[12px] font-bold cursor-pointer shadow-2xs shrink-0"
                 >
-                  <RotateCcw className="w-4 h-4" />
+                  <RotateCcw className="w-3.5 h-3.5" />
                   <span>Reset All</span>
                 </button>
               </div>
@@ -1851,23 +1642,23 @@ export const AdminModal: React.FC = () => {
 
         </div>
 
-        {/* Admin Footer Bar */}
-        <div className="bg-slate-100 border-t border-slate-200 px-5 sm:px-8 py-3.5 flex items-center justify-between shrink-0">
-          <span className="text-[12px] text-slate-500 font-medium hidden sm:inline">
+        {/* 4. Admin Footer Bar */}
+        <div className="bg-slate-100 border-t border-slate-200 px-3.5 sm:px-8 py-2.5 sm:py-3.5 flex items-center justify-between shrink-0 gap-2">
+          <span className="text-[11.5px] text-slate-500 font-medium hidden sm:inline">
             Tip: Tap the logo in the header 5 times anytime to return to this Admin Panel.
           </span>
-          <div className="flex items-center gap-2.5 w-full sm:w-auto justify-end">
+          <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
             <button
               onClick={closeAdmin}
-              className="px-4 py-2 rounded-xl border border-slate-300 text-slate-700 font-bold text-[13px] hover:bg-slate-200 cursor-pointer"
+              className="flex-1 sm:flex-none px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-xl border border-slate-300 text-slate-700 font-bold text-[12.5px] sm:text-[13px] hover:bg-slate-200 cursor-pointer text-center"
             >
               Exit Panel
             </button>
             <button
               onClick={handleSaveAll}
-              className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 rounded-xl font-bold text-[13px] shadow-md cursor-pointer transition-all active:scale-95"
+              className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white px-4 sm:px-5 py-1.5 sm:py-2 rounded-xl font-bold text-[12.5px] sm:text-[13px] shadow-sm cursor-pointer transition-all active:scale-95 text-center"
             >
-              <Save className="w-4 h-4" />
+              <Save className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               <span>Save & Apply Live</span>
             </button>
           </div>
