@@ -22,16 +22,24 @@ function MainApp() {
     type: 'contact',
   });
 
-  // Sync website favicon with custom branding logo if set
+  // Sync website favicon and meta with custom branding logo if set
   useEffect(() => {
-    const faviconHref = settings.branding.logoUrl || '/favicon.svg';
+    const iconHref = settings.branding.logoUrl || '/ush-logo.png';
     let iconLink = document.querySelector("link[rel~='icon']") as HTMLLinkElement | null;
     if (!iconLink) {
       iconLink = document.createElement('link');
       iconLink.rel = 'icon';
       document.head.appendChild(iconLink);
     }
-    iconLink.href = faviconHref;
+    iconLink.href = iconHref;
+
+    // Update og:image dynamically if custom logo is uploaded
+    if (settings.branding.logoUrl) {
+      const ogImg = document.querySelector("meta[property='og:image']") as HTMLMetaElement | null;
+      if (ogImg) ogImg.content = settings.branding.logoUrl;
+      const twImg = document.querySelector("meta[name='twitter:image']") as HTMLMetaElement | null;
+      if (twImg) twImg.content = settings.branding.logoUrl;
+    }
   }, [settings.branding.logoUrl]);
 
   const handleTabChange = (tab: NavTab) => {
