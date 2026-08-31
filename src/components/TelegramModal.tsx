@@ -69,12 +69,21 @@ export const TelegramModal: React.FC<TelegramModalProps> = ({ isOpen, onClose })
             <span className="font-bold tracking-wider uppercase">Pinned Daily Brief</span>
             <span>Today, 07:45 UTC</span>
           </div>
-          <p className="font-medium text-[#D5E3FF]">
-            📈 <strong>EUR/USD Institutional Liquidity Note:</strong> Price swept Asian high at 1.0855 into 4H bearish order block. Looking for MSB confirmation on 15M before London session open.
-          </p>
-          <div className="flex items-center gap-3 text-[11px] text-[#7484A3] pt-1">
-            <span>🔥 242 reactions</span>
-            <span>💬 68 comments</span>
+          <div className="flex items-start gap-2 text-[#D5E3FF]">
+            <TrendingUp className="w-4 h-4 text-[#93C5FD] mt-0.5 shrink-0" />
+            <p className="font-medium text-[#D5E3FF]">
+              <strong>EUR/USD Institutional Liquidity Note:</strong> Price swept Asian high at 1.0855 into 4H bearish order block. Looking for MSB confirmation on 15M before London session open.
+            </p>
+          </div>
+          <div className="flex items-center gap-4 text-[11.5px] text-[#7484A3] pt-1 border-t border-white/10">
+            <span className="flex items-center gap-1">
+              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+              <span>242 reactions</span>
+            </span>
+            <span className="flex items-center gap-1">
+              <Users className="w-3.5 h-3.5 text-[#93C5FD]" />
+              <span>68 comments</span>
+            </span>
           </div>
         </div>
 

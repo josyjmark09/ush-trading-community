@@ -13,9 +13,8 @@ interface HeaderProps {
 export const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, onOpenTelegram }) => {
   const { settings, openAdmin } = useSite();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [tapCountToast, setTapCountToast] = useState<string | null>(null);
 
-  // Logo 5-tap detector for Admin Panel login
+  // Logo 5-tap detector for Admin Panel login (completely silent)
   const tapCountRef = useRef(0);
   const tapTimerRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -29,19 +28,13 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, onOpenT
 
     if (currentTaps >= 5) {
       tapCountRef.current = 0;
-      setTapCountToast('🔓 Admin Panel Unlocked!');
-      setTimeout(() => setTapCountToast(null), 2500);
       openAdmin();
       return;
-    } else if (currentTaps >= 2) {
-      setTapCountToast(`Tap ${5 - currentTaps} more times for Admin Panel`);
-      setTimeout(() => setTapCountToast(null), 1500);
     }
 
     tapTimerRef.current = setTimeout(() => {
       tapCountRef.current = 0;
-      setTapCountToast(null);
-    }, 2800);
+    }, 2200);
 
     handleNavClick('home');
   };
@@ -49,7 +42,7 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, onOpenT
   const navItems: { id: NavTab; label: string }[] = [
     { id: 'home', label: 'Home' },
     { id: 'about', label: 'About' },
-    { id: 'testimonials', label: 'Reviews & Feedback' },
+    { id: 'testimonials', label: 'Reviews' },
     { id: 'broker', label: 'Recommended Broker' },
     { id: 'faq', label: 'FAQ' },
   ];
@@ -69,24 +62,15 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, onOpenT
   };
 
   return (
-    <header className="fixed top-0 w-full z-50 bg-[#F7FAFF]/90 backdrop-blur-md border-b border-[#C5C6CE]/30 shadow-sm transition-all duration-300">
-      <div className="flex justify-between items-center h-20 px-4 md:px-8 max-w-[1200px] mx-auto w-full relative">
-        
-        {/* Admin Toast Prompt */}
-        {tapCountToast && (
-          <div className="absolute top-22 left-4 z-50 bg-slate-900 text-white text-[12px] font-bold px-3 py-1.5 rounded-lg shadow-lg border border-slate-700 animate-in fade-in zoom-in-95">
-            {tapCountToast}
-          </div>
-        )}
-
-        {/* Logo (Tap 5 times to open Admin Panel) */}
+    <header className="fixed top-0 w-full z-50 bg-[#F7FAFF]/95 backdrop-blur-md border-b border-[#C5C6CE]/30 shadow-xs transition-all duration-300">
+      <div className="flex justify-between items-center h-20 px-3 sm:px-6 md:px-8 max-w-[1200px] mx-auto w-full relative">
+        {/* Logo */}
         <button 
           onClick={handleLogoTap}
-          className="flex items-center gap-3 cursor-pointer group text-left transition-transform active:scale-98"
-          aria-label="USH Home (Tap 5 times for Admin Panel)"
-          title="Tap 5 times for Admin Panel"
+          className="flex items-center gap-2.5 sm:gap-3 cursor-pointer group text-left transition-transform active:scale-98"
+          aria-label={settings.branding.brandName}
         >
-          <div className="h-10 w-10 sm:h-11 sm:w-11 rounded-xl bg-[#EBF3FF] flex items-center justify-center p-1 border border-[#B2C5FF]/50 group-hover:bg-[#DAE2FF] group-hover:border-[#116AFE]/60 transition-all shadow-sm overflow-hidden shrink-0">
+          <div className="h-9 w-9 sm:h-11 sm:w-11 rounded-xl bg-[#EBF3FF] flex items-center justify-center p-1 border border-[#B2C5FF]/50 group-hover:bg-[#DAE2FF] group-hover:border-[#116AFE]/60 transition-all shadow-xs overflow-hidden shrink-0">
             <img 
               src={settings.branding.logoUrl || logoSvg} 
               alt={settings.branding.logoAltText || "USH Logo"} 
@@ -94,24 +78,24 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, onOpenT
             />
           </div>
           <div className="flex flex-col">
-            <span className="font-manrope text-[20px] md:text-[22px] font-extrabold tracking-tight text-[#091C35] leading-none">
+            <span className="font-manrope text-[18px] sm:text-[21px] md:text-[22px] font-extrabold tracking-tight text-[#091C35] leading-none">
               {settings.branding.brandName}
             </span>
-            <span className="text-[10px] font-semibold text-[#0053CF] tracking-widest uppercase mt-0.5">
+            <span className="text-[9px] sm:text-[10px] font-semibold text-[#0053CF] tracking-widest uppercase mt-0.5">
               {settings.branding.tagline}
             </span>
           </div>
         </button>
 
         {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center gap-7">
+        <nav className="hidden md:flex items-center gap-6 lg:gap-7">
           {navItems.map((item) => {
             const isActive = activeTab === item.id;
             return (
               <button
                 key={item.id}
                 onClick={() => handleNavClick(item.id)}
-                className={`font-inter text-[14px] leading-[20px] transition-all duration-200 py-2 relative font-medium ${
+                className={`font-inter text-[14px] leading-[20px] transition-all duration-200 py-2 relative font-medium whitespace-nowrap ${
                   isActive
                     ? 'text-[#0053CF] font-bold'
                     : 'text-[#44474D] hover:text-[#0053CF]'
@@ -127,10 +111,10 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, onOpenT
         </nav>
 
         {/* Action Button & Mobile Menu Toggle */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           <button
             onClick={handleTelegramClick}
-            className="hidden sm:flex items-center gap-2 bg-gradient-to-r from-[#116AFE] to-[#0053CF] hover:from-[#0053CF] hover:to-[#0040A2] text-white font-inter text-[14px] font-semibold py-2.5 px-5 rounded-lg shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 active:scale-95 cursor-pointer glow-blue"
+            className="hidden sm:flex items-center gap-2 bg-gradient-to-r from-[#116AFE] to-[#0053CF] hover:from-[#0053CF] hover:to-[#0040A2] text-white font-inter text-[13.5px] sm:text-[14px] font-semibold py-2.5 px-4 sm:px-5 rounded-lg shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 active:scale-95 cursor-pointer glow-blue whitespace-nowrap"
           >
             <Send className="w-4 h-4" />
             <span>Join Telegram</span>

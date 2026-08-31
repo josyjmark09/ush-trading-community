@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { X, ExternalLink, ShieldCheck, CheckCircle2, AlertTriangle, ArrowRight, Zap, Check } from 'lucide-react';
+import { ExnessLogo } from './ExnessLogo';
 
 interface BrokerModalProps {
   isOpen: boolean;
@@ -20,25 +21,18 @@ export const BrokerModal: React.FC<BrokerModalProps> = ({ isOpen, onClose }) => 
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-5 right-5 text-[#75777E] hover:text-[#091C35] p-1.5 rounded-lg hover:bg-[#F1F4F9] transition-colors"
+          className="absolute top-5 right-5 text-[#75777E] hover:text-[#091C35] p-1.5 rounded-lg hover:bg-[#F1F4F9] transition-colors cursor-pointer"
           aria-label="Close modal"
         >
           <X className="w-5 h-5" />
         </button>
 
         {/* Header */}
-        <div className="flex items-center gap-3.5 mb-6">
-          <div className="w-12 h-12 rounded-2xl bg-[#091C35] flex items-center justify-center text-white font-manrope font-bold text-xl">
-            ex
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h3 className="font-manrope text-[20px] font-bold text-[#091C35]">Exness Partner Setup</h3>
-              <span className="text-[11px] font-bold text-[#0053CF] bg-[#EBF3FF] px-2 py-0.5 rounded">
-                Verified Broker
-              </span>
-            </div>
-            <p className="font-inter text-[13px] text-[#44474D]">Official U.S.H Forex Recommended Broker</p>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 pt-1">
+          <ExnessLogo size="md" />
+          <div className="flex items-center gap-1.5 bg-[#EBF3FF] text-[#0053CF] px-3 py-1 rounded-full text-[12px] font-semibold border border-[#D5E3FF]">
+            <ShieldCheck className="w-3.5 h-3.5" />
+            <span>Recommended Broker</span>
           </div>
         </div>
 

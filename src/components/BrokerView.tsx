@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavTab } from '../types';
-import { APP_IMAGES } from '../data/mockData';
+import { ExnessLogo, ExnessBrandCard } from './ExnessLogo';
 import { 
   ShieldCheck, 
   CheckCircle, 
@@ -8,10 +8,7 @@ import {
   Gavel, 
   Zap, 
   ExternalLink, 
-  Layers, 
-  DollarSign,
-  Lock,
-  Smartphone
+  Lock
 } from 'lucide-react';
 
 interface BrokerViewProps {
@@ -26,13 +23,13 @@ export const BrokerView: React.FC<BrokerViewProps> = ({
   onOpenTelegram,
 }) => {
   return (
-    <div className="w-full flex flex-col gap-10 md:gap-14 pt-4 pb-12">
+    <div className="w-full flex flex-col gap-8 md:gap-12 pt-4 pb-12">
       {/* Header Section */}
       <section className="text-center px-4 md:px-8 max-w-[1200px] mx-auto w-full">
-        <span className="inline-block bg-[#EBF3FF] text-[#0053CF] font-inter text-[12px] font-bold py-1 px-3.5 rounded uppercase tracking-wider mb-3">
-          BROKER PARTNER
+        <span className="inline-block bg-[#EBF3FF] text-[#0053CF] font-inter text-[12px] font-bold py-1 px-3.5 rounded-full uppercase tracking-wider mb-3">
+          RECOMMENDED BROKER
         </span>
-        <h1 className="font-manrope text-[32px] sm:text-[42px] md:text-[48px] font-extrabold text-[#091C35] mb-3 tracking-tight leading-[1.15]">
+        <h1 className="font-manrope text-[30px] sm:text-[40px] md:text-[46px] font-extrabold text-[#091C35] mb-3 tracking-tight leading-[1.15]">
           Recommended Broker Setup
         </h1>
         <p className="font-inter text-[15px] sm:text-[17px] text-[#44474D] max-w-2xl mx-auto leading-relaxed">
@@ -44,23 +41,14 @@ export const BrokerView: React.FC<BrokerViewProps> = ({
       <section className="px-4 md:px-8 max-w-[1200px] mx-auto w-full">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
           {/* Main Broker Info Card */}
-          <div className="md:col-span-8 bg-white rounded-2xl border border-[#E2E8F0] shadow-sm p-6 md:p-8 flex flex-col justify-between relative overflow-hidden">
+          <div className="md:col-span-8 bg-white rounded-3xl border border-[#E2E8F0] shadow-sm p-6 sm:p-8 flex flex-col justify-between relative overflow-hidden">
             {/* Abstract Grid Background */}
             <div className="absolute inset-0 pointer-events-none opacity-40 grid-bg-subtle" />
 
             <div className="relative z-10">
-              {/* Top row with logo & clean inline status */}
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
-                <div className="flex items-center gap-3">
-                  <div className="w-32 h-12 flex items-center justify-center bg-[#F1F4F9] rounded-xl px-3 border border-[#E2E8F0]">
-                    <span className="font-manrope text-[24px] font-extrabold text-[#091C35] tracking-tight">
-                      exness
-                    </span>
-                  </div>
-                  <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded">
-                    Official Partner
-                  </span>
-                </div>
+              {/* Top row with Exness Logo & clean status */}
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 sm:mb-8">
+                <ExnessLogo size="lg" />
 
                 <div className="flex gap-2 flex-wrap">
                   <span className="flex items-center gap-1.5 bg-[#EBF3FF] text-[#0053CF] px-3 py-1 rounded-md text-[12px] font-semibold">
@@ -74,37 +62,40 @@ export const BrokerView: React.FC<BrokerViewProps> = ({
                 </div>
               </div>
 
-              {/* Core Features & Image Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 items-center">
-                <ul className="space-y-4 font-inter text-[15px] text-[#181C20]">
-                  <li className="flex items-start gap-3">
-                    <CheckCircle className="w-5 h-5 text-[#0053CF] mt-0.5 shrink-0" />
-                    <span className="font-medium">Regulated by FCA, CySEC, FSCA</span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <CheckCircle className="w-5 h-5 text-[#0053CF] mt-0.5 shrink-0" />
-                    <span className="font-medium">Raw spreads starting from 0.0 pips</span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <CheckCircle className="w-5 h-5 text-[#0053CF] mt-0.5 shrink-0" />
-                    <span className="font-medium">Fast execution with zero requotes</span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <CheckCircle className="w-5 h-5 text-[#0053CF] mt-0.5 shrink-0" />
-                    <span className="font-medium">Instant local & crypto withdrawals</span>
-                  </li>
-                </ul>
+              {/* Core Benefits & Exness Main Brand Thumbnail */}
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8 items-center">
+                {/* Benefits List */}
+                <div className="lg:col-span-6 space-y-3">
+                  <h3 className="font-manrope text-[15px] font-bold text-[#091C35] uppercase tracking-wider mb-2">
+                    Benefits of Using Exness
+                  </h3>
+                  <ul className="space-y-3 font-inter text-[14px] sm:text-[14.5px] text-[#181C20]">
+                    <li className="flex items-start gap-2.5">
+                      <CheckCircle className="w-4 h-4 text-[#0053CF] mt-0.5 shrink-0" />
+                      <span>Ultra-low raw spreads starting from 0.0 pips</span>
+                    </li>
+                    <li className="flex items-start gap-2.5">
+                      <CheckCircle className="w-4 h-4 text-[#0053CF] mt-0.5 shrink-0" />
+                      <span>Instant 24/7 automated withdrawals with zero delay</span>
+                    </li>
+                    <li className="flex items-start gap-2.5">
+                      <CheckCircle className="w-4 h-4 text-[#0053CF] mt-0.5 shrink-0" />
+                      <span>0% deposit and withdrawal commission fees</span>
+                    </li>
+                    <li className="flex items-start gap-2.5">
+                      <CheckCircle className="w-4 h-4 text-[#0053CF] mt-0.5 shrink-0" />
+                      <span>Sub-millisecond execution with zero requotes</span>
+                    </li>
+                    <li className="flex items-start gap-2.5">
+                      <CheckCircle className="w-4 h-4 text-[#0053CF] mt-0.5 shrink-0" />
+                      <span>Multi-regulated Tier-1 security (FCA, CySEC, FSCA)</span>
+                    </li>
+                  </ul>
+                </div>
 
-                <div className="relative rounded-xl overflow-hidden border border-[#E2E8F0] shadow-inner bg-[#091C35] h-48 md:h-full min-h-[160px]">
-                  <img
-                    src={APP_IMAGES.brokerCharts}
-                    alt="Exness Trading Platform"
-                    className="w-full h-full object-cover opacity-80"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#091C35] via-transparent to-transparent" />
-                  <div className="absolute bottom-3 left-3 right-3 text-white text-[12px] font-inter">
-                    <span className="font-bold">MT4 / MT5 / WebTerminal</span>
-                  </div>
+                {/* Exness Main Brand Logo & Graphic Thumbnail */}
+                <div className="lg:col-span-6">
+                  <ExnessBrandCard />
                 </div>
               </div>
             </div>
@@ -121,7 +112,7 @@ export const BrokerView: React.FC<BrokerViewProps> = ({
 
               <button
                 onClick={onOpenTelegram}
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 text-[#44474D] hover:text-[#091C35] px-4 py-2 font-inter text-[14px] font-medium"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 text-[#44474D] hover:text-[#091C35] px-4 py-2 font-inter text-[14px] font-medium cursor-pointer"
               >
                 <span>Need setup help? Contact Support</span>
                 <ArrowRight className="w-4 h-4" />
@@ -132,10 +123,10 @@ export const BrokerView: React.FC<BrokerViewProps> = ({
           {/* Right Side Column Cards */}
           <div className="md:col-span-4 flex flex-col gap-6">
             {/* Regulation Card */}
-            <div className="bg-white rounded-2xl border border-[#E2E8F0] shadow-sm p-6 flex flex-col justify-between h-full hover:shadow-md transition-shadow">
+            <div className="bg-white rounded-3xl border border-[#E2E8F0] shadow-sm p-6 flex flex-col justify-between h-full hover:shadow-md transition-shadow">
               <div>
                 <div className="flex items-center gap-3 mb-3 text-[#091C35]">
-                  <div className="w-10 h-10 rounded-lg bg-[#EBF3FF] flex items-center justify-center text-[#0053CF]">
+                  <div className="w-10 h-10 rounded-xl bg-[#EBF3FF] flex items-center justify-center text-[#0053CF]">
                     <Gavel className="w-5 h-5" />
                   </div>
                   <h3 className="font-manrope text-[20px] font-bold">Tier-1 Regulated</h3>
@@ -159,10 +150,10 @@ export const BrokerView: React.FC<BrokerViewProps> = ({
             </div>
 
             {/* Lightning Execution Card */}
-            <div className="bg-white rounded-2xl border border-[#E2E8F0] shadow-sm p-6 flex flex-col justify-between h-full hover:shadow-md transition-shadow">
+            <div className="bg-white rounded-3xl border border-[#E2E8F0] shadow-sm p-6 flex flex-col justify-between h-full hover:shadow-md transition-shadow">
               <div>
                 <div className="flex items-center gap-3 mb-3 text-[#091C35]">
-                  <div className="w-10 h-10 rounded-lg bg-[#EBF3FF] flex items-center justify-center text-[#0053CF]">
+                  <div className="w-10 h-10 rounded-xl bg-[#EBF3FF] flex items-center justify-center text-[#0053CF]">
                     <Zap className="w-5 h-5" />
                   </div>
                   <h3 className="font-manrope text-[20px] font-bold">Lightning Execution</h3>

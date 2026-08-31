@@ -26,7 +26,15 @@ import {
   HelpCircle, 
   Info,
   Check,
-  AlertCircle
+  AlertCircle,
+  Palette,
+  Layers,
+  Users,
+  BookOpen,
+  Database,
+  Sparkles,
+  Zap,
+  Clock
 } from 'lucide-react';
 import { ReviewItem, FAQItem, FeatureItem } from '../types';
 
@@ -316,33 +324,42 @@ export const AdminModal: React.FC = () => {
         )}
 
         {/* Admin Navigation Tabs */}
-        <div className="bg-slate-50 border-b border-slate-200 px-3 sm:px-6 flex items-center gap-1 overflow-x-auto shrink-0 py-2 scrollbar-none">
+        <div className="bg-slate-50 border-b border-slate-200 px-3 sm:px-6 flex items-center gap-1.5 overflow-x-auto shrink-0 py-2.5 scrollbar-none">
           {[
-            { id: 'branding', label: '🎨 Branding & Logo' },
-            { id: 'hero', label: '🚀 Hero & CTAs' },
-            { id: 'reviews', label: `⭐ Reviews (${pendingCount不易 > 0 ? `${pendingCount不易} Pending` : `${approvedCount不易}`})`, highlight: pendingCount不易 > 0 },
-            { id: 'features', label: '📦 What You Get' },
-            { id: 'community', label: '👥 Community' },
-            { id: 'broker', label: '🛡️ Broker Setup' },
-            { id: 'about', label: '📖 About & Pillars' },
-            { id: 'faqs', label: '❓ FAQs' },
-            { id: 'social', label: '🔗 Links & Socials' },
-            { id: 'backup', label: '💾 Backup & Reset' },
-          ].map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id as any)}
-              className={`px-3.5 py-2 rounded-xl text-[13px] font-semibold whitespace-nowrap transition-all cursor-pointer flex items-center gap-1.5 ${
-                activeTab === tab.id
-                  ? 'bg-[#0053CF] text-white shadow-xs'
-                  : tab.highlight
-                  ? 'bg-amber-100 text-amber-900 hover:bg-amber-200 border border-amber-300'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
-              }`}
-            >
-              <span>{tab.label}</span>
-            </button>
-          ))}
+            { id: 'branding', label: 'Branding & Logo', icon: Palette },
+            { id: 'hero', label: 'Hero & CTAs', icon: Sparkles },
+            { 
+              id: 'reviews', 
+              label: `Reviews ${pendingCount不易 > 0 ? `(${pendingCount不易} Pending)` : `(${approvedCount不易})`}`, 
+              icon: Star,
+              highlight: pendingCount不易 > 0 
+            },
+            { id: 'features', label: 'What You Get', icon: Layers },
+            { id: 'community', label: 'Community', icon: Users },
+            { id: 'broker', label: 'Broker Setup', icon: ShieldCheck },
+            { id: 'about', label: 'About & Pillars', icon: BookOpen },
+            { id: 'faqs', label: 'FAQs', icon: HelpCircle },
+            { id: 'social', label: 'Links & Socials', icon: LinkIcon },
+            { id: 'backup', label: 'Backup & Reset', icon: Database },
+          ].map((tab) => {
+            const Icon = tab.icon;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id as any)}
+                className={`px-3 sm:px-3.5 py-2 rounded-xl text-[12.5px] sm:text-[13px] font-semibold whitespace-nowrap transition-all cursor-pointer flex items-center gap-1.5 ${
+                  activeTab === tab.id
+                    ? 'bg-[#0053CF] text-white shadow-xs'
+                    : tab.highlight
+                    ? 'bg-amber-100 text-amber-900 hover:bg-amber-200 border border-amber-300'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
+                }`}
+              >
+                <Icon className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${activeTab === tab.id ? 'text-white' : tab.highlight ? 'text-amber-800' : 'text-slate-500'}`} />
+                <span>{tab.label}</span>
+              </button>
+            );
+          })}
         </div>
 
         {/* Tab Content Body */}
@@ -768,8 +785,8 @@ export const AdminModal: React.FC = () => {
                     </h4>
                     <p className="text-[12.5px] text-amber-800 font-inter">
                       {draft.moderation.requireReviewApproval
-                        ? '🛡️ STRICT MODE: User reviews are stored as "Pending" until you manually review & approve them.'
-                        : '⚡ INSTANT MODE: User reviews immediately publish and appear live on the site as soon as they submit.'}
+                        ? 'STRICT MODE: User reviews are stored as "Pending" until you manually review & approve them.'
+                        : 'INSTANT MODE: User reviews immediately publish and appear live on the site as soon as they submit.'}
                     </p>
                   </div>
                 </div>
@@ -805,8 +822,18 @@ export const AdminModal: React.FC = () => {
               {isAddingReview && (
                 <form onSubmit={handleSaveNewReview} className="bg-slate-50 border-2 border-[#0053CF]/30 p-5 rounded-2xl space-y-4 animate-in fade-in">
                   <div className="flex items-center justify-between border-b border-slate-200 pb-2.5">
-                    <h4 className="font-manrope font-bold text-[15px] text-[#0053CF]">
-                      {editingReviewId ? '✏️ Edit Review Details' : '➕ Create New Verified Review'}
+                    <h4 className="font-manrope font-bold text-[15px] text-[#0053CF] flex items-center gap-2">
+                      {editingReviewId ? (
+                        <>
+                          <Edit3 className="w-4 h-4" />
+                          <span>Edit Review Details</span>
+                        </>
+                      ) : (
+                        <>
+                          <Plus className="w-4 h-4" />
+                          <span>Create New Verified Review</span>
+                        </>
+                      )}
                     </h4>
                     <button
                       type="button"
@@ -855,9 +882,9 @@ export const AdminModal: React.FC = () => {
                         onChange={(e) => setRevStatus(e.target.value as any)}
                         className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-xl text-[13px] font-inter font-bold text-slate-800 focus:ring-2 focus:ring-[#0053CF]"
                       >
-                        <option value="approved">✅ Approved (Visible)</option>
-                        <option value="pending">⏳ Pending (Hidden)</option>
-                        <option value="rejected">❌ Rejected (Hidden)</option>
+                        <option value="approved">Approved (Visible)</option>
+                        <option value="pending">Pending (Hidden)</option>
+                        <option value="rejected">Rejected (Hidden)</option>
                       </select>
                     </div>
                   </div>
@@ -1782,8 +1809,9 @@ export const AdminModal: React.FC = () => {
                   <p className="text-[12px] text-rose-600 font-semibold">{importError}</p>
                 )}
                 {importSuccess && (
-                  <p className="text-[12px] text-emerald-600 font-semibold">
-                    ✅ Configuration successfully restored!
+                  <p className="text-[12px] text-emerald-600 font-semibold flex items-center gap-1.5">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                    <span>Configuration successfully restored!</span>
                   </p>
                 )}
                 <button

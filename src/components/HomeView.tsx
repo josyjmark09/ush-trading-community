@@ -1,8 +1,9 @@
 import React from 'react';
 import { NavTab } from '../types';
-import { useLiveForexQuotes } from '../hooks/useLiveForexQuotes';
+import { LiveQuotesTicker } from './LiveQuotesTicker';
 import { useSite } from '../context/SiteContext';
 import { ReviewsSection } from './ReviewsSection';
+import { ExnessLogo, ExnessBrandCard } from './ExnessLogo';
 import { APP_IMAGES } from '../data/mockData';
 import chartImage2 from './image 2.png';
 import chartImage3 from './image 3.png';
@@ -42,7 +43,6 @@ export const HomeView: React.FC<HomeViewProps> = ({
   onOpenContact,
 }) => {
   const { settings } = useSite();
-  const liveQuotes = useLiveForexQuotes();
 
   // FAQ interactive state
   const [activeFaqCategory, setActiveFaqCategory] = React.useState<string>('All');
@@ -136,35 +136,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
     <div className="w-full flex flex-col pt-0 sm:pt-1 pb-16">
       
       {/* 1. Live Market Ticker Bar */}
-      <div className="bg-white/90 backdrop-blur-md border border-[#E2E8F0] rounded-xl py-2 px-2 shadow-xs max-w-[1200px] mx-auto w-full overflow-hidden animate-soft-entry mb-3 sm:mb-6 md:mb-8">
-        <div className="relative w-full overflow-hidden ticker-fade-mask">
-          <div className="animate-ticker-continuous flex items-center gap-10 text-[13px] font-inter">
-            {[...liveQuotes, ...liveQuotes].map((q, idx) => (
-              <div
-                key={`${q.pair}-${idx}`}
-                className="flex items-center gap-2.5 shrink-0 hover:bg-[#F1F4F9]/80 px-3 py-1.5 rounded-lg transition-colors cursor-default select-none"
-              >
-                <span className="font-bold text-[#091C35] tracking-tight">{q.pair}</span>
-                <span className="text-[#33373D] font-mono text-[12px] font-medium">
-                  {q.bid.toLocaleString(undefined, {
-                    minimumFractionDigits: q.pair.includes('JPY') || q.pair.includes('XAU') || q.pair.includes('BTC') || q.pair.includes('US') || q.pair.includes('NAS') ? 2 : 4,
-                    maximumFractionDigits: q.pair.includes('JPY') || q.pair.includes('XAU') || q.pair.includes('BTC') || q.pair.includes('US') || q.pair.includes('NAS') ? 2 : 4,
-                  })}
-                </span>
-                <span
-                  className={`text-[10px] font-bold px-1.5 py-0.5 rounded transition-all duration-300 ${
-                    q.direction === 'up'
-                      ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/60'
-                      : 'bg-rose-50 text-rose-700 border border-rose-200/60'
-                  }`}
-                >
-                  {q.change >= 0 ? `+${q.change.toFixed(2)}%` : `${q.change.toFixed(2)}%`}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
+      <LiveQuotesTicker />
 
       {/* 2. Hero Section */}
       <section id="hero" className="relative px-4 md:px-8 max-w-[1200px] mx-auto w-full flex flex-col items-center text-center overflow-hidden pt-0 sm:pt-2 pb-6 md:pb-10 mb-10 md:mb-16 scroll-mt-24">
@@ -468,18 +440,9 @@ export const HomeView: React.FC<HomeViewProps> = ({
           {/* Main Broker Info Card */}
           <div className="md:col-span-8 bg-white rounded-3xl border border-[#E2E8F0] shadow-sm p-6 sm:p-8 flex flex-col justify-between relative overflow-hidden">
             <div className="relative z-10">
-              {/* Top row with logo & clean inline status */}
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
-                <div className="flex items-center gap-3">
-                  <div className="h-12 px-4 flex items-center justify-center bg-[#F1F4F9] rounded-xl border border-[#E2E8F0]">
-                    <span className="font-manrope text-[24px] font-extrabold text-[#091C35] tracking-tight">
-                      {settings.broker?.brokerName || "Exness"}
-                    </span>
-                  </div>
-                  <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-full">
-                    {settings.broker?.brokerTag || settings.broker?.partnerTag || "Official Partner Broker"}
-                  </span>
-                </div>
+              {/* Top row with official Exness Logo & clean status */}
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 sm:mb-8">
+                <ExnessLogo size="lg" />
 
                 <div className="flex gap-2 flex-wrap">
                   <span className="flex items-center gap-1.5 bg-[#EBF3FF] text-[#0053CF] px-3 py-1 rounded-md text-[12px] font-semibold">
@@ -493,27 +456,40 @@ export const HomeView: React.FC<HomeViewProps> = ({
                 </div>
               </div>
 
-              {/* Core Features & Platform Image */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 items-center">
-                <ul className="space-y-4 font-inter text-[15px] text-[#181C20]">
-                  {(settings.broker?.features || settings.broker?.featuresList || []).map((feat, idx) => (
-                    <li key={idx} className="flex items-start gap-3">
-                      <CheckCircle className="w-5 h-5 text-[#0053CF] mt-0.5 shrink-0" />
-                      <span className="font-medium">{feat}</span>
+              {/* Core Benefits & Exness Main Brand Thumbnail */}
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8 items-center">
+                {/* Benefits List */}
+                <div className="lg:col-span-6 space-y-3">
+                  <h3 className="font-manrope text-[15px] font-bold text-[#091C35] uppercase tracking-wider mb-2">
+                    Benefits of Trading with Exness
+                  </h3>
+                  <ul className="space-y-3 font-inter text-[14px] sm:text-[14.5px] text-[#181C20]">
+                    <li className="flex items-start gap-2.5">
+                      <CheckCircle className="w-4 h-4 text-[#0053CF] mt-0.5 shrink-0" />
+                      <span>Ultra-low raw spreads starting from 0.0 pips</span>
                     </li>
-                  ))}
-                </ul>
+                    <li className="flex items-start gap-2.5">
+                      <CheckCircle className="w-4 h-4 text-[#0053CF] mt-0.5 shrink-0" />
+                      <span>Instant 24/7 automated withdrawals (no manual delay)</span>
+                    </li>
+                    <li className="flex items-start gap-2.5">
+                      <CheckCircle className="w-4 h-4 text-[#0053CF] mt-0.5 shrink-0" />
+                      <span>0% deposit and withdrawal commission</span>
+                    </li>
+                    <li className="flex items-start gap-2.5">
+                      <CheckCircle className="w-4 h-4 text-[#0053CF] mt-0.5 shrink-0" />
+                      <span>Sub-millisecond execution with zero requotes</span>
+                    </li>
+                    <li className="flex items-start gap-2.5">
+                      <CheckCircle className="w-4 h-4 text-[#0053CF] mt-0.5 shrink-0" />
+                      <span>Multi-regulated Tier-1 security (FCA, CySEC, FSCA)</span>
+                    </li>
+                  </ul>
+                </div>
 
-                <div className="relative rounded-2xl overflow-hidden border border-[#E2E8F0] shadow-inner bg-[#091C35] h-48 md:h-full min-h-[170px]">
-                  <img
-                    src={settings.broker?.brokerImageUrl || APP_IMAGES.brokerCharts}
-                    alt="Exness Platform"
-                    className="w-full h-full object-cover opacity-85"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#091C35] via-transparent to-transparent" />
-                  <div className="absolute bottom-3 left-3 right-3 text-white text-[12px] font-inter">
-                    <span className="font-bold">MT4 / MT5 / WebTerminal</span>
-                  </div>
+                {/* Exness Main Brand Logo & Graphic Thumbnail */}
+                <div className="lg:col-span-6">
+                  <ExnessBrandCard />
                 </div>
               </div>
             </div>
@@ -524,7 +500,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
                 onClick={handleBrokerAccountCta}
                 className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-[#0053CF] hover:bg-[#0040A2] text-white px-8 py-3.5 rounded-xl font-inter text-[15px] font-semibold glow-blue transition-all cursor-pointer shadow-md"
               >
-                <span>Open {settings.broker?.brokerName || "Exness"} Account</span>
+                <span>Open Exness Account</span>
                 <ExternalLink className="w-4 h-4" />
               </button>
 
