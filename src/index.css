@@ -1,0 +1,174 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    background-color: #F7FAFF;
+    color: #181C20;
+  }
+
+  h1, h2, h3, h4, h5, h6, .font-display, .font-heading {
+    font-family: 'Manrope', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+}
+
+.font-manrope {
+  font-family: 'Manrope', sans-serif;
+}
+
+.font-inter {
+  font-family: 'Inter', sans-serif;
+}
+
+.grid-bg-subtle {
+  background-image: radial-gradient(#e5e8ed 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+.grid-bg-dark {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.15) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+.glow-blue {
+  box-shadow: 0 4px 20px -2px rgba(17, 106, 254, 0.25);
+}
+
+.glow-blue-lg {
+  box-shadow: 0 8px 30px rgba(17, 106, 254, 0.35);
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+}
+
+/* Soft Radiant Blue Glow & Shimmer */
+@keyframes soft-glow-pulse {
+  0%, 100% {
+    box-shadow: 0 0 25px rgba(17, 106, 254, 0.28), 0 0 50px rgba(0, 83, 207, 0.15);
+    border-color: rgba(17, 106, 254, 0.55);
+  }
+  50% {
+    box-shadow: 0 0 38px rgba(17, 106, 254, 0.45), 0 0 75px rgba(0, 83, 207, 0.28);
+    border-color: rgba(59, 130, 246, 0.85);
+  }
+}
+
+.animate-soft-glow {
+  animation: soft-glow-pulse 5s ease-in-out infinite;
+}
+
+/* Gentle, luxury soft sheen sweep - slow, smooth and elegant */
+@keyframes soft-shine-sweep {
+  0% {
+    transform: translateX(-180%) rotate(25deg);
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  45% {
+    transform: translateX(280%) rotate(25deg);
+    opacity: 1;
+  }
+  55%, 100% {
+    transform: translateX(280%) rotate(25deg);
+    opacity: 0;
+  }
+}
+
+.shine-effect {
+  position: relative;
+  overflow: hidden;
+}
+
+.shine-effect::after {
+  content: '';
+  position: absolute;
+  top: -60%;
+  left: -60%;
+  width: 220%;
+  height: 220%;
+  background: linear-gradient(
+    65deg,
+    transparent 38%,
+    rgba(255, 255, 255, 0.08) 47%,
+    rgba(255, 255, 255, 0.24) 50%,
+    rgba(255, 255, 255, 0.08) 53%,
+    transparent 62%
+  );
+  transform: translateX(-180%) rotate(25deg);
+  animation: soft-shine-sweep 9.5s cubic-bezier(0.25, 1, 0.5, 1) infinite;
+  pointer-events: none;
+  z-index: 20;
+}
+
+/* Gentle Entry Animation for Pages & Tabs */
+@keyframes soft-entry {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes soft-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-soft-entry {
+  animation: soft-entry 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-soft-fade {
+  animation: soft-fade-in 0.35s ease-out forwards;
+}
+
+.animate-stagger-1 {
+  animation: soft-entry 0.4s cubic-bezier(0.16, 1, 0.3, 1) 0.05s backwards;
+}
+
+.animate-stagger-2 {
+  animation: soft-entry 0.45s cubic-bezier(0.16, 1, 0.3, 1) 0.12s backwards;
+}
+
+.animate-stagger-3 {
+  animation: soft-entry 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.18s backwards;
+}
+
+/* Continuous Infinite Sliding Marquee for Forex Pairs - Cinematic & Soft */
+@keyframes ticker-slide {
+  0% {
+    transform: translate3d(0%, 0, 0);
+  }
+  100% {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+.animate-ticker-continuous {
+  display: flex;
+  width: max-content;
+  animation: ticker-slide 95s linear infinite;
+  will-change: transform;
+}
+
+.animate-ticker-continuous:hover {
+  animation-play-state: paused;
+}
+
+.ticker-fade-mask {
+  mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent 100%);
+}
+

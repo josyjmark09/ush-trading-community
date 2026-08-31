@@ -1,0 +1,6 @@
+{
+  "name": "U.S.H Forex",
+  "description": "Practical forex insights, institutional-grade market education, recommended broker partnerships, and a disciplined trading community.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
