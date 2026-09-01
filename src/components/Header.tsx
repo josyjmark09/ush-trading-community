@@ -70,13 +70,11 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, onOpenT
           className="flex items-center gap-2.5 sm:gap-3 cursor-pointer group text-left transition-transform active:scale-98"
           aria-label={settings.branding.brandName}
         >
-          <div className="h-9 w-9 sm:h-11 sm:w-11 rounded-xl bg-[#EBF3FF] flex items-center justify-center p-1 border border-[#B2C5FF]/50 group-hover:bg-[#DAE2FF] group-hover:border-[#116AFE]/60 transition-all shadow-xs overflow-hidden shrink-0">
-            <img 
-              src={settings.branding.logoUrl || logoSvg} 
-              alt={settings.branding.logoAltText || "USH Logo"} 
-              className="w-full h-full object-contain"
-            />
-          </div>
+          <img 
+            src={settings.branding.logoUrl || logoSvg} 
+            alt={settings.branding.logoAltText || "USH Logo"} 
+            className="h-10 sm:h-12 w-auto max-w-[56px] object-contain shrink-0 transition-transform group-hover:scale-105"
+          />
           <div className="flex flex-col">
             <span className="font-manrope text-[18px] sm:text-[21px] md:text-[22px] font-extrabold tracking-tight text-[#091C35] leading-none">
               {settings.branding.brandName}

@@ -50,13 +50,11 @@ export const Footer: React.FC<FooterProps> = ({
               onClick={() => handleNav('home')} 
               className="flex items-center gap-3 cursor-pointer inline-flex group"
             >
-              <div className="w-10 h-10 rounded-xl bg-[#0053CF] flex items-center justify-center p-1 shadow-sm overflow-hidden shrink-0">
-                <img 
-                  src={settings.branding.logoUrl || logoSvg} 
-                  alt={settings.branding.logoAltText || "USH Logo"} 
-                  className="w-full h-full object-contain"
-                />
-              </div>
+              <img 
+                src={settings.branding.logoUrl || logoSvg} 
+                alt={settings.branding.logoAltText || "USH Logo"} 
+                className="h-10 sm:h-12 w-auto max-w-[56px] object-contain shrink-0 transition-transform group-hover:scale-105"
+              />
               <div className="flex flex-col">
                 <span className="font-manrope text-[20px] font-extrabold tracking-tight text-[#091C35] leading-none">
                   {settings.branding.brandName}
