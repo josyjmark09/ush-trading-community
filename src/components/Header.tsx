@@ -64,24 +64,26 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, onOpenT
   return (
     <header className="fixed top-0 w-full z-50 bg-[#F7FAFF]/95 backdrop-blur-md border-b border-[#C5C6CE]/30 shadow-xs transition-all duration-300">
       <div className="flex justify-between items-center h-20 px-3 sm:px-6 md:px-8 max-w-[1200px] mx-auto w-full relative">
-        {/* Logo */}
+        {/* Brand Logo & Title */}
         <button 
           onClick={handleLogoTap}
-          className="flex items-center gap-2.5 sm:gap-3 cursor-pointer group text-left transition-transform active:scale-98"
+          className="flex items-center gap-2.5 sm:gap-3.5 cursor-pointer group text-left transition-transform active:scale-98"
           aria-label={settings.branding.brandName}
         >
           <img 
             src={settings.branding.logoUrl || logoSvg} 
             alt={settings.branding.logoAltText || "USH Logo"} 
-            className="h-10 sm:h-12 w-auto max-w-[56px] object-contain shrink-0 transition-transform group-hover:scale-105"
+            className="h-10 sm:h-12 w-auto max-h-12 object-contain shrink-0 transition-transform group-hover:scale-105"
           />
-          <div className="flex flex-col">
-            <span className="font-manrope text-[18px] sm:text-[21px] md:text-[22px] font-extrabold tracking-tight text-[#091C35] leading-none">
+          <div className="flex flex-col justify-center">
+            <span className="font-manrope text-[15px] sm:text-[17px] md:text-[18px] font-bold tracking-tight text-[#091C35] leading-tight group-hover:text-[#0053CF] transition-colors">
               {settings.branding.brandName}
             </span>
-            <span className="text-[9px] sm:text-[10px] font-semibold text-[#0053CF] tracking-widest uppercase mt-0.5">
-              {settings.branding.tagline}
-            </span>
+            {settings.branding.tagline && (
+              <span className="text-[9px] sm:text-[10px] font-semibold text-[#0053CF] tracking-wider uppercase mt-0.5">
+                {settings.branding.tagline}
+              </span>
+            )}
           </div>
         </button>
 

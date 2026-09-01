@@ -14,10 +14,10 @@ const REVIEWS_STORAGE_KEY = 'ush_site_reviews_v2';
 
 export const DEFAULT_SITE_SETTINGS: SiteSettings = {
   branding: {
-    brandName: 'USH',
-    tagline: 'COMMUNITY OF TRADERS',
+    brandName: 'Community of Traders',
+    tagline: '',
     logoUrl: '',
-    logoAltText: 'USH Logo',
+    logoAltText: 'USH Community of Traders Logo',
     footerDescription: 'A disciplined trading collective dedicated to high-probability market structure, institutional liquidity breakdowns, and consistent risk management.',
     copyrightText: '© 2026 USH Community of Traders. All rights reserved. Forex and CFD trading involves significant risk of loss.',
   },
@@ -291,7 +291,14 @@ export const SiteProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return {
           ...DEFAULT_SITE_SETTINGS,
           ...parsed,
-          branding: { ...DEFAULT_SITE_SETTINGS.branding, ...(parsed.branding || {}) },
+          branding: { 
+            ...DEFAULT_SITE_SETTINGS.branding, 
+            ...(parsed.branding || {}),
+            brandName: (!parsed.branding?.brandName || parsed.branding?.brandName === 'USH' || parsed.branding?.brandName === 'U.S.H Forex') 
+              ? 'Community of Traders' 
+              : parsed.branding.brandName,
+            tagline: (parsed.branding?.tagline === 'COMMUNITY OF TRADERS') ? '' : (parsed.branding?.tagline ?? '')
+          },
           hero: {
             ...mergedHero,
             headline: mergedHero.headline || mergedHero.headingLine1 || DEFAULT_SITE_SETTINGS.hero.headline,

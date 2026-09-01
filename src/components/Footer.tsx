@@ -48,20 +48,22 @@ export const Footer: React.FC<FooterProps> = ({
           <div className="md:col-span-4 space-y-4">
             <div 
               onClick={() => handleNav('home')} 
-              className="flex items-center gap-3 cursor-pointer inline-flex group"
+              className="flex items-center gap-2.5 sm:gap-3.5 cursor-pointer inline-flex group"
             >
               <img 
                 src={settings.branding.logoUrl || logoSvg} 
                 alt={settings.branding.logoAltText || "USH Logo"} 
-                className="h-10 sm:h-12 w-auto max-w-[56px] object-contain shrink-0 transition-transform group-hover:scale-105"
+                className="h-10 sm:h-12 w-auto max-h-12 object-contain shrink-0 transition-transform group-hover:scale-105"
               />
-              <div className="flex flex-col">
-                <span className="font-manrope text-[20px] font-extrabold tracking-tight text-[#091C35] leading-none">
+              <div className="flex flex-col justify-center">
+                <span className="font-manrope text-[17px] sm:text-[19px] font-extrabold tracking-tight text-[#091C35] leading-tight group-hover:text-[#0053CF] transition-colors">
                   {settings.branding.brandName}
                 </span>
-                <span className="text-[9.5px] font-bold text-[#0053CF] uppercase tracking-widest mt-0.5">
-                  {settings.branding.tagline}
-                </span>
+                {settings.branding.tagline && (
+                  <span className="text-[9.5px] font-bold text-[#0053CF] uppercase tracking-widest mt-0.5">
+                    {settings.branding.tagline}
+                  </span>
+                )}
               </div>
             </div>
 

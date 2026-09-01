@@ -380,7 +380,7 @@ export const AdminModal: React.FC = () => {
                       setDraft((prev紧) => ({ ...prev紧, branding: { ...prev紧.branding, brandName: val } }));
                       updateSettings((prev紧) => ({ ...prev紧, branding: { ...prev紧.branding, brandName: val } }));
                     }}
-                    placeholder="e.g. USH"
+                    placeholder="e.g. Community of Traders"
                     className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-[13px] sm:text-[14px] font-semibold focus:outline-hidden focus:ring-2 focus:ring-[#0053CF]"
                   />
                   <p className="text-[11px] text-slate-400">Currently set to "{draft.branding.brandName}" next to the logo.</p>
