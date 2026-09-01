@@ -24,7 +24,7 @@ function MainApp() {
 
   // Sync website favicon and meta with custom branding logo if set
   useEffect(() => {
-    const iconHref = settings.branding.logoUrl || '/ush-logo.png';
+    const iconHref = settings.branding.logoUrl || '/ush-square.jpg';
     let iconLink = document.querySelector("link[rel~='icon']") as HTMLLinkElement | null;
     if (!iconLink) {
       iconLink = document.createElement('link');
