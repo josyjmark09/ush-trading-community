@@ -1,47 +1,66 @@
 import React from 'react';
-import exnessLogoImg from './Abandoned Baby Candlestick Pattern _ Best Forex Brokers For Scalping.jpg';
+import exnessLogoUploadedImg from './Online trading platform for global markets _ Exness (1).jpg';
 import exnessThumbnailImg from './Online trading platform for global markets _ Exness.jpg';
 
 interface ExnessLogoProps {
   className?: string;
   size?: 'sm' | 'md' | 'lg' | 'xl';
   showName?: boolean;
+  showSubtitle?: boolean;
+  textColor?: string;
 }
+
+export const ExnessEmblem: React.FC<{ size?: 'sm' | 'md' | 'lg' | 'xl'; className?: string }> = ({
+  size = 'md',
+  className = '',
+}) => {
+  const sizeMap = {
+    sm: 'h-6',
+    md: 'h-8 sm:h-9',
+    lg: 'h-10 sm:h-12',
+    xl: 'h-12 sm:h-14',
+  };
+
+  return (
+    <img
+      src={exnessLogoUploadedImg}
+      alt="Exness Logo"
+      className={`${sizeMap[size]} w-auto object-contain shrink-0 ${className}`}
+      loading="eager"
+    />
+  );
+};
 
 export const ExnessLogo: React.FC<ExnessLogoProps> = ({ 
   className = '', 
   size = 'md',
   showName = true,
+  showSubtitle = true,
 }) => {
-  const imgSizeMap = {
-    sm: 'h-7',
-    md: 'h-9',
+  const imgHeightMap = {
+    sm: 'h-6 sm:h-7',
+    md: 'h-8 sm:h-9',
     lg: 'h-10 sm:h-12',
-    xl: 'h-12 sm:h-14',
-  };
-
-  const textSizeMap = {
-    sm: 'text-[18px]',
-    md: 'text-[22px]',
-    lg: 'text-[24px] sm:text-[28px]',
-    xl: 'text-[28px] sm:text-[32px]',
+    xl: 'h-12 sm:h-15',
   };
 
   return (
-    <div className={`inline-flex items-center gap-2.5 select-none ${className}`}>
+    <div className={`inline-flex items-center gap-2.5 sm:gap-3.5 select-none ${className}`}>
+      {/* Uploaded official Exness Logo image */}
       <img
-        src={exnessLogoImg}
-        alt="Exness Logo"
-        className={`${imgSizeMap[size]} w-auto object-contain rounded-lg shadow-2xs`}
-        loading="lazy"
+        src={exnessLogoUploadedImg}
+        alt="Exness"
+        className={`${imgHeightMap[size]} w-auto max-w-[200px] sm:max-w-[260px] object-contain shrink-0`}
+        loading="eager"
       />
-      {showName && (
-        <div className="flex flex-col">
-          <span className={`font-manrope font-extrabold text-[#091C35] tracking-tight leading-none ${textSizeMap[size]}`}>
-            exness
+
+      {showSubtitle && (
+        <div className="hidden sm:flex flex-col border-l border-slate-300 pl-3">
+          <span className="text-[10px] font-extrabold text-emerald-600 uppercase tracking-wider font-inter">
+            Partner Broker
           </span>
-          <span className="text-[10px] font-bold text-emerald-700 uppercase tracking-wider mt-0.5 font-inter">
-            Recommended Broker
+          <span className="text-[11px] font-bold text-slate-500 font-inter">
+            Raw Zero Spreads
           </span>
         </div>
       )}
@@ -54,10 +73,11 @@ export const ExnessBrandCard: React.FC<{ className?: string }> = ({ className = 
     <div className={`w-full h-full min-h-[190px] sm:min-h-[220px] rounded-2xl overflow-hidden border border-[#E2E8F0] shadow-sm bg-slate-900 flex items-center justify-center ${className}`}>
       <img
         src={exnessThumbnailImg}
-        alt="Exness Review"
+        alt="Exness Platform"
         className="w-full h-full object-cover object-center transition-transform duration-300 hover:scale-[1.02]"
         loading="lazy"
       />
     </div>
   );
 };
+

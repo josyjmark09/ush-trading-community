@@ -51,7 +51,7 @@ const getInitials = (name: string): string => {
 const CountryFlag: React.FC<{ code?: string; name?: string; className?: string }> = ({ 
   code = 'gb', 
   name = 'Country Flag', 
-  className = "w-5 h-3.5 object-cover rounded-xs shadow-2xs inline-block" 
+  className = "w-5 h-3.5 object-cover rounded-xs inline-block" 
 }) => {
   const cleanCode = (code || 'gb').toLowerCase();
   return (
@@ -59,7 +59,7 @@ const CountryFlag: React.FC<{ code?: string; name?: string; className?: string }
       src={`https://flagcdn.com/w40/${cleanCode}.png`}
       srcSet={`https://flagcdn.com/w80/${cleanCode}.png 2x`}
       alt={`${name} flag`}
-      className={`shrink-0 border border-slate-300/70 ${className}`}
+      className={`shrink-0 border border-slate-300 ${className}`}
       loading="lazy"
     />
   );
@@ -69,7 +69,7 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({
   title = "Trusted By Serious Traders Worldwide",
   subtitle = "Swipe or use the arrows to see verified reviews from our global trading members."
 }) => {
-  const { approvedReviews, addReview, settings } = useSite();
+  const { approvedReviews, addReview } = useSite();
   const reviewsList = approvedReviews.length > 0 ? approvedReviews : [];
   const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -98,40 +98,41 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({
     return (currentIndex + offset + totalReviews) % totalReviews;
   };
 
-  const currentItem = reviewsList[currentIndex] || {
-    id: 'placeholder',
-    name: 'Marcus Sterling',
-    content: 'The institutional structure and liquidity zone breakdowns completely shifted my mindset from gambling to calculated probability.',
-    rating: 5,
-    country: 'United Kingdom',
-    countryCode: 'gb',
-    status: 'approved'
-  };
-  const prevItem = reviewsList[getIdx(-1)] || currentItem;
-  const nextItem = reviewsList[getIdx(1)] || currentItem;
+  // Swipe support for touch screens
+  const [touchStartX, setTouchStartX] = useState<number | null>(null);
+  const [touchEndX, setTouchEndX] = useState<number | null>(null);
 
-  // Touch swipe support for mobile
-  const [touchStart, setTouchStart] = useState<number | null>(null);
-  const [touchEnd, setTouchEnd] = useState<number | null>(null);
+  const minSwipeDistance = 45;
 
   const onTouchStart = (e: React.TouchEvent) => {
-    setTouchEnd(null);
-    setTouchStart(e.targetTouches[0].clientX);
+    setTouchEndX(null);
+    setTouchStartX(e.targetTouches[0].clientX);
   };
 
   const onTouchMove = (e: React.TouchEvent) => {
-    setTouchEnd(e.targetTouches[0].clientX);
+    setTouchEndX(e.targetTouches[0].clientX);
   };
 
   const onTouchEnd = () => {
-    if (!touchStart || !touchEnd) return;
-    const distance = touchStart - touchEnd;
-    if (distance > 45) {
+    if (!touchStartX || !touchEndX) return;
+    const distance = touchStartX - touchEndX;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+
+    if (isLeftSwipe) {
       nextReview();
-    } else if (distance < -45) {
+    } else if (isRightSwipe) {
       prevReview();
     }
   };
+
+  if (totalReviews === 0) {
+    return null;
+  }
+
+  const currentItem = reviewsList[currentIndex];
+  const prevItem = reviewsList[getIdx(-1)];
+  const nextItem = reviewsList[getIdx(1)];
 
   const handleSubmitReview = (e: React.FormEvent) => {
     e.preventDefault();
@@ -139,11 +140,10 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({
 
     const res = addReview({
       name: name.trim(),
-      content: content.trim(),
-      rating: rating,
       country: selectedCountry.name,
       countryCode: selectedCountry.code,
-      location: selectedCountry.name,
+      rating,
+      content: content.trim(),
     });
 
     setSubmissionResult({
@@ -168,26 +168,26 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
     >
-      <div className="text-center mb-6 space-y-1">
-        <span className="text-[#0053CF] font-inter text-[12px] sm:text-[13px] font-bold uppercase tracking-wider block">
+      <div className="text-center mb-5 sm:mb-6 space-y-1">
+        <span className="text-[#0053CF] font-inter text-[11px] sm:text-[13px] font-extrabold uppercase tracking-wider block">
           VERIFIED TRADER EXPERIENCES
         </span>
-        <h2 className="font-manrope text-[26px] sm:text-[34px] font-bold text-[#091C35]">
+        <h2 className="font-manrope text-[24px] sm:text-[34px] font-black text-slate-900 leading-tight">
           {title}
         </h2>
-        <p className="font-inter text-[13.5px] sm:text-[15px] text-[#44474D] max-w-lg mx-auto">
+        <p className="font-inter text-[13px] sm:text-[15px] text-slate-600 max-w-lg mx-auto px-1">
           {subtitle}
         </p>
       </div>
 
       {/* Horizontal Carousel */}
-      <div className="relative flex items-center justify-center min-h-[290px] sm:min-h-[340px] overflow-hidden py-2">
+      <div className="relative flex items-center justify-center min-h-[240px] sm:min-h-[340px] overflow-hidden py-1 sm:py-2">
         
-        {/* Left Preview Card */}
+        {/* Left Preview Card (desktop/tablet only) */}
         {totalReviews > 1 && (
           <div 
             onClick={prevReview}
-            className="flex flex-col justify-between absolute left-[-45%] xs:left-[-25%] sm:left-2 md:left-6 lg:left-12 w-[65%] sm:w-[280px] md:w-[320px] h-[250px] sm:h-[280px] bg-white/75 p-4 sm:p-6 rounded-2xl border border-[#E2E8F0] shadow-xs blur-[2.5px] sm:blur-[3.5px] opacity-30 sm:opacity-40 scale-85 -translate-x-2 sm:-translate-x-4 transition-all duration-300 cursor-pointer pointer-events-auto hover:opacity-60 z-10"
+            className="hidden sm:flex flex-col justify-between absolute sm:left-2 md:left-6 lg:left-12 sm:w-[260px] md:w-[320px] sm:h-[260px] md:h-[280px] bg-white p-4 sm:p-6 rounded-xl border border-slate-300 shadow-2xs opacity-35 scale-90 -translate-x-2 sm:-translate-x-4 transition-all duration-200 cursor-pointer pointer-events-auto hover:opacity-60 z-10"
           >
             <div>
               <div className="flex items-center gap-1 mb-2">
@@ -195,16 +195,16 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({
                   <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
                 ))}
               </div>
-              <p className="font-inter text-[12px] sm:text-[13px] text-[#44474D] line-clamp-4 italic leading-relaxed">
+              <p className="font-inter text-[12px] sm:text-[13px] text-slate-600 line-clamp-4 leading-relaxed">
                 "{prevItem.content}"
               </p>
             </div>
-            <div className="flex items-center gap-2.5 pt-2 border-t border-[#F1F4F9]">
-              <div className="w-8 h-8 rounded-full bg-[#EBF3FF] border border-[#116AFE]/20 flex items-center justify-center text-[#0053CF] font-manrope font-bold text-[12px] shrink-0">
+            <div className="flex items-center gap-2.5 pt-2 border-t border-slate-200">
+              <div className="w-7 h-7 rounded-md bg-slate-100 flex items-center justify-center text-slate-800 font-manrope font-black text-[11px] shrink-0 border border-slate-300">
                 {getInitials(prevItem.name)}
               </div>
               <div className="flex items-center gap-1.5 truncate">
-                <span className="font-manrope text-[12px] sm:text-[13px] font-bold text-[#091C35] truncate">
+                <span className="font-manrope text-[12px] sm:text-[13px] font-bold text-slate-900 truncate">
                   {prevItem.name}
                 </span>
                 <CountryFlag code={prevItem.countryCode} name={prevItem.country} className="w-4 h-2.5 rounded-xs" />
@@ -213,55 +213,55 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({
           </div>
         )}
 
-        {/* Center Main Active Review Card */}
-        <div className="relative z-20 w-[92%] max-w-[580px] bg-white rounded-2xl sm:rounded-3xl border border-[#D5E3FF] shadow-lg sm:shadow-xl p-5 sm:p-7 transition-all duration-300 animate-in fade-in zoom-in-95">
-          <div className="flex items-center justify-between mb-3">
+        {/* Center Main Solid Card */}
+        <div className="relative z-20 w-full max-w-[580px] bg-white rounded-xl sm:rounded-2xl border border-slate-300 shadow-xs p-4 sm:p-7 mx-auto">
+          <div className="flex items-center justify-between mb-2.5 sm:mb-3">
             <div className="flex items-center gap-1">
               {[...Array(currentItem.rating)].map((_, i) => (
                 <Star key={i} className="w-4 h-4 sm:w-5 sm:h-5 fill-amber-400 text-amber-400" />
               ))}
             </div>
-            <div className="w-8 h-8 rounded-full bg-[#EBF3FF] flex items-center justify-center text-[#0053CF]">
-              <Quote className="w-4 h-4" />
+            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-md bg-slate-100 border border-slate-300 flex items-center justify-center text-[#0053CF]">
+              <Quote className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </div>
           </div>
 
           {/* Main Review Quote */}
-          <p className="font-inter text-[14px] sm:text-[16px] text-[#181C20] leading-relaxed mb-5 italic">
+          <p className="font-inter text-[13.5px] sm:text-[16px] text-slate-800 leading-relaxed mb-4 sm:mb-5 font-normal">
             "{currentItem.content}"
           </p>
 
           {/* Author Footer */}
-          <div className="pt-3 border-t border-[#E5E8ED] flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-gradient-to-br from-[#EBF3FF] to-[#D5E3FF] border-2 border-[#116AFE]/30 flex items-center justify-center text-[#0053CF] font-manrope font-extrabold text-[14px] sm:text-[15px] shadow-xs shrink-0 tracking-tight">
+          <div className="pt-2.5 sm:pt-3 border-t border-slate-200 flex items-center justify-between">
+            <div className="flex items-center gap-2.5 sm:gap-3">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-md bg-slate-100 border border-slate-300 flex items-center justify-center text-slate-900 font-manrope font-black text-[12px] sm:text-[14px] shrink-0">
                 {getInitials(currentItem.name)}
               </div>
-              <div className="flex items-center gap-2">
-                <span className="font-manrope text-[14.5px] sm:text-[16px] font-bold text-[#091C35]">
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <span className="font-manrope text-[13.5px] sm:text-[16px] font-bold text-slate-900">
                   {currentItem.name}
                 </span>
                 <CountryFlag 
                   code={currentItem.countryCode} 
                   name={currentItem.country} 
-                  className="w-5 h-3.5 rounded-xs" 
+                  className="w-4 h-3 sm:w-5 sm:h-3.5 rounded-xs" 
                 />
               </div>
             </div>
 
             {currentItem.country && (
-              <span className="text-[11.5px] sm:text-[12.5px] text-[#75777E] font-inter">
+              <span className="text-[11px] sm:text-[12.5px] text-slate-500 font-inter">
                 {currentItem.country}
               </span>
             )}
           </div>
         </div>
 
-        {/* Right Preview Card */}
+        {/* Right Preview Card (desktop/tablet only) */}
         {totalReviews > 1 && (
           <div 
             onClick={nextReview}
-            className="flex flex-col justify-between absolute right-[-45%] xs:right-[-25%] sm:right-2 md:right-6 lg:right-12 w-[65%] sm:w-[280px] md:w-[320px] h-[250px] sm:h-[280px] bg-white/75 p-4 sm:p-6 rounded-2xl border border-[#E2E8F0] shadow-xs blur-[2.5px] sm:blur-[3.5px] opacity-30 sm:opacity-40 scale-85 translate-x-2 sm:translate-x-4 transition-all duration-300 cursor-pointer pointer-events-auto hover:opacity-60 z-10"
+            className="hidden sm:flex flex-col justify-between absolute sm:right-2 md:right-6 lg:right-12 sm:w-[260px] md:w-[320px] sm:h-[260px] md:h-[280px] bg-white p-4 sm:p-6 rounded-xl border border-slate-300 shadow-2xs opacity-35 scale-90 translate-x-2 sm:translate-x-4 transition-all duration-200 cursor-pointer pointer-events-auto hover:opacity-60 z-10"
           >
             <div>
               <div className="flex items-center gap-1 mb-2">
@@ -269,16 +269,16 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({
                   <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
                 ))}
               </div>
-              <p className="font-inter text-[12px] sm:text-[13px] text-[#44474D] line-clamp-4 italic leading-relaxed">
+              <p className="font-inter text-[12px] sm:text-[13px] text-slate-600 line-clamp-4 leading-relaxed">
                 "{nextItem.content}"
               </p>
             </div>
-            <div className="flex items-center gap-2.5 pt-2 border-t border-[#F1F4F9]">
-              <div className="w-8 h-8 rounded-full bg-[#EBF3FF] border border-[#116AFE]/20 flex items-center justify-center text-[#0053CF] font-manrope font-bold text-[12px] shrink-0">
+            <div className="flex items-center gap-2.5 pt-2 border-t border-slate-200">
+              <div className="w-7 h-7 rounded-md bg-slate-100 flex items-center justify-center text-slate-800 font-manrope font-black text-[11px] shrink-0 border border-slate-300">
                 {getInitials(nextItem.name)}
               </div>
               <div className="flex items-center gap-1.5 truncate">
-                <span className="font-manrope text-[12px] sm:text-[13px] font-bold text-[#091C35] truncate">
+                <span className="font-manrope text-[12px] sm:text-[13px] font-bold text-slate-900 truncate">
                   {nextItem.name}
                 </span>
                 <CountryFlag code={nextItem.countryCode} name={nextItem.country} className="w-4 h-2.5 rounded-xs" />
@@ -293,7 +293,7 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({
       <div className="flex items-center justify-center gap-4 mt-2">
         <button
           onClick={prevReview}
-          className="w-10 h-10 rounded-full bg-white border border-[#E2E8F0] hover:bg-[#F1F4F9] text-[#091C35] flex items-center justify-center shadow-xs transition-all active:scale-95 cursor-pointer"
+          className="w-10 h-10 rounded-lg bg-white border border-slate-300 hover:bg-slate-100 text-slate-800 flex items-center justify-center shadow-2xs transition-colors cursor-pointer"
           aria-label="Previous Review"
         >
           <ChevronLeft className="w-5 h-5" />
@@ -308,7 +308,7 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({
               className={`h-2 rounded-full transition-all cursor-pointer ${
                 currentIndex === idx
                   ? 'w-6 bg-[#0053CF]'
-                  : 'w-2 bg-[#CBD5E1] hover:bg-[#94A3B8]'
+                  : 'w-2 bg-slate-300 hover:bg-slate-400'
               }`}
               aria-label={`Go to slide ${idx + 1}`}
             />
@@ -317,7 +317,7 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({
 
         <button
           onClick={nextReview}
-          className="w-10 h-10 rounded-full bg-white border border-[#E2E8F0] hover:bg-[#F1F4F9] text-[#091C35] flex items-center justify-center shadow-xs transition-all active:scale-95 cursor-pointer"
+          className="w-10 h-10 rounded-lg bg-white border border-slate-300 hover:bg-slate-100 text-slate-800 flex items-center justify-center shadow-2xs transition-colors cursor-pointer"
           aria-label="Next Review"
         >
           <ChevronRight className="w-5 h-5" />
@@ -329,44 +329,44 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({
         {!isFormOpen ? (
           <button
             onClick={() => setIsFormOpen(true)}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#EBF3FF] hover:bg-[#D5E3FF] text-[#0053CF] text-[13.5px] font-semibold transition-all border border-[#116AFE]/20 shadow-2xs active:scale-98 cursor-pointer"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-white hover:bg-slate-100 text-slate-900 text-[13px] font-bold transition-colors border border-slate-300 shadow-2xs cursor-pointer"
           >
-            <MessageSquarePlus className="w-4 h-4" />
+            <MessageSquarePlus className="w-4 h-4 text-[#0053CF]" />
             <span>Share Your Trading Feedback</span>
           </button>
         ) : (
-          <div className="mt-4 max-w-lg mx-auto bg-white rounded-2xl border border-[#D5E3FF] p-5 sm:p-6 shadow-md text-left animate-in slide-in-from-top-2 duration-300">
-            <div className="flex items-center justify-between mb-4 pb-2 border-b border-[#F1F4F9]">
-              <h3 className="font-manrope font-bold text-[16px] text-[#091C35]">
+          <div className="mt-4 max-w-lg mx-auto bg-white rounded-xl border border-slate-300 p-5 sm:p-6 shadow-sm text-left">
+            <div className="flex items-center justify-between mb-4 pb-2 border-b border-slate-200">
+              <h3 className="font-manrope font-black text-[16px] text-slate-900">
                 Submit Your Trader Review
               </h3>
               <button
                 onClick={() => setIsFormOpen(false)}
-                className="text-slate-400 hover:text-slate-600 text-[13px] font-bold cursor-pointer"
+                className="text-slate-500 hover:text-slate-800 text-[13px] font-bold cursor-pointer"
               >
                 Close
               </button>
             </div>
 
             {submissionResult?.submitted ? (
-              <div className="py-6 text-center space-y-2 animate-in zoom-in-95">
+              <div className="py-6 text-center space-y-2">
                 {submissionResult.requiresApproval ? (
                   <>
-                    <Clock className="w-10 h-10 text-amber-500 mx-auto" />
-                    <h4 className="font-manrope font-bold text-[16px] text-[#091C35]">
+                    <Clock className="w-10 h-10 text-amber-600 mx-auto" />
+                    <h4 className="font-manrope font-bold text-[16px] text-slate-900">
                       Review Submitted for Verification!
                     </h4>
-                    <p className="text-[13px] text-[#44474D] font-inter max-w-xs mx-auto">
+                    <p className="text-[13px] text-slate-600 font-inter max-w-xs mx-auto">
                       Thank you! Your feedback has been received and will appear live once approved by the admin team.
                     </p>
                   </>
                 ) : (
                   <>
-                    <CheckCircle2 className="w-10 h-10 text-emerald-500 mx-auto" />
-                    <h4 className="font-manrope font-bold text-[16px] text-[#091C35]">
+                    <CheckCircle2 className="w-10 h-10 text-emerald-600 mx-auto" />
+                    <h4 className="font-manrope font-bold text-slate-900 text-[16px]">
                       Review Published Live!
                     </h4>
-                    <p className="text-[13px] text-[#44474D] font-inter max-w-xs mx-auto">
+                    <p className="text-[13px] text-slate-600 font-inter max-w-xs mx-auto">
                       Thank you for sharing your experience with the USH trading community.
                     </p>
                   </>
@@ -376,7 +376,7 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({
               <form onSubmit={handleSubmitReview} className="space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-[12px] font-semibold text-[#091C35] mb-1 font-inter">
+                    <label className="block text-[12px] font-bold text-slate-900 mb-1 font-inter">
                       Your Name
                     </label>
                     <input
@@ -385,12 +385,12 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       placeholder="e.g. Alex Johnson"
-                      className="w-full px-3 py-2 text-[13.5px] rounded-xl border border-[#C5C6CE] focus:border-[#0053CF] focus:ring-1 focus:ring-[#0053CF] outline-hidden font-inter"
+                      className="w-full px-3 py-2 text-[13.5px] rounded-lg border border-slate-300 focus:border-[#0053CF] outline-hidden font-inter"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-[12px] font-semibold text-[#091C35] mb-1 font-inter">
+                    <label className="block text-[12px] font-bold text-slate-900 mb-1 font-inter">
                       Country
                     </label>
                     <div className="flex items-center gap-2">
@@ -401,7 +401,7 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({
                           const found = COUNTRIES.find((c) => c.name === e.target.value);
                           if (found) setSelectedCountry(found);
                         }}
-                        className="w-full px-3 py-2 text-[13.5px] rounded-xl border border-[#C5C6CE] focus:border-[#0053CF] focus:ring-1 focus:ring-[#0053CF] outline-hidden font-inter bg-white"
+                        className="w-full px-3 py-2 text-[13.5px] rounded-lg border border-slate-300 focus:border-[#0053CF] outline-hidden font-inter bg-white"
                       >
                         {COUNTRIES.map((c) => (
                           <option key={c.name} value={c.name}>
@@ -414,7 +414,7 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({
                 </div>
 
                 <div>
-                  <label className="block text-[12px] font-semibold text-[#091C35] mb-1 font-inter">
+                  <label className="block text-[12px] font-bold text-slate-900 mb-1 font-inter">
                     Rating
                   </label>
                   <div className="flex items-center gap-1.5">
@@ -429,19 +429,19 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({
                           className={`w-5 h-5 ${
                             star <= rating
                               ? 'fill-amber-400 text-amber-400'
-                              : 'text-[#D1D5DB]'
+                              : 'text-slate-300'
                           }`}
                         />
                       </button>
                     ))}
-                    <span className="ml-2 text-[12px] font-bold text-[#091C35] font-inter">
+                    <span className="ml-2 text-[12px] font-bold text-slate-900 font-inter">
                       {rating}.0 Stars
                     </span>
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-[12px] font-semibold text-[#091C35] mb-1 font-inter">
+                  <label className="block text-[12px] font-bold text-slate-900 mb-1 font-inter">
                     Review Content
                   </label>
                   <textarea
@@ -450,13 +450,13 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({
                     value={content}
                     onChange={(e) => setContent(e.target.value)}
                     placeholder="Write your honest trading feedback or experience..."
-                    className="w-full px-3 py-2 text-[13.5px] rounded-xl border border-[#C5C6CE] focus:border-[#0053CF] focus:ring-1 focus:ring-[#0053CF] outline-hidden font-inter resize-none"
+                    className="w-full px-3 py-2 text-[13.5px] rounded-lg border border-slate-300 focus:border-[#0053CF] outline-hidden font-inter resize-none"
                   />
                 </div>
 
                 <button
                   type="submit"
-                  className="w-full inline-flex items-center justify-center gap-2 bg-[#0053CF] hover:bg-[#0040A2] text-white py-2.5 px-4 rounded-xl font-inter text-[14px] font-semibold shadow-md transition-all cursor-pointer"
+                  className="w-full inline-flex items-center justify-center gap-2 bg-[#0053CF] hover:bg-[#0040A2] text-white py-2.5 px-4 rounded-lg font-inter text-[14px] font-bold shadow-xs transition-colors cursor-pointer"
                 >
                   <Send className="w-4 h-4" />
                   <span>Send Review</span>

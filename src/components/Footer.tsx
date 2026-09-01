@@ -1,7 +1,19 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { NavTab } from '../types';
 import { useSite } from '../context/SiteContext';
-import { Send, ExternalLink, Mail, MessageSquare } from 'lucide-react';
+import { 
+  Send,
+  ExternalLink, 
+  Headphones 
+} from 'lucide-react';
+import {
+  TelegramLogo,
+  InstagramLogo,
+  YouTubeLogo,
+  TikTokLogo,
+  SnapchatLogo,
+} from './SocialIcons';
+import { SocialLinksModal, SocialPlatformType } from './SocialLinksModal';
 import logoSvg from './image 1.svg';
 
 interface FooterProps {
@@ -18,6 +30,7 @@ export const Footer: React.FC<FooterProps> = ({
   onOpenDisclaimer,
 }) => {
   const { settings } = useSite();
+  const [socialModalPlatform, setSocialModalPlatform] = useState<SocialPlatformType | null>(null);
 
   const handleNav = (tab: NavTab, sectionId?: string) => {
     setActiveTab(tab);
@@ -31,83 +44,84 @@ export const Footer: React.FC<FooterProps> = ({
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleTelegram = () => {
-    if (settings.social.telegramUrl) {
-      window.open(settings.social.telegramUrl, '_blank', 'noopener,noreferrer');
-    } else {
-      onOpenTelegram();
-    }
-  };
-
   return (
-    <footer className="bg-[#DFE3E8]/80 text-[#181C20] w-full pt-16 pb-12 border-t border-[#C5C6CE]/50 mt-auto">
+    <>
+      <footer className="bg-slate-100 text-slate-900 w-full pt-12 pb-10 border-t border-slate-300 mt-auto">
       <div className="max-w-[1200px] mx-auto px-4 md:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-10 pb-12 border-b border-[#C5C6CE]/40">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-8 pb-10 border-b border-slate-300">
           
           {/* Brand & Summary */}
-          <div className="md:col-span-4 space-y-4">
+          <div className="md:col-span-4 space-y-3.5">
             <div 
               onClick={() => handleNav('home')} 
-              className="flex items-center gap-2.5 sm:gap-3.5 cursor-pointer inline-flex group"
+              className="flex items-center gap-2.5 cursor-pointer inline-flex group"
             >
               <img 
                 src={settings.branding.logoUrl || logoSvg} 
                 alt={settings.branding.logoAltText || "USH Logo"} 
-                className="h-10 sm:h-12 w-auto max-h-12 object-contain shrink-0 transition-transform group-hover:scale-105"
+                className="h-9 sm:h-10 w-auto max-h-10 object-contain shrink-0"
               />
               <div className="flex flex-col justify-center">
-                <span className="font-manrope text-[17px] sm:text-[19px] font-extrabold tracking-tight text-[#091C35] leading-tight group-hover:text-[#0053CF] transition-colors">
+                <span className="font-manrope text-[17px] font-black tracking-tight text-slate-900 leading-tight">
                   {settings.branding.brandName}
                 </span>
                 {settings.branding.tagline && (
-                  <span className="text-[9.5px] font-bold text-[#0053CF] uppercase tracking-widest mt-0.5">
+                  <span className="text-[9.5px] font-black text-[#0053CF] uppercase tracking-widest mt-0.5">
                     {settings.branding.tagline}
                   </span>
                 )}
               </div>
             </div>
 
-            <p className="text-[#44474D] font-inter text-[14px] leading-relaxed max-w-sm">
+            <p className="text-slate-600 font-inter text-[13.5px] leading-relaxed max-w-sm">
               {settings.branding.footerDescription}
             </p>
 
-            <div className="pt-2">
+            <div className="pt-1">
               <button
-                onClick={handleTelegram}
-                className="inline-flex items-center gap-2 text-[13px] font-semibold text-[#0053CF] bg-[#EBF3FF] hover:bg-[#DAE2FF] px-3.5 py-2 rounded-lg border border-[#B2C5FF]/50 transition-colors cursor-pointer"
+                onClick={onOpenTelegram}
+                className="inline-flex items-center gap-2 text-[12.5px] font-black text-[#0053CF] bg-white hover:bg-slate-50 px-3.5 py-2 rounded-md border border-slate-300 transition-colors cursor-pointer shadow-2xs"
               >
-                <Send className="w-3.5 h-3.5" />
-                <span>Join Official Telegram Channel</span>
+                <Send className="w-3.5 h-3.5 text-[#0053CF]" />
+                <span>Join Our Free VIP Group</span>
               </button>
             </div>
           </div>
 
           {/* Quick Links */}
           <div className="md:col-span-3">
-            <h4 className="font-inter text-[14px] font-bold text-[#091C35] uppercase tracking-wider mb-4">
+            <h4 className="font-inter text-[13px] font-black text-slate-900 uppercase tracking-wider mb-3">
               Quick Links
             </h4>
-            <ul className="space-y-2.5 font-inter text-[14px]">
+            <ul className="space-y-2 font-inter text-[13.5px]">
               <li>
                 <button
                   onClick={() => handleNav('home', 'hero')}
-                  className="text-[#44474D] hover:text-[#0053CF] transition-colors cursor-pointer"
+                  className="text-slate-600 hover:text-slate-900 transition-colors cursor-pointer font-medium"
                 >
                   Home
                 </button>
               </li>
               <li>
                 <button
-                  onClick={() => handleNav('home', 'about')}
-                  className="text-[#44474D] hover:text-[#0053CF] transition-colors cursor-pointer"
+                  onClick={() => handleNav('vip-guide')}
+                  className="text-slate-600 hover:text-[#0053CF] transition-colors cursor-pointer font-bold"
+                >
+                  VIP Group Guide
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => handleNav('about')}
+                  className="text-slate-600 hover:text-slate-900 transition-colors cursor-pointer font-medium"
                 >
                   About Us
                 </button>
               </li>
               <li>
                 <button
-                  onClick={() => handleNav('home', 'broker')}
-                  className="text-[#0053CF] font-semibold hover:text-[#0040A2] transition-colors inline-flex items-center gap-1 cursor-pointer"
+                  onClick={() => handleNav('broker')}
+                  className="text-[#0053CF] font-bold hover:underline transition-colors inline-flex items-center gap-1 cursor-pointer"
                 >
                   Recommended Broker
                   <ExternalLink className="w-3 h-3" />
@@ -115,8 +129,8 @@ export const Footer: React.FC<FooterProps> = ({
               </li>
               <li>
                 <button
-                  onClick={() => handleNav('home', 'testimonials')}
-                  className="text-[#44474D] hover:text-[#0053CF] transition-colors cursor-pointer"
+                  onClick={() => handleNav('testimonials')}
+                  className="text-slate-600 hover:text-slate-900 transition-colors cursor-pointer font-medium"
                 >
                   Reviews & Experiences
                 </button>
@@ -126,14 +140,14 @@ export const Footer: React.FC<FooterProps> = ({
 
           {/* Resources */}
           <div className="md:col-span-2">
-            <h4 className="font-inter text-[14px] font-bold text-[#091C35] uppercase tracking-wider mb-4">
+            <h4 className="font-inter text-[13px] font-black text-slate-900 uppercase tracking-wider mb-3">
               Resources
             </h4>
-            <ul className="space-y-2.5 font-inter text-[14px]">
+            <ul className="space-y-2 font-inter text-[13.5px]">
               <li>
                 <button
-                  onClick={() => handleNav('home', 'faq')}
-                  className="text-[#44474D] hover:text-[#0053CF] transition-colors cursor-pointer"
+                  onClick={() => handleNav('faq')}
+                  className="text-slate-600 hover:text-slate-900 transition-colors cursor-pointer font-medium"
                 >
                   FAQ
                 </button>
@@ -141,7 +155,7 @@ export const Footer: React.FC<FooterProps> = ({
               <li>
                 <button
                   onClick={onOpenDisclaimer}
-                  className="text-[#44474D] hover:text-[#0053CF] transition-colors cursor-pointer"
+                  className="text-slate-600 hover:text-slate-900 transition-colors cursor-pointer font-medium"
                 >
                   Risk Disclosure
                 </button>
@@ -149,7 +163,7 @@ export const Footer: React.FC<FooterProps> = ({
               <li>
                 <button
                   onClick={onOpenDisclaimer}
-                  className="text-[#44474D] hover:text-[#0053CF] transition-colors cursor-pointer"
+                  className="text-slate-600 hover:text-slate-900 transition-colors cursor-pointer font-medium"
                 >
                   Privacy Policy
                 </button>
@@ -157,7 +171,7 @@ export const Footer: React.FC<FooterProps> = ({
               <li>
                 <button
                   onClick={onOpenDisclaimer}
-                  className="text-[#44474D] hover:text-[#0053CF] transition-colors cursor-pointer"
+                  className="text-slate-600 hover:text-slate-900 transition-colors cursor-pointer font-medium"
                 >
                   Terms of Service
                 </button>
@@ -167,89 +181,90 @@ export const Footer: React.FC<FooterProps> = ({
 
           {/* Connect / Socials */}
           <div className="md:col-span-3">
-            <h4 className="font-inter text-[14px] font-bold text-[#091C35] uppercase tracking-wider mb-4">
+            <h4 className="font-inter text-[13px] font-black text-slate-900 uppercase tracking-wider mb-3">
               Connect
             </h4>
-            <ul className="space-y-2.5 font-inter text-[14px]">
-              {settings.social.telegramUrl && (
-                <li>
-                  <a
-                    href={settings.social.telegramUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-[#44474D] hover:text-[#0053CF] transition-colors inline-flex items-center gap-1.5"
-                  >
-                    <span>Telegram</span>
-                    <span className="text-[10px] bg-[#116AFE]/10 text-[#0053CF] px-1.5 py-0.5 rounded font-bold">ACTIVE</span>
-                  </a>
-                </li>
-              )}
-              {settings.social.tiktokUrl && (
-                <li>
-                  <a
-                    href={settings.social.tiktokUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-[#44474D] hover:text-[#0053CF] transition-colors inline-block"
-                  >
-                    TikTok
-                  </a>
-                </li>
-              )}
-              {settings.social.instagramUrl && (
-                <li>
-                  <a
-                    href={settings.social.instagramUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-[#44474D] hover:text-[#0053CF] transition-colors inline-block"
-                  >
-                    Instagram
-                  </a>
-                </li>
-              )}
-              {settings.social.youtubeUrl && (
-                <li>
-                  <a
-                    href={settings.social.youtubeUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-[#44474D] hover:text-[#0053CF] transition-colors inline-block"
-                  >
-                    YouTube
-                  </a>
-                </li>
-              )}
-              {settings.social.twitterUrl && (
-                <li>
-                  <a
-                    href={settings.social.twitterUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-[#44474D] hover:text-[#0053CF] transition-colors inline-block"
-                  >
-                    Twitter / X
-                  </a>
-                </li>
-              )}
-              {settings.social.discordUrl && (
-                <li>
-                  <a
-                    href={settings.social.discordUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-[#44474D] hover:text-[#0053CF] transition-colors inline-block"
-                  >
-                    Discord Community
-                  </a>
-                </li>
-              )}
+            <ul className="space-y-2.5 font-inter text-[13.5px]">
+              {/* Telegram - Redirects to Exness VIP Verification flow */}
               <li>
                 <button
-                  onClick={onOpenContact}
-                  className="text-[#0053CF] font-medium hover:underline cursor-pointer"
+                  onClick={onOpenTelegram}
+                  className="text-slate-700 hover:text-[#0088cc] transition-colors inline-flex items-center gap-2.5 font-medium cursor-pointer group"
+                  title="Telegram"
                 >
-                  Contact Us
+                  <div className="w-6 h-6 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                    <TelegramLogo className="w-5 h-5" />
+                  </div>
+                  <span>Telegram</span>
+                </button>
+              </li>
+
+              {/* Instagram - Pops up accounts */}
+              <li>
+                <button
+                  onClick={() => setSocialModalPlatform('instagram')}
+                  className="text-slate-700 hover:text-[#E1306C] transition-colors inline-flex items-center gap-2.5 font-medium group cursor-pointer"
+                  title="Instagram"
+                >
+                  <div className="w-6 h-6 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                    <InstagramLogo className="w-5 h-5" />
+                  </div>
+                  <span>Instagram</span>
+                </button>
+              </li>
+
+              {/* YouTube - Pops up channels */}
+              <li>
+                <button
+                  onClick={() => setSocialModalPlatform('youtube')}
+                  className="text-slate-700 hover:text-[#FF0000] transition-colors inline-flex items-center gap-2.5 font-medium group cursor-pointer"
+                  title="YouTube"
+                >
+                  <div className="w-6 h-6 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                    <YouTubeLogo className="w-5 h-5" />
+                  </div>
+                  <span>YouTube</span>
+                </button>
+              </li>
+
+              {/* TikTok - Pops up accounts */}
+              <li>
+                <button
+                  onClick={() => setSocialModalPlatform('tiktok')}
+                  className="text-slate-700 hover:text-black transition-colors inline-flex items-center gap-2.5 font-medium group cursor-pointer"
+                  title="TikTok"
+                >
+                  <div className="w-6 h-6 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                    <TikTokLogo className="w-5 h-5" />
+                  </div>
+                  <span>TikTok</span>
+                </button>
+              </li>
+
+              {/* Snapchat - Pops up accounts */}
+              <li>
+                <button
+                  onClick={() => setSocialModalPlatform('snapchat')}
+                  className="text-slate-700 hover:text-amber-600 transition-colors inline-flex items-center gap-2.5 font-medium group cursor-pointer"
+                  title="Snapchat"
+                >
+                  <div className="w-6 h-6 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                    <SnapchatLogo className="w-5 h-5" />
+                  </div>
+                  <span>Snapchat</span>
+                </button>
+              </li>
+
+              {/* Contact Us */}
+              <li className="pt-1 border-t border-slate-200">
+                <button
+                  onClick={onOpenContact}
+                  className="text-[#0053CF] font-bold hover:underline cursor-pointer inline-flex items-center gap-2.5"
+                >
+                  <div className="w-6 h-6 rounded-md bg-blue-100 flex items-center justify-center text-[#0053CF] shrink-0">
+                    <Headphones className="w-3.5 h-3.5" />
+                  </div>
+                  <span>Contact Us</span>
                 </button>
               </li>
             </ul>
@@ -257,12 +272,20 @@ export const Footer: React.FC<FooterProps> = ({
         </div>
 
         {/* Copyright */}
-        <div className="mt-8 pt-6 text-center border-t border-[#E2E8F0]">
-          <p className="font-inter text-[13.5px] text-[#44474D]">
+        <div className="mt-6 text-center">
+          <p className="font-inter text-[12.5px] text-slate-500 font-medium">
             {settings.branding.copyrightText}
           </p>
         </div>
       </div>
     </footer>
+
+    {/* Multi-Channel Selection Popup Modal */}
+    <SocialLinksModal 
+      isOpen={socialModalPlatform !== null}
+      onClose={() => setSocialModalPlatform(null)}
+      platform={socialModalPlatform}
+    />
+  </>
   );
 };

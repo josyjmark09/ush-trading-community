@@ -1,4 +1,4 @@
-export type NavTab = 'home' | 'about' | 'broker' | 'testimonials' | 'faq';
+export type NavTab = 'home' | 'about' | 'broker' | 'testimonials' | 'faq' | 'vip-guide';
 
 export interface Milestone {
   year: string;
@@ -198,9 +198,20 @@ export interface SocialLinksSettings {
   tiktokUrl?: string;
   instagramUrl?: string;
   youtubeUrl?: string;
+  snapchatUrl?: string;
   twitterUrl?: string;
   discordUrl?: string;
   whatsappUrl?: string;
+}
+
+export interface VipGuideSettings {
+  title: string;
+  subtitle: string;
+  partnerLink: string;
+  partnerCode: string;
+  vipTelegramUrl: string;
+  adminTelegramUser?: string;
+  supportHelpText?: string;
 }
 
 export interface SiteSettings {
@@ -212,6 +223,7 @@ export interface SiteSettings {
   community: CommunitySettings;
   broker: BrokerSettings;
   about: AboutSettings;
+  vipGuide?: VipGuideSettings;
   faqs: FAQItem[];
   social: SocialLinksSettings;
   moderation: {

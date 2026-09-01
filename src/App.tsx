@@ -6,12 +6,16 @@ import { Footer } from './components/Footer';
 import { HomeView } from './components/HomeView';
 import { TelegramModal } from './components/TelegramModal';
 import { BrokerModal } from './components/BrokerModal';
+import { VipGuideModal } from './components/VipGuideModal';
+import { VipGuideView } from './components/VipGuideView';
 import { ContactModal } from './components/ContactModal';
 import { AdminModal } from './components/AdminModal';
 
 function MainApp() {
   const { settings } = useSite();
   const [activeTab, setActiveTab] = useState<NavTab>('home');
+  const [isVipModalOpen, setIsVipModalOpen] = useState(false);
+  const [vipModalTab, setVipModalTab] = useState<'new' | 'existing'>('new');
   const [isTelegramModalOpen, setIsTelegramModalOpen] = useState(false);
   const [isBrokerModalOpen, setIsBrokerModalOpen] = useState(false);
   const [contactModalState, setContactModalState] = useState<{
@@ -21,6 +25,11 @@ function MainApp() {
     isOpen: false,
     type: 'contact',
   });
+
+  const handleOpenVip = () => {
+    setActiveTab('vip-guide');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   // Sync website favicon and meta with custom branding logo if set
   useEffect(() => {
@@ -46,7 +55,7 @@ function MainApp() {
     setActiveTab(tab);
     
     // Map tabs to section IDs on the single landing page
-    const sectionMap: Record<NavTab, string> = {
+    const sectionMap: Partial<Record<NavTab, string>> = {
       home: 'hero',
       about: 'about',
       broker: 'broker',
@@ -66,36 +75,48 @@ function MainApp() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F7FAFF] text-[#181C20] flex flex-col font-inter selection:bg-[#116AFE]/20 selection:text-[#0053CF]">
+    <div className="min-h-screen w-full max-w-full overflow-x-hidden bg-[#F7FAFF] text-[#181C20] flex flex-col font-inter selection:bg-[#116AFE]/20 selection:text-[#0053CF]">
       {/* Header with 5-tap logo Admin trigger */}
       <Header
         activeTab={activeTab}
         setActiveTab={handleTabChange}
-        onOpenTelegram={() => setIsTelegramModalOpen(true)}
+        onOpenTelegram={handleOpenVip}
+        onOpenContact={() => setContactModalState({ isOpen: true, type: 'contact' })}
       />
 
-      {/* Main Single Landing Page Content */}
-      <main className="flex-grow pt-[84px] md:pt-[88px] pb-8 px-2 sm:px-4 flex flex-col items-center w-full">
-        <div className="w-full flex flex-col items-center animate-soft-entry">
-          <HomeView
-            setActiveTab={handleTabChange}
-            onOpenTelegram={() => setIsTelegramModalOpen(true)}
-            onOpenBroker={() => setIsBrokerModalOpen(true)}
-            onOpenContact={() => setContactModalState({ isOpen: true, type: 'contact' })}
-          />
-        </div>
+      {/* Main Content (Home Landing or Dedicated Full-Page VIP Guide) */}
+      <main className="flex-grow pt-[84px] md:pt-[88px] pb-8 px-2 sm:px-4 flex flex-col items-center w-full max-w-full overflow-x-hidden box-border">
+        {activeTab === 'vip-guide' ? (
+          <VipGuideView setActiveTab={handleTabChange} />
+        ) : (
+          <div className="w-full flex flex-col items-center animate-soft-entry">
+            <HomeView
+              setActiveTab={handleTabChange}
+              onOpenTelegram={handleOpenVip}
+              onOpenBroker={() => handleTabChange('broker')}
+              onOpenContact={() => setContactModalState({ isOpen: true, type: 'contact' })}
+            />
+          </div>
+        )}
       </main>
 
       {/* Footer with dynamic links */}
       <Footer
         setActiveTab={handleTabChange}
-        onOpenTelegram={() => setIsTelegramModalOpen(true)}
+        onOpenTelegram={handleOpenVip}
         onOpenContact={() =>
           setContactModalState({ isOpen: true, type: 'contact' })
         }
         onOpenDisclaimer={() =>
           setContactModalState({ isOpen: true, type: 'disclaimer' })
         }
+      />
+
+      {/* VIP Step-by-Step Guide Modal (For both new and existing Exness users) */}
+      <VipGuideModal
+        isOpen={isVipModalOpen}
+        defaultTab={vipModalTab}
+        onClose={() => setIsVipModalOpen(false)}
       />
 
       {/* Interactive Modals */}

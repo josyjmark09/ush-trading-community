@@ -1283,12 +1283,92 @@ export const AdminModal: React.FC = () => {
                     type="text"
                     value={draft.broker.minDepositText}
                     onChange={(e) => {
-                      const val力pytest = e.target.value;
-                      setDraft((prev紧) => ({ ...prev紧, broker: { ...prev紧.broker, minDepositText: val力pytest } }));
-                      updateSettings((prev紧) => ({ ...prev紧, broker: { ...prev紧.broker, minDepositText: val力pytest } }));
+                      const val = e.target.value;
+                      setDraft((prev) => ({ ...prev, broker: { ...prev.broker, minDepositText: val } }));
+                      updateSettings((prev) => ({ ...prev, broker: { ...prev.broker, minDepositText: val } }));
                     }}
                     className="w-full px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg text-[12.5px] font-bold"
                   />
+                </div>
+              </div>
+
+              {/* VIP Group & Partner IB Section */}
+              <div className="p-4 rounded-xl bg-blue-50/70 border border-blue-200 space-y-3">
+                <h4 className="font-manrope font-bold text-[14px] text-[#0053CF]">
+                  Free VIP Group & Partner IB Configuration
+                </h4>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <label className="text-[12px] font-bold text-slate-700 block">Exness Partner Code (IB Number)</label>
+                    <input
+                      type="text"
+                      value={draft.vipGuide?.partnerCode || '1046090975706890644'}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setDraft((prev) => ({
+                          ...prev,
+                          vipGuide: {
+                            ...(prev.vipGuide || {
+                              title: 'Join Our Free VIP Group',
+                              subtitle: 'Follow the instructions below to join our free VIP group, for both new and already existing Exness users',
+                              partnerLink: 'https://one.exnessonelink.com/a/yxxz5mlw1n',
+                              vipTelegramUrl: 'https://t.me/ushforex_official',
+                            }),
+                            partnerCode: val,
+                          },
+                        }));
+                        updateSettings((prev) => ({
+                          ...prev,
+                          vipGuide: {
+                            ...(prev.vipGuide || {
+                              title: 'Join Our Free VIP Group',
+                              subtitle: 'Follow the instructions below to join our free VIP group, for both new and already existing Exness users',
+                              partnerLink: 'https://one.exnessonelink.com/a/yxxz5mlw1n',
+                              vipTelegramUrl: 'https://t.me/ushforex_official',
+                            }),
+                            partnerCode: val,
+                          },
+                        }));
+                      }}
+                      className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-xl text-[13px] font-mono font-bold text-[#0053CF]"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-[12px] font-bold text-slate-700 block">VIP Telegram Admin Contact URL</label>
+                    <input
+                      type="url"
+                      value={draft.vipGuide?.vipTelegramUrl || 'https://t.me/ushforex_official'}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setDraft((prev) => ({
+                          ...prev,
+                          vipGuide: {
+                            ...(prev.vipGuide || {
+                              title: 'Join Our Free VIP Group',
+                              subtitle: 'Follow the instructions below to join our free VIP group, for both new and already existing Exness users',
+                              partnerLink: 'https://one.exnessonelink.com/a/yxxz5mlw1n',
+                              partnerCode: '1046090975706890644',
+                            }),
+                            vipTelegramUrl: val,
+                          },
+                        }));
+                        updateSettings((prev) => ({
+                          ...prev,
+                          vipGuide: {
+                            ...(prev.vipGuide || {
+                              title: 'Join Our Free VIP Group',
+                              subtitle: 'Follow the instructions below to join our free VIP group, for both new and already existing Exness users',
+                              partnerLink: 'https://one.exnessonelink.com/a/yxxz5mlw1n',
+                              partnerCode: '1046090975706890644',
+                            }),
+                            vipTelegramUrl: val,
+                          },
+                        }));
+                      }}
+                      className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-xl text-[12.5px] font-mono text-[#0053CF]"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
