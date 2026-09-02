@@ -15,7 +15,7 @@ import {
   Info,
   ChevronRight,
   Mail,
-  Headphones
+  Phone
 } from 'lucide-react';
 import { useSite } from '../context/SiteContext';
 import { NavTab } from '../types';
@@ -26,7 +26,7 @@ interface VipGuideViewProps {
 }
 
 export const VipGuideView: React.FC<VipGuideViewProps> = ({ setActiveTab }) => {
-  const { settings } = useSite();
+  const { settings, addInboxMessage } = useSite();
   // userType can be null (initial question screen), 'new', or 'existing'
   const [userType, setUserType] = useState<'new' | 'existing' | null>(null);
   const [copiedCode, setCopiedCode] = useState(false);
@@ -65,6 +65,15 @@ export const VipGuideView: React.FC<VipGuideViewProps> = ({ setActiveTab }) => {
 
     let finalUrl = telegramUrl;
     if (accountId.trim()) {
+      addInboxMessage({
+        name: 'VIP Trader',
+        email: 'direct_vip@telegram.community',
+        accountId: accountId.trim(),
+        topic: 'VIP Onboarding with Exness ID',
+        message: `Trader provided Exness ID: ${accountId.trim()} upon joining VIP Telegram.`,
+        source: 'vip_onboarding',
+      });
+
       const msg = encodeURIComponent(
         `Hello Admin! I have completed my VIP registration under Partner Code ${partnerCode}. My Exness Account ID is: ${accountId.trim()}. Please grant me access to the Free VIP Group!`
       );
@@ -95,8 +104,8 @@ export const VipGuideView: React.FC<VipGuideViewProps> = ({ setActiveTab }) => {
             onClick={() => setIsAdminContactModalOpen(true)}
             className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-[#0053CF] hover:bg-[#0040A2] text-white text-[12px] sm:text-[13px] font-bold rounded-lg transition-all shadow-sm shrink-0 cursor-pointer"
           >
-            <Headphones className="w-3.5 h-3.5" />
-            <span>Contact Admin</span>
+            <Phone className="w-3.5 h-3.5" />
+            <span>Contact Support</span>
           </button>
         </div>
       </div>
@@ -104,7 +113,7 @@ export const VipGuideView: React.FC<VipGuideViewProps> = ({ setActiveTab }) => {
       {/* Main Container */}
       <div className="w-full max-w-3xl mx-auto px-3 sm:px-4">
         {/* Title Header */}
-        <div className="text-center space-y-2 mb-6 sm:mb-8 px-1">
+        <div className="text-center space-y-2 mb-5 sm:mb-6 px-1">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-slate-100 border border-slate-300 rounded-md text-[11px] sm:text-[12px] font-bold text-slate-800">
             <ShieldCheck className="w-3.5 h-3.5 text-[#0053CF] shrink-0" />
             <span>OFFICIAL VIP ONBOARDING PORTAL</span>
@@ -115,20 +124,49 @@ export const VipGuideView: React.FC<VipGuideViewProps> = ({ setActiveTab }) => {
           </h1>
 
           <p className="font-inter text-[13.5px] sm:text-[15px] text-slate-600 max-w-lg mx-auto leading-relaxed">
-            Follow the instructions below to join our free VIP group, for both new and already existing Exness users.
+            Gain immediate access to institutional trade setups and signals. Opening an Exness broker account is completely optional.
           </p>
+        </div>
+
+        {/* DIRECT TELEGRAM CTA BANNER - ZERO OBLIGATION ENTRY */}
+        <div className="w-full bg-[#0053CF] text-white rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-md border border-blue-600 mb-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="space-y-1 text-center sm:text-left">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white/20 text-white text-[11px] font-extrabold tracking-wider uppercase">
+              <Send className="w-3 h-3" />
+              DIRECT ACCESS • NO DELAY
+            </span>
+            <h2 className="font-manrope text-[18px] sm:text-[21px] font-black leading-snug">
+              Proceed Directly to Telegram
+            </h2>
+            <p className="text-[12.5px] sm:text-[13px] text-blue-100 font-inter max-w-md">
+              No registration required! You can jump straight into the official Telegram channel right now. Opening an Exness broker account is completely optional.
+            </p>
+          </div>
+
+          <a
+            href={telegramUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-6 py-3.5 bg-white hover:bg-slate-100 text-[#0053CF] font-inter font-black text-[14px] rounded-xl shadow-md transition-all cursor-pointer hover:scale-[1.02] active:scale-[0.98] shrink-0 whitespace-nowrap"
+          >
+            <Send className="w-4 h-4 text-[#0053CF]" />
+            <span>Proceed to Telegram Channel</span>
+            <ArrowRight className="w-4 h-4" />
+          </a>
         </div>
 
         {/* STEP 0: QUESTION CHOOSER */}
         {userType === null ? (
           <div className="w-full bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-sm border border-slate-300 space-y-4">
             <div className="text-center space-y-1">
-              <span className="text-[11px] font-black tracking-widest text-[#0053CF] uppercase">Step 1 of 2</span>
+              <span className="text-[11px] font-black tracking-widest text-[#0053CF] uppercase">
+                Recommended Broker Setup (Optional)
+              </span>
               <h2 className="font-manrope text-[18px] sm:text-[22px] font-black text-slate-900 leading-snug">
-                Do you already have an Exness trading account?
+                Do you want to set up an Exness account for raw spreads?
               </h2>
               <p className="text-[12.5px] sm:text-[13px] text-slate-600 font-inter max-w-md mx-auto">
-                Please select your status so we can provide the exact step-by-step setup instructions.
+                Opening an Exness account is <strong>optional</strong>. If you already want raw institutional spreads, choose your status below, or skip straight to Telegram.
               </p>
             </div>
 
@@ -147,7 +185,7 @@ export const VipGuideView: React.FC<VipGuideViewProps> = ({ setActiveTab }) => {
                       No, I am a New Trader
                     </h3>
                     <p className="text-[12px] text-slate-500 mt-0.5 font-inter">
-                      Register with our VIP partner link
+                      Register with VIP partner link (Optional)
                     </p>
                   </div>
                 </div>
@@ -168,12 +206,26 @@ export const VipGuideView: React.FC<VipGuideViewProps> = ({ setActiveTab }) => {
                       Yes, I Have An Account
                     </h3>
                     <p className="text-[12px] text-slate-500 mt-0.5 font-inter">
-                      Switch partner code to join
+                      Switch partner code (Optional)
                     </p>
                   </div>
                 </div>
                 <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-[#0053CF] shrink-0" />
               </button>
+            </div>
+
+            {/* Option C: Direct Skip to Telegram */}
+            <div className="pt-2 border-t border-slate-200 text-center">
+              <a
+                href={telegramUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center gap-2 py-2.5 px-4 text-slate-700 hover:text-[#0053CF] font-inter text-[13px] font-bold hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
+              >
+                <Send className="w-4 h-4 text-[#0053CF]" />
+                <span>Skip Broker Setup & Proceed Directly to Telegram Channel</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </a>
             </div>
           </div>
         ) : (
@@ -184,15 +236,27 @@ export const VipGuideView: React.FC<VipGuideViewProps> = ({ setActiveTab }) => {
               <div className="flex items-center gap-1.5 text-[12.5px] sm:text-[13px] font-bold text-slate-700">
                 <span className="text-slate-500">Selected:</span>
                 <span className="text-[#0053CF] truncate max-w-[200px] sm:max-w-none">
-                  {userType === 'new' ? 'New Account Registration' : 'Existing User (Switch IB)'}
+                  {userType === 'new' ? 'New Account Registration (Optional)' : 'Existing User (Switch IB) (Optional)'}
                 </span>
               </div>
-              <button
-                onClick={() => { setUserType(null); setIsCompleted(false); }}
-                className="text-[12px] text-slate-600 hover:text-[#0053CF] font-bold underline transition-colors cursor-pointer shrink-0"
-              >
-                Change Selection
-              </button>
+              <div className="flex items-center gap-3">
+                <a
+                  href={telegramUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[12px] text-[#0053CF] font-bold inline-flex items-center gap-1 hover:underline cursor-pointer"
+                >
+                  <Send className="w-3 h-3" />
+                  <span>Proceed to Telegram</span>
+                </a>
+                <span className="text-slate-300">|</span>
+                <button
+                  onClick={() => { setUserType(null); setIsCompleted(false); }}
+                  className="text-[12px] text-slate-600 hover:text-[#0053CF] font-bold underline transition-colors cursor-pointer shrink-0"
+                >
+                  Change Selection
+                </button>
+              </div>
             </div>
 
             {/* TRACK 1: NEW EXNESS USER */}
@@ -206,16 +270,16 @@ export const VipGuideView: React.FC<VipGuideViewProps> = ({ setActiveTab }) => {
                     </div>
                     <div className="min-w-0 flex-1">
                       <h3 className="font-manrope font-extrabold text-[15.5px] sm:text-[17px] text-slate-900 leading-snug">
-                        To Register: Create Your Exness Account
+                        Step 1 (Optional): Create Your Exness Account
                       </h3>
                       <p className="text-[12px] text-slate-500 mt-0.5 font-medium">
-                        Our official Partner IB is embedded in this link automatically.
+                        Optional: Register if you wish to trade with 0.0 pip raw spreads and institutional execution.
                       </p>
                     </div>
                   </div>
 
                   <p className="text-[13px] sm:text-[14px] text-slate-800 font-inter leading-relaxed">
-                    Create your Exness trading account using our official VIP affiliate link:
+                    Create your Exness trading account using our official partner link below:
                   </p>
 
                   {/* Responsive Link Box */}
@@ -259,7 +323,7 @@ export const VipGuideView: React.FC<VipGuideViewProps> = ({ setActiveTab }) => {
                   <div className="w-full flex items-start gap-2.5 p-3 rounded-lg bg-amber-100/70 border border-amber-300 text-amber-950 text-[12.5px] sm:text-[13px] font-inter">
                     <AlertCircle className="w-4 h-4 text-amber-700 mt-0.5 shrink-0" />
                     <p className="leading-relaxed">
-                      <strong>Make sure you stay on the website until you complete the full registration process.</strong> This ensures your account is properly linked.
+                      <strong>Exness is optional:</strong> You do not have to register with Exness to join our channel. You can proceed directly to Telegram anytime!
                     </p>
                   </div>
                 </div>
@@ -271,11 +335,11 @@ export const VipGuideView: React.FC<VipGuideViewProps> = ({ setActiveTab }) => {
                       2
                     </div>
                     <h3 className="font-manrope font-extrabold text-[15.5px] sm:text-[17px] text-slate-900">
-                      Verify & Fund Your Account
+                      Step 2 (Optional): Verify & Fund Your Account
                     </h3>
                   </div>
                   <p className="text-[13px] text-slate-700 font-inter leading-relaxed">
-                    Complete your quick Exness identity verification and make your first trading deposit (minimum $10) using bank transfer, card, or crypto.
+                    If you created an Exness account, complete quick verification and fund your account (minimum $10) using your preferred deposit method.
                   </p>
                 </div>
 
@@ -286,28 +350,28 @@ export const VipGuideView: React.FC<VipGuideViewProps> = ({ setActiveTab }) => {
                       3
                     </div>
                     <h3 className="font-manrope font-extrabold text-[15.5px] sm:text-[17px] text-slate-900">
-                      Done? Join the VIP Telegram Channel
+                      Step 3: Proceed to Telegram Channel
                     </h3>
                   </div>
 
                   <p className="text-[13px] text-slate-700 font-inter">
-                    Enter your Exness Account ID and tap <strong>Done</strong> to access our free VIP Telegram channel:
+                    Enter your Exness Account ID (optional) and tap below to proceed directly to our Telegram channel:
                   </p>
 
-                    <form onSubmit={handleCompleteAndRedirect} className="w-full space-y-2.5">
+                  <form onSubmit={handleCompleteAndRedirect} className="w-full space-y-2.5">
                     <input
                       type="text"
-                      placeholder="Exness Account ID (e.g. 19284712)"
+                      placeholder="Exness Account ID (Optional - e.g. 19284712)"
                       value={accountId}
                       onChange={(e) => setAccountId(e.target.value)}
                       className="w-full px-3.5 py-3 bg-white border border-slate-300 rounded-md text-[13px] sm:text-[13.5px] font-inter focus:outline-hidden focus:border-[#0053CF]"
                     />
                     <button
                       type="submit"
-                      className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-[#0053CF] hover:bg-[#0040A2] text-white font-inter font-bold text-[13.5px] sm:text-[14px] rounded-md transition-colors shadow-sm cursor-pointer active:scale-99"
+                      className="w-full flex items-center justify-center gap-2 py-3.5 px-4 bg-[#0053CF] hover:bg-[#0040A2] text-white font-inter font-bold text-[14px] rounded-md transition-colors shadow-sm cursor-pointer active:scale-99"
                     >
                       <Send className="w-4 h-4 shrink-0" />
-                      <span>Done! Join VIP Telegram Channel</span>
+                      <span>Proceed to Telegram Channel</span>
                     </button>
 
                     <div className="pt-1 flex items-center justify-between text-[11.5px] text-slate-500 font-inter">
@@ -480,27 +544,27 @@ export const VipGuideView: React.FC<VipGuideViewProps> = ({ setActiveTab }) => {
                 {/* Final step & Done CTA */}
                 <div className="w-full max-w-full p-4 sm:p-5 rounded-xl bg-slate-50 border border-slate-300 space-y-3 overflow-hidden">
                   <h4 className="font-manrope font-extrabold text-[15.5px] sm:text-[16px] text-slate-900">
-                    Step 4: Done with IB Change? Access VIP Channel
+                    Step 4: Proceed to Telegram Channel
                   </h4>
 
                   <p className="text-[13px] text-slate-700 font-inter">
-                    Enter your Exness Account ID and click <strong>Done</strong> to unlock the VIP Telegram community:
+                    Enter your Exness Account ID (optional) and click below to access the VIP Telegram channel:
                   </p>
 
                   <form onSubmit={handleCompleteAndRedirect} className="w-full space-y-2.5">
                     <input
                       type="text"
-                      placeholder="Exness Account ID after switching"
+                      placeholder="Exness Account ID after switching (Optional)"
                       value={accountId}
                       onChange={(e) => setAccountId(e.target.value)}
                       className="w-full px-3.5 py-3 bg-white border border-slate-300 rounded-md text-[13px] sm:text-[13.5px] font-inter focus:outline-hidden focus:border-[#0053CF]"
                     />
                     <button
                       type="submit"
-                      className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-[#0053CF] hover:bg-[#0040A2] text-white font-inter font-bold text-[13.5px] sm:text-[14px] rounded-md transition-colors shadow-sm cursor-pointer active:scale-99"
+                      className="w-full flex items-center justify-center gap-2 py-3.5 px-4 bg-[#0053CF] hover:bg-[#0040A2] text-white font-inter font-bold text-[14px] rounded-md transition-colors shadow-sm cursor-pointer active:scale-99"
                     >
                       <Send className="w-4 h-4 shrink-0" />
-                      <span>Done! Join VIP Telegram Channel</span>
+                      <span>Proceed to Telegram Channel</span>
                     </button>
 
                     <div className="pt-1 flex items-center justify-between text-[11.5px] text-slate-500 font-inter">

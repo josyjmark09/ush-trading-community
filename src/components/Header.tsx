@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
 import { NavTab } from '../types';
-import { Send, Headphones } from 'lucide-react';
+import { Send, Phone } from 'lucide-react';
 import { useSite } from '../context/SiteContext';
 import logoSvg from './image 1.svg';
 
@@ -47,6 +47,7 @@ export const Header: React.FC<HeaderProps> = ({
   const navItems: { id: NavTab; label: string }[] = [
     { id: 'home', label: 'Home' },
     { id: 'about', label: 'About' },
+    { id: 'forex-news', label: 'Forex News' },
     { id: 'testimonials', label: 'Reviews' },
     { id: 'broker', label: 'Recommended Broker' },
     { id: 'faq', label: 'FAQ' },
@@ -54,7 +55,6 @@ export const Header: React.FC<HeaderProps> = ({
 
   const handleNavClick = (tab: NavTab) => {
     setActiveTab(tab);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleTelegramClick = () => {
@@ -120,15 +120,15 @@ export const Header: React.FC<HeaderProps> = ({
             <span>Join Free VIP Group</span>
           </button>
 
-          {/* Contact Support Icon Button */}
+          {/* Customer Support Telephone Icon Button */}
           {onOpenContact && (
             <button
               onClick={onOpenContact}
               className="flex items-center justify-center w-10 h-10 rounded-lg text-slate-700 hover:text-[#0053CF] bg-slate-100 hover:bg-blue-50 border border-slate-300 transition-colors cursor-pointer"
-              title="Contact Support & Admin"
-              aria-label="Contact Support & Admin"
+              title="Customer Care & Support"
+              aria-label="Customer Care & Support"
             >
-              <Headphones className="w-5 h-5" />
+              <Phone className="w-4.5 h-4.5" />
             </button>
           )}
         </div>

@@ -104,74 +104,8 @@ export const LIVE_QUOTES: MarketQuote[] = [
   { pair: "BTC/USD", bid: 92450.00, ask: 92480.00, change: +2.35, direction: "up" },
 ];
 
-export const TESTIMONIALS: TestimonialItem[] = [
-  {
-    id: "1",
-    name: "Marcus Sterling",
-    content: "The institutional structure and liquidity zone breakdowns completely shifted my mindset from gambling to calculated probability. I went from blowing accounts to steady risk-managed discipline. Pairing U.S.H setups with the recommended Exness Raw account makes spreads virtually non-existent.",
-    rating: 5,
-    country: "United Kingdom",
-    countryCode: "gb",
-    location: "United Kingdom",
-    status: "approved",
-    submittedAt: "2025-01-15"
-  },
-  {
-    id: "2",
-    name: "Elena Rostova",
-    content: "What sets U.S.H Forex apart is the lack of fake flashy lambos. It's calm, factual, and deeply educational. The recommended broker link with ultra-low raw spreads saves me hundreds on slippage weekly during high-impact news releases.",
-    rating: 5,
-    country: "Switzerland",
-    countryCode: "ch",
-    location: "Switzerland",
-    status: "approved",
-    submittedAt: "2025-01-20"
-  },
-  {
-    id: "3",
-    name: "David Mwangi",
-    content: "The daily market preparation notes on Telegram are my morning ritual before London open. Clear invalidation levels and systematic position sizing have protected my capital during high-impact news. Withdrawals on the recommended broker are instant.",
-    rating: 5,
-    country: "Kenya",
-    countryCode: "ke",
-    location: "Kenya",
-    status: "approved",
-    submittedAt: "2025-02-02"
-  },
-  {
-    id: "4",
-    name: "Carlos Mendez",
-    content: "I started as a complete beginner overwhelmed by YouTube noise. Following U.S.H Forex step-by-step risk management and opening my demo/live through the broker guide made everything clear. The telegram voice notes when market conditions shift are pure gold.",
-    rating: 5,
-    country: "Spain",
-    countryCode: "es",
-    location: "Spain",
-    status: "approved",
-    submittedAt: "2025-02-10"
-  },
-  {
-    id: "5",
-    name: "Sophia Chen",
-    content: "No hype, just pure risk discipline and precision entries. The broker execution speed is lightning fast with zero requotes. I especially love the weekend macroeconomic breakdowns before Asian session open.",
-    rating: 5,
-    country: "Singapore",
-    countryCode: "sg",
-    location: "Singapore",
-    status: "approved",
-    submittedAt: "2025-02-14"
-  },
-  {
-    id: "6",
-    name: "Tariq Al-Mansoor",
-    content: "Community transparency is 10/10. When trades hit stop loss, we review why without sugarcoating. That honesty is why I stick with U.S.H Forex. Highly recommended for anyone serious about longevity in this business.",
-    rating: 5,
-    country: "United Arab Emirates",
-    countryCode: "ae",
-    location: "United Arab Emirates",
-    status: "approved",
-    submittedAt: "2025-02-22"
-  }
-];
+// Verified reviews submitted by real traders (moderated before going live)
+export const TESTIMONIALS: TestimonialItem[] = [];
 
 export const FAQS: FAQItem[] = [
   {

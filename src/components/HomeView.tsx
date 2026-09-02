@@ -22,7 +22,11 @@ import {
 import { useSite } from '../context/SiteContext';
 import { LiveQuotesTicker } from './LiveQuotesTicker';
 import { ReviewsSection } from './ReviewsSection';
+import { ForexFactoryNews } from './ForexFactoryNews';
+import { TradingCalculator } from './TradingCalculator';
 import { APP_IMAGES } from '../data/mockData';
+import { ExnessLogo } from './ExnessLogo';
+import { TradingViewChart } from './TradingViewChart';
 import chartImage2 from './image 2.png';
 import chartImage3 from './image 3.png';
 
@@ -67,24 +71,6 @@ const getValueIcon = (iconName?: string) => {
     default:
       return <Award className="w-5 h-5" />;
   }
-};
-
-const ExnessLogo: React.FC<{ className?: string; size?: 'sm' | 'md' | 'lg' }> = ({ className = '', size = 'md' }) => {
-  const iconDimensions = size === 'lg' ? 'w-8 h-8' : size === 'sm' ? 'w-5 h-5' : 'w-6 h-6';
-  const textStyles = size === 'lg' ? 'text-[22px] tracking-tight' : size === 'sm' ? 'text-[15px]' : 'text-[18px]';
-
-  return (
-    <div className={`flex items-center gap-2.5 select-none ${className}`}>
-      <div className={`${iconDimensions} bg-[#FFD400] rounded-md flex items-center justify-center p-1 shadow-xs shrink-0`}>
-        <div className="w-full h-full bg-[#111111] rounded-sm flex items-center justify-center">
-          <span className="text-[#FFD400] font-black text-[13px] leading-none tracking-tighter">e</span>
-        </div>
-      </div>
-      <span className={`font-manrope font-black text-[#111111] leading-none ${textStyles}`}>
-        exness
-      </span>
-    </div>
-  );
 };
 
 const ExnessBrandCard: React.FC = () => {
@@ -220,22 +206,25 @@ export const HomeView: React.FC<HomeViewProps> = ({
           </div>
         </div>
 
-        {/* Dashboard Showcase Image */}
+        {/* Live Interactive TradingView Terminal with Technical Drawing & Fullscreen Landscape */}
         <div className="mt-8 sm:mt-12 md:mt-14 w-full max-w-5xl relative">
-          <div className="relative p-2 sm:p-3 rounded-xl bg-white border border-slate-300 shadow-sm overflow-hidden">
-            <img
-              src={settings.hero?.heroImageUrl || settings.hero?.chartImageUrl || chartImage2}
-              alt="Forex Trading Analysis Chart"
-              className="w-full h-auto rounded-lg border border-slate-200 object-cover"
-              loading="eager"
-            />
-          </div>
+          <TradingViewChart />
         </div>
       </section>
 
-      {/* 3. Reviews Section */}
+      {/* 3. Forex Factory Live Calendar & News (Placed directly BEFORE the Reviews page) */}
+      <div id="forex-news" className="scroll-mt-24">
+        <ForexFactoryNews />
+      </div>
+
+      {/* 4. Reviews & Experiences Section */}
       <div id="testimonials" className="scroll-mt-24">
         <ReviewsSection />
+      </div>
+
+      {/* 5. Trading Calculator (Placed directly UNDER the Reviews page) */}
+      <div id="calculator" className="scroll-mt-24">
+        <TradingCalculator />
       </div>
 
       {/* 4. Features Grid ("WHAT YOU GET") */}
@@ -338,65 +327,30 @@ export const HomeView: React.FC<HomeViewProps> = ({
       {/* 6. ABOUT Section */}
       <section id="about" className="px-3 sm:px-6 md:px-8 max-w-[1200px] mx-auto w-full scroll-mt-24">
         <div className="bg-white rounded-xl sm:rounded-2xl border border-slate-300 shadow-xs p-4 sm:p-8 md:p-10">
-          <div className="flex flex-col lg:flex-row gap-6 sm:gap-8 lg:gap-12 items-center mb-6 sm:mb-8">
-            {/* Left Column Story */}
-            <div className="flex-1 space-y-3 sm:space-y-4 text-left">
-              <span className="inline-block bg-slate-100 border border-slate-300 text-slate-900 font-inter text-[11px] sm:text-[12px] font-black px-2.5 py-1 rounded-md uppercase tracking-wider">
-                {settings.about?.badgeText || settings.about?.sectionBadge || "ABOUT US"}
-              </span>
-              <h2 className="font-manrope text-[24px] sm:text-[30px] md:text-[36px] font-black text-slate-900 leading-tight">
-                {settings.about?.headline || settings.about?.title || "Built by Traders. Driven by Discipline."}
-              </h2>
+          <div className="max-w-3xl mb-6 sm:mb-8 text-left space-y-3 sm:space-y-4">
+            <span className="inline-block bg-slate-100 border border-slate-300 text-slate-900 font-inter text-[11px] sm:text-[12px] font-black px-2.5 py-1 rounded-md uppercase tracking-wider">
+              {settings.about?.badgeText || settings.about?.sectionBadge || "ABOUT US"}
+            </span>
+            <h2 className="font-manrope text-[24px] sm:text-[30px] md:text-[36px] font-black text-slate-900 leading-tight">
+              {settings.about?.headline || settings.about?.title || "Built by Traders. Driven by Discipline."}
+            </h2>
+            <p className="font-inter text-[13.5px] sm:text-[15px] text-slate-600 leading-relaxed">
+              {settings.about?.storyParagraph1 || settings.about?.description || "U.S.H Forex was established with a singular objective: to cut through the hype of modern retail trading and provide structured, objective analysis grounded in institutional market structure."}
+            </p>
+            {settings.about?.storyParagraph2 && (
               <p className="font-inter text-[13.5px] sm:text-[15px] text-slate-600 leading-relaxed">
-                {settings.about?.storyParagraph1 || settings.about?.description || "U.S.H Forex was established with a singular objective: to cut through the hype of modern retail trading and provide structured, objective analysis grounded in institutional market structure."}
+                {settings.about?.storyParagraph2}
               </p>
-              {settings.about?.storyParagraph2 && (
-                <p className="font-inter text-[13.5px] sm:text-[15px] text-slate-600 leading-relaxed">
-                  {settings.about?.storyParagraph2}
-                </p>
-              )}
+            )}
 
-              <div className="pt-1.5 sm:pt-2 flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3">
-                <button
-                  onClick={onOpenTelegram}
-                  className="inline-flex items-center justify-center gap-2 bg-[#0053CF] hover:bg-[#0040A2] text-white px-5 py-2.5 rounded-lg font-inter text-[13.5px] font-bold transition-colors cursor-pointer"
-                >
-                  <Send className="w-4 h-4" />
-                  <span>Join Our Community</span>
-                </button>
-                <button
-                  onClick={onOpenBroker}
-                  className="inline-flex items-center justify-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-900 border border-slate-300 px-4 py-2.5 rounded-lg font-inter text-[13.5px] font-bold transition-colors cursor-pointer"
-                >
-                  <ShieldCheck className="w-4 h-4 text-[#0053CF]" />
-                  <span>Recommended Broker</span>
-                </button>
-              </div>
-            </div>
-
-            {/* Right Column Founder Image */}
-            <div className="flex-1 w-full max-w-md">
-              <div className="relative w-full aspect-[4/3] rounded-xl p-1.5 sm:p-2 bg-slate-100 border border-slate-300 shadow-sm overflow-hidden">
-                <img
-                  src={settings.about?.founderImageUrl || APP_IMAGES.founderPortrait}
-                  alt="U.S.H Leadership"
-                  className="w-full h-full object-cover rounded-lg"
-                  loading="lazy"
-                />
-                <div className="absolute bottom-3 left-3 right-3 bg-white/95 p-2.5 sm:p-3 rounded-lg border border-slate-300 shadow-sm flex items-center justify-between z-10">
-                  <div>
-                    <div className="font-manrope text-[13px] sm:text-[14px] font-black text-slate-900">
-                      {settings.about?.founderLeaderName || settings.about?.leadershipTitle || "USH Trading Desk"}
-                    </div>
-                    <div className="font-inter text-[11px] sm:text-[11.5px] text-slate-600 font-medium">
-                      {settings.about?.founderRole || settings.about?.leadershipRole || "Market Structure & Execution Lead"}
-                    </div>
-                  </div>
-                  <span className="text-[10px] bg-slate-100 border border-slate-300 text-slate-800 px-2 py-0.5 rounded font-black">
-                    VERIFIED
-                  </span>
-                </div>
-              </div>
+            <div className="pt-2 flex flex-col sm:flex-row items-stretch sm:items-center">
+              <button
+                onClick={onOpenTelegram}
+                className="inline-flex items-center justify-center gap-2 bg-[#0053CF] hover:bg-[#0040A2] text-white px-6 py-3 rounded-xl font-inter text-[14px] font-bold shadow-xs transition-colors cursor-pointer w-full sm:w-auto"
+              >
+                <Send className="w-4 h-4" />
+                <span>Join Our Community</span>
+              </button>
             </div>
           </div>
 
@@ -418,26 +372,6 @@ export const HomeView: React.FC<HomeViewProps> = ({
                 </p>
               </div>
             ))}
-          </div>
-
-          {/* Philosophy Strip */}
-          <div className="mt-5 sm:mt-7 bg-slate-50 rounded-xl p-4 sm:p-6 border border-slate-300 flex flex-col md:flex-row items-center gap-4 sm:gap-5">
-            <div className="flex-1 space-y-1 sm:space-y-1.5">
-              <h3 className="font-manrope text-[17px] sm:text-[20px] md:text-[22px] font-black text-slate-900">
-                {settings.about?.philosophyTitle || "The USH Trading Philosophy"}
-              </h3>
-              <p className="font-inter text-[13px] sm:text-[14px] text-slate-600 leading-relaxed">
-                {settings.about?.philosophyDescription || "Capital preservation precedes capital appreciation. We execute only when liquidity, market structure, and risk-reward dynamically align."}
-              </p>
-            </div>
-            <div className="w-full md:w-60 rounded-lg overflow-hidden border border-slate-300 bg-white shadow-2xs shrink-0">
-              <img
-                src={settings.about?.philosophyImageUrl || APP_IMAGES.philosophyDashboard}
-                alt="Philosophy Terminal"
-                className="w-full h-28 sm:h-32 object-cover"
-                loading="lazy"
-              />
-            </div>
           </div>
         </div>
       </section>

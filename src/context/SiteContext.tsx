@@ -5,12 +5,16 @@ import {
   FeatureItem, 
   Milestone, 
   PillarItem, 
-  FAQItem 
+  FAQItem,
+  InboxMessage 
 } from '../types';
 import { TESTIMONIALS, FAQS, COMMUNITY_FEATURES, MILESTONES, VALUES } from '../data/mockData';
 
 const SETTINGS_STORAGE_KEY = 'ush_site_settings_v2';
-const REVIEWS_STORAGE_KEY = 'ush_site_reviews_v2';
+const REVIEWS_STORAGE_KEY = 'ush_site_reviews_v3';
+const MESSAGES_STORAGE_KEY = 'ush_site_messages_v2';
+
+const INITIAL_SAMPLE_MESSAGES: InboxMessage[] = [];
 
 export const DEFAULT_SITE_SETTINGS: SiteSettings = {
   branding: {
@@ -269,6 +273,8 @@ interface SiteContextType {
   reviews: ReviewItem[];
   approvedReviews: ReviewItem[];
   pendingReviews: ReviewItem[];
+  messages: InboxMessage[];
+  unreadMessagesCount: number;
   isAdminOpen: boolean;
   openAdmin: () => void;
   closeAdmin: () => void;
@@ -280,6 +286,12 @@ interface SiteContextType {
   addReview: (review: Omit<ReviewItem, 'id' | 'status' | 'submittedAt'> & { status?: 'approved' | 'pending' | 'rejected' }) => { success: boolean; requiresApproval: boolean };
   updateReview: (id: string, updated: Partial<ReviewItem>) => void;
   toggleAutoApproveReviews: (val?: boolean) => void;
+  addInboxMessage: (messageData: Omit<InboxMessage, 'id' | 'submittedAt' | 'read' | 'status'> & { status?: 'new' | 'in_progress' | 'resolved'; adminNotes?: string }) => void;
+  markMessageRead: (id: string, read?: boolean) => void;
+  updateMessageStatus: (id: string, status: 'new' | 'in_progress' | 'resolved') => void;
+  deleteMessage: (id: string) => void;
+  addAdminNote: (id: string, note: string) => void;
+  clearAllMessages: () => void;
   exportSettingsJson: () => string;
   importSettingsJson: (jsonStr: string) => boolean;
 }
@@ -386,14 +398,32 @@ export const SiteProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const saved = localStorage.getItem(REVIEWS_STORAGE_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          return parsed;
+        if (Array.isArray(parsed)) {
+          const demoNames = ['Marcus Sterling', 'Elena Rostova', 'David Mwangi', 'Carlos Mendez', 'Sophia Chen', 'Tariq Al-Mansoor'];
+          const userOnly = parsed.filter((r: ReviewItem) => !demoNames.includes(r.name) && !['1', '2', '3', '4', '5', '6'].includes(r.id));
+          return userOnly;
         }
       }
     } catch (e) {
       console.warn('Could not parse saved reviews:', e);
     }
-    return TESTIMONIALS;
+    return [];
+  });
+
+  const [messages, setMessages] = useState<InboxMessage[]>(() => {
+    try {
+      const saved = localStorage.getItem(MESSAGES_STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          const realOnly = parsed.filter((m: InboxMessage) => m.id !== 'msg-1' && m.id !== 'msg-2');
+          return realOnly;
+        }
+      }
+    } catch (e) {
+      console.warn('Could not parse saved inbox messages:', e);
+    }
+    return INITIAL_SAMPLE_MESSAGES;
   });
 
   const [isAdminOpen, setIsAdminOpen] = useState(false);
@@ -414,6 +444,14 @@ export const SiteProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.error('Error saving reviews to localStorage:', e);
     }
   }, [reviews]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(MESSAGES_STORAGE_KEY, JSON.stringify(messages));
+    } catch (e) {
+      console.error('Error saving messages to localStorage:', e);
+    }
+  }, [messages]);
 
   const openAdmin = () => setIsAdminOpen(true);
   const closeAdmin = () => setIsAdminOpen(false);
@@ -441,9 +479,11 @@ export const SiteProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const resetSettings = () => {
     setSettings(DEFAULT_SITE_SETTINGS);
     setReviews(TESTIMONIALS);
+    setMessages(INITIAL_SAMPLE_MESSAGES);
     try {
       localStorage.removeItem(SETTINGS_STORAGE_KEY);
       localStorage.removeItem(REVIEWS_STORAGE_KEY);
+      localStorage.removeItem(MESSAGES_STORAGE_KEY);
     } catch (e) {
       console.error(e);
     }
@@ -505,8 +545,49 @@ export const SiteProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }));
   };
 
+  const unreadMessagesCount = messages.filter((m) => !m.read).length;
+
+  const addInboxMessage = (
+    messageData: Omit<InboxMessage, 'id' | 'submittedAt' | 'read' | 'status'> & { status?: 'new' | 'in_progress' | 'resolved'; adminNotes?: string }
+  ) => {
+    const newMsg: InboxMessage = {
+      ...messageData,
+      id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
+      submittedAt: new Date().toISOString().replace('T', ' ').slice(0, 16),
+      read: false,
+      status: messageData.status || 'new',
+    };
+    setMessages((prev) => [newMsg, ...prev]);
+  };
+
+  const markMessageRead = (id: string, read = true) => {
+    setMessages((prev) =>
+      prev.map((m) => (m.id === id ? { ...m, read } : m))
+    );
+  };
+
+  const updateMessageStatus = (id: string, status: 'new' | 'in_progress' | 'resolved') => {
+    setMessages((prev) =>
+      prev.map((m) => (m.id === id ? { ...m, status, read: status !== 'new' ? true : m.read } : m))
+    );
+  };
+
+  const deleteMessage = (id: string) => {
+    setMessages((prev) => prev.filter((m) => m.id !== id));
+  };
+
+  const addAdminNote = (id: string, note: string) => {
+    setMessages((prev) =>
+      prev.map((m) => (m.id === id ? { ...m, adminNotes: note } : m))
+    );
+  };
+
+  const clearAllMessages = () => {
+    setMessages([]);
+  };
+
   const exportSettingsJson = (): string => {
-    return JSON.stringify({ settings, reviews }, null, 2);
+    return JSON.stringify({ settings, reviews, messages }, null, 2);
   };
 
   const importSettingsJson = (jsonStr: string): boolean => {
@@ -517,6 +598,9 @@ export const SiteProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
       if (Array.isArray(parsed.reviews)) {
         setReviews(parsed.reviews);
+      }
+      if (Array.isArray(parsed.messages)) {
+        setMessages(parsed.messages);
       }
       return true;
     } catch (e) {
@@ -532,6 +616,8 @@ export const SiteProvider: React.FC<{ children: React.ReactNode }> = ({ children
         reviews,
         approvedReviews,
         pendingReviews,
+        messages,
+        unreadMessagesCount,
         isAdminOpen,
         openAdmin,
         closeAdmin,
@@ -543,6 +629,12 @@ export const SiteProvider: React.FC<{ children: React.ReactNode }> = ({ children
         addReview,
         updateReview,
         toggleAutoApproveReviews,
+        addInboxMessage,
+        markMessageRead,
+        updateMessageStatus,
+        deleteMessage,
+        addAdminNote,
+        clearAllMessages,
         exportSettingsJson,
         importSettingsJson,
       }}

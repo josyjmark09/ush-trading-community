@@ -23,9 +23,11 @@ import {
   BookOpen, 
   Database, 
   Sparkles,
-  MessageSquare
+  MessageSquare,
+  Inbox
 } from 'lucide-react';
 import { ReviewItem, FAQItem } from '../types';
+import { AdminInboxTab } from './AdminInboxTab';
 
 const COUNTRIES_LIST不易 = [
   { name: 'United Kingdom', code: 'gb' },
@@ -50,6 +52,8 @@ export const AdminModal: React.FC = () => {
   const {
     settings,
     reviews,
+    messages,
+    unreadMessagesCount,
     isAdminOpen,
     closeAdmin,
     updateSettings,
@@ -63,7 +67,7 @@ export const AdminModal: React.FC = () => {
     importSettingsJson,
   } = useSite();
 
-  const [activeTab, setActiveTab] = useState<'branding' | 'hero' | 'reviews' | 'features' | 'community' | 'broker' | 'about' | 'faqs' | 'social' | 'backup'>('branding');
+  const [activeTab, setActiveTab] = useState<'inbox' | 'branding' | 'hero' | 'reviews' | 'features' | 'community' | 'broker' | 'about' | 'faqs' | 'social' | 'backup'>('inbox');
   const [saveSuccessToast, setSaveSuccessToast] = useState(false);
 
   // Local draft state for settings to allow fine-grained live editing
@@ -315,6 +319,12 @@ export const AdminModal: React.FC = () => {
         {/* 2. Admin Navigation Tabs (Responsive Smooth-Scroll) */}
         <div className="bg-slate-50 border-b border-slate-200 px-2.5 sm:px-6 flex items-center gap-1 sm:gap-1.5 overflow-x-auto shrink-0 py-2 sm:py-2.5 scrollbar-none snap-x">
           {[
+            { 
+              id: 'inbox', 
+              label: `Inbox ${unreadMessagesCount > 0 ? `(${unreadMessagesCount})` : `(${messages.length})`}`, 
+              icon: Inbox, 
+              highlight: unreadMessagesCount > 0 
+            },
             { id: 'branding', label: 'Branding & Logo', icon: Palette },
             { id: 'hero', label: 'Hero & CTAs', icon: Sparkles },
             { 
@@ -354,6 +364,9 @@ export const AdminModal: React.FC = () => {
         {/* 3. Tab Content Body */}
         <div className="p-3.5 sm:p-6 md:p-8 overflow-y-auto flex-1 space-y-4 sm:space-y-6 text-slate-800">
           
+          {/* TAB 0: INBOX & MESSAGES */}
+          {activeTab === 'inbox' && <AdminInboxTab />}
+
           {/* TAB 1: BRANDING & LOGO */}
           {activeTab === 'branding' && (
             <div className="space-y-4 sm:space-y-6 max-w-3xl animate-in fade-in">

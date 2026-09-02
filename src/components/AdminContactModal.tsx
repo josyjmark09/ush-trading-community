@@ -6,7 +6,7 @@ import {
   Check, 
   Send,
   CheckCircle2, 
-  Headphones
+  Phone
 } from 'lucide-react';
 import { useSite } from '../context/SiteContext';
 
@@ -21,7 +21,7 @@ export const AdminContactModal: React.FC<AdminContactModalProps> = ({
   onClose,
   defaultAccountId = '',
 }) => {
-  const { settings } = useSite();
+  const { settings, addInboxMessage } = useSite();
   const [copiedEmail, setCopiedEmail] = useState(false);
   const [copiedPartnerCode, setCopiedPartnerCode] = useState(false);
   
@@ -63,6 +63,17 @@ export const AdminContactModal: React.FC<AdminContactModalProps> = ({
 
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!formData.name.trim() || !formData.email.trim() || !formData.message.trim()) return;
+
+    addInboxMessage({
+      name: formData.name.trim(),
+      email: formData.email.trim(),
+      accountId: formData.accountId.trim(),
+      topic: 'Exness IB & VIP Setup Support',
+      message: formData.message.trim(),
+      source: 'admin_support',
+    });
+
     setFormSubmitted(true);
     setTimeout(() => {
       setFormSubmitted(false);
@@ -83,7 +94,7 @@ export const AdminContactModal: React.FC<AdminContactModalProps> = ({
         <div className="flex items-start justify-between pb-2.5 border-b border-slate-200 mb-3">
           <div className="flex items-center gap-2">
             <div className="w-7 h-7 rounded-md bg-slate-100 flex items-center justify-center text-[#0053CF] shrink-0">
-              <Headphones className="w-3.5 h-3.5" />
+              <Phone className="w-3.5 h-3.5" />
             </div>
             <div>
               <h2 className="font-manrope text-[15px] sm:text-[16px] font-black text-slate-900 leading-tight">

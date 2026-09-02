@@ -58,8 +58,9 @@ function MainApp() {
     const sectionMap: Partial<Record<NavTab, string>> = {
       home: 'hero',
       about: 'about',
-      broker: 'broker',
+      'forex-news': 'forex-news',
       testimonials: 'testimonials',
+      broker: 'broker',
       faq: 'faq',
     };
 

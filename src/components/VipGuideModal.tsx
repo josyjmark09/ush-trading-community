@@ -15,7 +15,7 @@ import {
   ArrowRight,
   Info,
   Mail,
-  Headphones
+  Phone
 } from 'lucide-react';
 import { useSite } from '../context/SiteContext';
 import { AdminContactModal } from './AdminContactModal';
@@ -31,7 +31,7 @@ export const VipGuideModal: React.FC<VipGuideModalProps> = ({
   onClose,
   defaultTab = 'new'
 }) => {
-  const { settings } = useSite();
+  const { settings, addInboxMessage } = useSite();
   const [activeTab, setActiveTab] = useState<'new' | 'existing'>(defaultTab);
   const [copiedCode, setCopiedCode] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
@@ -67,15 +67,25 @@ export const VipGuideModal: React.FC<VipGuideModalProps> = ({
 
   const handleVerifySubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!accountId.trim()) return;
     setSubmittedId(true);
     
-    // Construct telegram message URL with pre-filled account ID
-    const msg = encodeURIComponent(
-      `Hello Admin! I have registered under your partner code (${partnerCode}). My Exness Account ID is: ${accountId.trim()}. Please add me to the Free VIP Group!`
-    );
-    const cleanTgUrl = telegramUrl.replace(/\/+$/, '');
-    const finalUrl = `${cleanTgUrl}?text=${msg}`;
+    let finalUrl = telegramUrl;
+    if (accountId.trim()) {
+      addInboxMessage({
+        name: 'VIP Trader',
+        email: 'vip_applicant@telegram.community',
+        accountId: accountId.trim(),
+        topic: 'VIP Access with Exness ID',
+        message: `Trader submitted Exness ID: ${accountId.trim()} via VIP Modal.`,
+        source: 'vip_onboarding',
+      });
+
+      const msg = encodeURIComponent(
+        `Hello Admin! I have registered under your partner code (${partnerCode}). My Exness Account ID is: ${accountId.trim()}. Please add me to the Free VIP Group!`
+      );
+      const cleanTgUrl = telegramUrl.replace(/\/+$/, '');
+      finalUrl = `${cleanTgUrl}?text=${msg}`;
+    }
     
     setTimeout(() => {
       window.open(finalUrl, '_blank', 'noopener,noreferrer');
@@ -98,7 +108,7 @@ export const VipGuideModal: React.FC<VipGuideModalProps> = ({
         </button>
 
         {/* Modal Header */}
-        <div className="flex flex-col items-start gap-1.5 mb-4 sm:mb-5 pr-8">
+        <div className="flex flex-col items-start gap-1.5 mb-3 sm:mb-4 pr-8">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-slate-100 border border-slate-300 rounded-md text-[11px] sm:text-[12px] font-black text-slate-900">
             <Sparkles className="w-3.5 h-3.5 text-[#0053CF]" />
             <span>100% FREE VIP COMMUNITY ACCESS</span>
@@ -109,8 +119,30 @@ export const VipGuideModal: React.FC<VipGuideModalProps> = ({
           </h2>
 
           <p className="font-inter text-[13px] sm:text-[14px] text-slate-600 leading-relaxed">
-            Follow the instructions below to join our free VIP group, for both new and already existing Exness users.
+            Gain immediate access to trade setups. Opening an Exness broker account is completely optional.
           </p>
+        </div>
+
+        {/* DIRECT TELEGRAM CTA BANNER */}
+        <div className="w-full bg-[#0053CF] text-white rounded-xl p-3.5 sm:p-4 shadow-sm border border-blue-600 mb-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div className="space-y-0.5 text-center sm:text-left">
+            <div className="font-manrope font-black text-[15px] sm:text-[16px]">
+              Direct Access to Telegram Channel
+            </div>
+            <p className="text-[12px] text-blue-100 font-inter">
+              No registration needed. Exness account opening is optional.
+            </p>
+          </div>
+
+          <a
+            href={telegramUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-white hover:bg-slate-100 text-[#0053CF] font-inter font-black text-[13px] rounded-lg shadow-sm transition-all cursor-pointer shrink-0 whitespace-nowrap"
+          >
+            <Send className="w-3.5 h-3.5 text-[#0053CF]" />
+            <span>Proceed to Telegram Channel</span>
+          </a>
         </div>
 
         {/* User Type Switcher Tabs */}
@@ -223,11 +255,11 @@ export const VipGuideModal: React.FC<VipGuideModalProps> = ({
                   3
                 </div>
                 <h3 className="font-manrope font-black text-[15px] sm:text-[16px] text-slate-900">
-                  Submit Account ID & Access Free VIP Group
+                  Step 3: Proceed to Telegram Channel
                 </h3>
               </div>
               <p className="text-[13px] text-slate-600 font-inter">
-                Enter your Exness Account ID below to get direct VIP channel access from our admin:
+                Enter your Exness Account ID (optional) and click below to proceed to the Telegram channel:
               </p>
 
               {/* Verification Form */}
@@ -235,8 +267,7 @@ export const VipGuideModal: React.FC<VipGuideModalProps> = ({
                 <div className="flex flex-col sm:flex-row gap-2">
                   <input
                     type="text"
-                    required
-                    placeholder="Enter your Exness Account Number (e.g. 19284712)"
+                    placeholder="Exness Account ID (Optional - e.g. 19284712)"
                     value={accountId}
                     onChange={(e) => setAccountId(e.target.value)}
                     className="flex-1 px-3 py-2 bg-white border border-slate-300 rounded-lg text-[13px] font-inter focus:outline-hidden focus:border-[#0053CF]"
@@ -246,13 +277,13 @@ export const VipGuideModal: React.FC<VipGuideModalProps> = ({
                     className="flex items-center justify-center gap-2 px-4 py-2 bg-[#0053CF] hover:bg-[#0040A2] text-white font-inter font-bold text-[13px] rounded-lg transition-colors shadow-2xs cursor-pointer shrink-0"
                   >
                     <Send className="w-3.5 h-3.5" />
-                    <span>Get VIP Access</span>
+                    <span>Proceed to Telegram Channel</span>
                   </button>
                 </div>
                 {submittedId && (
                   <p className="text-[12px] text-emerald-700 font-bold flex items-center gap-1.5">
                     <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                    Opening Telegram to send your account ID to admin...
+                    Opening Telegram channel...
                   </p>
                 )}
               </form>
@@ -406,30 +437,32 @@ export const VipGuideModal: React.FC<VipGuideModalProps> = ({
             {/* Step 5 Verification */}
             <div className="p-4 rounded-xl bg-slate-50 border border-slate-300 space-y-2.5">
               <h4 className="font-manrope font-black text-[14px] text-slate-900">
-                Step 5: Send Account Number for VIP Verification
+                Step 5: Proceed to Telegram Channel
               </h4>
+              <p className="text-[13px] text-slate-600 font-inter">
+                Enter your Exness Account ID (optional) and click below to join the channel:
+              </p>
               <form onSubmit={handleVerifySubmit} className="space-y-2">
                 <div className="flex flex-col sm:flex-row gap-2">
                   <input
                     type="text"
-                    required
-                    placeholder="Enter Exness Account ID after switching"
+                    placeholder="Exness Account ID after switching (Optional)"
                     value={accountId}
                     onChange={(e) => setAccountId(e.target.value)}
                     className="flex-1 px-3 py-2 bg-white border border-slate-300 rounded-lg text-[13px] font-inter focus:outline-hidden focus:border-[#0053CF]"
                   />
                   <button
                     type="submit"
-                    className="flex items-center justify-center gap-2 px-4 py-2 bg-[#0053CF] hover:bg-[#0040A2] text-white font-inter font-bold text-[13px] rounded-lg transition-colors shadow-2xs cursor-pointer shrink-0"
+                    className="flex items-center justify-center gap-2 px-5 py-2.5 bg-[#0053CF] hover:bg-[#0040A2] text-white font-inter font-bold text-[13px] rounded-lg transition-colors shadow-2xs cursor-pointer shrink-0"
                   >
                     <Send className="w-3.5 h-3.5" />
-                    <span>Confirm & Get VIP Link</span>
+                    <span>Proceed to Telegram Channel</span>
                   </button>
                 </div>
                 {submittedId && (
                   <p className="text-[12px] text-emerald-700 font-bold flex items-center gap-1.5">
                     <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                    Opening Telegram to send your account ID to admin...
+                    Opening Telegram channel...
                   </p>
                 )}
               </form>

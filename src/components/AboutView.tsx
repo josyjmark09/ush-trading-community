@@ -58,39 +58,11 @@ export const AboutView: React.FC<AboutViewProps> = ({
             <div className="pt-1 sm:pt-2 flex flex-col sm:flex-row gap-2.5 sm:gap-3">
               <button
                 onClick={onOpenTelegram}
-                className="inline-flex items-center justify-center gap-2 bg-[#0053CF] hover:bg-[#0040A2] text-white px-5 sm:px-6 py-2.5 sm:py-3 rounded-lg font-inter text-[13.5px] sm:text-[14px] font-bold shadow-xs transition-colors cursor-pointer"
+                className="inline-flex items-center justify-center gap-2 bg-[#0053CF] hover:bg-[#0040A2] text-white px-5 sm:px-6 py-2.5 sm:py-3 rounded-lg font-inter text-[13.5px] sm:text-[14px] font-bold shadow-xs transition-colors cursor-pointer w-full sm:w-auto"
               >
                 <Send className="w-4 h-4" />
-                <span>Join Free VIP Group</span>
+                <span>Join Our Community</span>
               </button>
-              <button
-                onClick={() => setActiveTab('broker')}
-                className="inline-flex items-center justify-center gap-2 bg-white hover:bg-slate-100 text-slate-900 border border-slate-300 px-5 sm:px-6 py-2.5 sm:py-3 rounded-lg font-inter text-[13.5px] sm:text-[14px] font-bold transition-colors cursor-pointer shadow-2xs"
-              >
-                <ShieldCheck className="w-4 h-4 text-[#0053CF]" />
-                <span>Recommended Broker</span>
-              </button>
-            </div>
-          </div>
-
-          {/* Right Column Founder Image */}
-          <div className="flex-1 w-full max-w-lg">
-            <div className="relative w-full aspect-[4/3] rounded-xl p-1.5 sm:p-2 bg-slate-100 border border-slate-300 shadow-sm overflow-hidden">
-              <img
-                src={APP_IMAGES.founderPortrait}
-                alt="U.S.H Forex Founder in Modern Corporate Setting"
-                className="w-full h-full object-cover rounded-lg"
-                loading="eager"
-              />
-              <div className="absolute bottom-3 left-3 right-3 bg-white/95 p-2.5 sm:p-3 rounded-lg border border-slate-300 shadow-sm flex items-center justify-between z-10">
-                <div>
-                  <div className="font-manrope text-[13px] sm:text-[14px] font-black text-slate-900">U.S.H Leadership</div>
-                  <div className="font-inter text-[11px] sm:text-[11.5px] text-slate-600 font-medium">Systematic Forex Strategy & Community</div>
-                </div>
-                <span className="text-[10px] sm:text-[10.5px] bg-slate-100 border border-slate-300 text-slate-800 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded font-black">
-                  VERIFIED
-                </span>
-              </div>
             </div>
           </div>
         </div>
@@ -115,60 +87,6 @@ export const AboutView: React.FC<AboutViewProps> = ({
               </p>
             </div>
           ))}
-        </div>
-      </section>
-
-      {/* Trading Philosophy Section */}
-      <section className="px-3 sm:px-6 md:px-8 max-w-[1200px] mx-auto w-full">
-        <div className="bg-slate-50 rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 border border-slate-300 shadow-xs">
-          <div className="flex flex-col md:flex-row items-center gap-6 sm:gap-8 md:gap-10">
-            {/* Chart screen image */}
-            <div className="flex-1 w-full">
-              <div className="rounded-xl overflow-hidden border border-slate-300 bg-white shadow-2xs p-1">
-                <img
-                  src={APP_IMAGES.philosophyDashboard}
-                  alt="U.S.H Forex Market Analysis Terminal and Chart Structure"
-                  className="w-full h-auto object-cover rounded-lg"
-                  loading="lazy"
-                />
-              </div>
-            </div>
-
-            {/* Philosophy description */}
-            <div className="flex-1 space-y-2.5 sm:space-y-3.5">
-              <h2 className="font-manrope text-[22px] sm:text-[28px] md:text-[32px] font-black text-slate-900 leading-tight">
-                Our Trading Philosophy
-              </h2>
-              <p className="font-inter text-[15px] text-slate-600 leading-relaxed">
-                We believe that consistent trading results come from a structured approach to risk management and market structure.
-              </p>
-
-              <ul className="space-y-2.5 pt-1 font-inter text-[14px] text-slate-700 font-medium">
-                <li className="flex items-start gap-2.5">
-                  <CheckCircle className="w-4 h-4 text-[#0053CF] shrink-0 mt-0.5" />
-                  <span>Focus on high-probability setups over frequency.</span>
-                </li>
-                <li className="flex items-start gap-2.5">
-                  <CheckCircle className="w-4 h-4 text-[#0053CF] shrink-0 mt-0.5" />
-                  <span>Strict risk management parameters to protect capital.</span>
-                </li>
-                <li className="flex items-start gap-2.5">
-                  <CheckCircle className="w-4 h-4 text-[#0053CF] shrink-0 mt-0.5" />
-                  <span>Continuous adaptation to changing market conditions.</span>
-                </li>
-              </ul>
-
-              <div className="pt-2">
-                <button
-                  onClick={onOpenTelegram}
-                  className="inline-flex items-center gap-2 text-[#0053CF] font-bold text-[14px] hover:text-[#0040A2] cursor-pointer"
-                >
-                  <span>See our daily market prep write-ups in Telegram</span>
-                  <ChevronRight className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-          </div>
         </div>
       </section>
 

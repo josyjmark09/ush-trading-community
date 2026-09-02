@@ -1,4 +1,4 @@
-export type NavTab = 'home' | 'about' | 'broker' | 'testimonials' | 'faq' | 'vip-guide';
+export type NavTab = 'home' | 'about' | 'forex-news' | 'testimonials' | 'broker' | 'faq' | 'vip-guide';
 
 export interface Milestone {
   year: string;
@@ -50,6 +50,20 @@ export interface ReviewItem {
 }
 
 export type TestimonialItem = ReviewItem;
+
+export interface InboxMessage {
+  id: string;
+  name: string;
+  email: string;
+  topic?: string;
+  accountId?: string;
+  message: string;
+  submittedAt: string;
+  read: boolean;
+  status: 'new' | 'in_progress' | 'resolved';
+  source: 'contact_form' | 'admin_support' | 'vip_onboarding';
+  adminNotes?: string;
+}
 
 export interface FeedbackSubmission {
   name: string;

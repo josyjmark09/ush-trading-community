@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { X, Mail, CheckCircle, AlertTriangle } from 'lucide-react';
+import { X, Phone, Mail, CheckCircle, AlertTriangle } from 'lucide-react';
+import { useSite } from '../context/SiteContext';
 
 interface ContactModalProps {
   isOpen: boolean;
@@ -8,6 +9,7 @@ interface ContactModalProps {
 }
 
 export const ContactModal: React.FC<ContactModalProps> = ({ isOpen, type, onClose }) => {
+  const { addInboxMessage, settings } = useSite();
   const [submitted, setSubmitted] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
@@ -20,9 +22,26 @@ export const ContactModal: React.FC<ContactModalProps> = ({ isOpen, type, onClos
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!formData.name.trim() || !formData.email.trim() || !formData.message.trim()) return;
+
+    // Save directly to Admin Inbox via SiteContext
+    addInboxMessage({
+      name: formData.name.trim(),
+      email: formData.email.trim(),
+      topic: formData.topic,
+      message: formData.message.trim(),
+      source: 'contact_form',
+    });
+
     setSubmitted(true);
     setTimeout(() => {
       setSubmitted(false);
+      setFormData({
+        name: '',
+        email: '',
+        topic: 'General Inquiry',
+        message: '',
+      });
       onClose();
     }, 2500);
   };
@@ -45,12 +64,16 @@ export const ContactModal: React.FC<ContactModalProps> = ({ isOpen, type, onClos
         {type === 'contact' ? (
           <div>
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-lg bg-slate-100 border border-slate-300 flex items-center justify-center text-[#0053CF]">
-                <Mail className="w-5 h-5" />
+              <div className="w-10 h-10 rounded-lg bg-blue-50 border border-blue-200 flex items-center justify-center text-[#0053CF]">
+                <Phone className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="font-manrope text-[19px] font-black text-slate-900">Contact U.S.H Forex</h3>
-                <p className="font-inter text-[13px] text-slate-600">Get in touch with our team</p>
+                <h3 className="font-manrope text-[19px] font-black text-slate-900">
+                  Customer Care & Support
+                </h3>
+                <p className="font-inter text-[13px] text-slate-600">
+                  {settings.branding.brandName || 'Community of Traders'} Desk
+                </p>
               </div>
             </div>
 

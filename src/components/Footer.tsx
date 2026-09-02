@@ -129,10 +129,26 @@ export const Footer: React.FC<FooterProps> = ({
               </li>
               <li>
                 <button
-                  onClick={() => handleNav('testimonials')}
+                  onClick={() => handleNav('forex-news', 'forex-news')}
+                  className="text-slate-600 hover:text-slate-900 transition-colors cursor-pointer font-medium"
+                >
+                  Forex Factory News
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => handleNav('testimonials', 'testimonials')}
                   className="text-slate-600 hover:text-slate-900 transition-colors cursor-pointer font-medium"
                 >
                   Reviews & Experiences
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => handleNav('testimonials', 'calculator')}
+                  className="text-slate-600 hover:text-slate-900 transition-colors cursor-pointer font-medium"
+                >
+                  Trading Calculator
                 </button>
               </li>
             </ul>

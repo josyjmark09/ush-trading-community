@@ -38,10 +38,10 @@ export const ExnessLogo: React.FC<ExnessLogoProps> = ({
   showSubtitle = true,
 }) => {
   const imgHeightMap = {
-    sm: 'h-6 sm:h-7',
-    md: 'h-8 sm:h-9',
-    lg: 'h-10 sm:h-12',
-    xl: 'h-12 sm:h-15',
+    sm: 'h-7 sm:h-8',
+    md: 'h-9 sm:h-10',
+    lg: 'h-11 sm:h-13',
+    xl: 'h-14 sm:h-16',
   };
 
   return (
@@ -50,7 +50,7 @@ export const ExnessLogo: React.FC<ExnessLogoProps> = ({
       <img
         src={exnessLogoUploadedImg}
         alt="Exness"
-        className={`${imgHeightMap[size]} w-auto max-w-[200px] sm:max-w-[260px] object-contain shrink-0`}
+        className={`${imgHeightMap[size]} w-auto max-w-[220px] sm:max-w-[280px] object-contain shrink-0 rounded-sm`}
         loading="eager"
       />
 
@@ -72,8 +72,8 @@ export const ExnessBrandCard: React.FC<{ className?: string }> = ({ className = 
   return (
     <div className={`w-full h-full min-h-[190px] sm:min-h-[220px] rounded-2xl overflow-hidden border border-[#E2E8F0] shadow-sm bg-slate-900 flex items-center justify-center ${className}`}>
       <img
-        src={exnessThumbnailImg}
-        alt="Exness Platform"
+        src={exnessLogoUploadedImg}
+        alt="Exness"
         className="w-full h-full object-cover object-center transition-transform duration-300 hover:scale-[1.02]"
         loading="lazy"
       />
