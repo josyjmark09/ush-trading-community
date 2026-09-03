@@ -6,8 +6,7 @@ import {
   Download, 
   Share2, 
   Check, 
-  Mail,
-  Copy
+  Loader2
 } from 'lucide-react';
 import { useSite } from '../context/SiteContext';
 import ushLogoPng from './ush logo.png';
@@ -29,6 +28,7 @@ export const QuoteGallerySlider: React.FC<QuoteGallerySliderProps> = ({
 
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
+  const [sharingId, setSharingId] = useState<string | null>(null);
 
   const quotes = gallery.quotes || [];
   // Duplicate array so it continuously loops with zero seam
@@ -52,7 +52,7 @@ export const QuoteGallerySlider: React.FC<QuoteGallerySliderProps> = ({
 
     let animationFrameId: number;
     let lastTime = performance.now();
-    const speedPixelsPerSecond = 42; // lively, legible, continuous gliding
+    const speedPixelsPerSecond = 42; // lively, continuous gliding
 
     const step = (now: number) => {
       const delta = (now - lastTime) / 1000;
@@ -78,155 +78,281 @@ export const QuoteGallerySlider: React.FC<QuoteGallerySliderProps> = ({
     };
   }, [quotes.length]);
 
+  // Helper function to draw rounded rectangle on Canvas
+  const drawRoundRect = (
+    ctx: CanvasRenderingContext2D,
+    x: number,
+    y: number,
+    w: number,
+    h: number,
+    r: number
+  ) => {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+    ctx.closePath();
+  };
+
+  // Generate High-Resolution 1080x1080 Quote Card Canvas
+  // Redesigned to 1:1 match the luxury card on the website with deep sapphire studio atmosphere
+  const generateCardCanvas = async (item: QuoteItem, index: number) => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 1080;
+    canvas.height = 1080;
+    const ctx = canvas.getContext('2d');
+
+    if (!ctx) return null;
+
+    // 1. Luxury Royal Sapphire Studio Atmosphere
+    const bgGrad = ctx.createLinearGradient(0, 0, 1080, 1080);
+    bgGrad.addColorStop(0, '#040B18');
+    bgGrad.addColorStop(0.3, '#081D3E');
+    bgGrad.addColorStop(0.65, '#002B66');
+    bgGrad.addColorStop(1, '#030812');
+    ctx.fillStyle = bgGrad;
+    ctx.fillRect(0, 0, 1080, 1080);
+
+    // 2. Soft Ambient Radial Glow
+    const glowGrad = ctx.createRadialGradient(540, 520, 60, 540, 520, 560);
+    glowGrad.addColorStop(0, 'rgba(0, 83, 207, 0.35)');
+    glowGrad.addColorStop(0.5, 'rgba(16, 185, 129, 0.16)');
+    glowGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+    ctx.fillStyle = glowGrad;
+    ctx.fillRect(0, 0, 1080, 1080);
+
+    // 3. Luxury Outer Studio Border Trims
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.10)';
+    ctx.lineWidth = 1.5;
+    ctx.strokeRect(36, 36, 1008, 1008);
+
+    ctx.strokeStyle = 'rgba(0, 83, 207, 0.35)';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(46, 46, 988, 988);
+
+    // Header Tagline in Studio Frame
+    ctx.textAlign = 'center';
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+    ctx.font = '800 13px system-ui, -apple-system, sans-serif';
+    ctx.fillText('USH COMMUNITY OF TRADERS  •  OFFICIAL TRADER CREED', 540, 82);
+
+    // 4. Dimensions of the Centered Luxury Card
+    const cardW = 900;
+    const cardH = 800;
+    const cardX = 90;
+    const cardY = 125;
+    const cornerR = 36;
+
+    // Layer A: Signature Emerald Offset Accent Layer (1:1 with website)
+    const offX = 14;
+    const offY = 14;
+    const greenGrad = ctx.createLinearGradient(
+      cardX + offX, 
+      cardY + offY, 
+      cardX + offX + cardW, 
+      cardY + offY + cardH
+    );
+    greenGrad.addColorStop(0, '#059669');
+    greenGrad.addColorStop(1, '#10B981');
+    ctx.fillStyle = greenGrad;
+    ctx.globalAlpha = 0.88;
+    drawRoundRect(ctx, cardX + offX, cardY + offY, cardW, cardH, cornerR);
+    ctx.fill();
+    ctx.globalAlpha = 1.0;
+
+    // Layer B: Main Luxury White Card with Soft Radial Shader
+    ctx.save();
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.45)';
+    ctx.shadowBlur = 36;
+    ctx.shadowOffsetY = 16;
+    drawRoundRect(ctx, cardX, cardY, cardW, cardH, cornerR);
+    const cardGrad = ctx.createRadialGradient(
+      cardX + cardW / 2, 
+      cardY + 80, 
+      40, 
+      cardX + cardW / 2, 
+      cardY + cardH / 2, 
+      cardW * 0.7
+    );
+    cardGrad.addColorStop(0, '#FFFFFF');
+    cardGrad.addColorStop(0.6, '#FCFDFD');
+    cardGrad.addColorStop(1, '#F0F7F3');
+    ctx.fillStyle = cardGrad;
+    ctx.fill();
+
+    ctx.strokeStyle = 'rgba(226, 232, 240, 0.95)';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    ctx.restore();
+
+    // 5. Card Header: B&W Official Logo + Community of Traders + Card Number
+    const displayNum = (item.number || (index % quotes.length) + 1).toString().padStart(2, '0');
+    const headerY = cardY + 48;
+
+    try {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      await new Promise<void>((resolve) => {
+        img.onload = () => resolve();
+        img.onerror = () => resolve();
+        img.src = effectiveLogo;
+      });
+
+      if (img.complete && img.naturalWidth > 0) {
+        ctx.save();
+        ctx.filter = 'grayscale(100%) contrast(140%) brightness(95%)';
+        const targetH = 58;
+        const targetW = (img.naturalWidth / img.naturalHeight) * targetH;
+        const drawW = Math.min(targetW, 110);
+        ctx.drawImage(img, cardX + 50, headerY, drawW, targetH);
+        ctx.restore();
+
+        ctx.textAlign = 'left';
+        ctx.fillStyle = '#0F172A';
+        ctx.font = '900 28px system-ui, -apple-system, sans-serif';
+        ctx.fillText(brandName, cardX + 50 + drawW + 18, headerY + 34);
+
+        ctx.fillStyle = '#64748B';
+        ctx.font = '700 12px system-ui, -apple-system, sans-serif';
+        ctx.fillText('OFFICIAL TRADER CREED', cardX + 50 + drawW + 18, headerY + 54);
+      } else {
+        ctx.textAlign = 'left';
+        ctx.fillStyle = '#0F172A';
+        ctx.font = '900 28px system-ui, -apple-system, sans-serif';
+        ctx.fillText(brandName, cardX + 50, headerY + 36);
+      }
+    } catch {
+      ctx.textAlign = 'left';
+      ctx.fillStyle = '#0F172A';
+      ctx.font = '900 28px system-ui, -apple-system, sans-serif';
+      ctx.fillText(brandName, cardX + 50, headerY + 36);
+    }
+
+    // Top-Right Luxury Number Badge
+    const badgeW = 76;
+    const badgeH = 36;
+    const badgeX = cardX + cardW - 50 - badgeW;
+    const badgeY = headerY + 10;
+    drawRoundRect(ctx, badgeX, badgeY, badgeW, badgeH, 8);
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fill();
+    ctx.strokeStyle = '#E2E8F0';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#334155';
+    ctx.font = '700 17px "Courier New", monospace';
+    ctx.fillText(displayNum, badgeX + badgeW / 2, badgeY + 24);
+
+    // 6. Azure Quotation Mark Icon Container (1:1 with site)
+    const quoteIconX = cardX + 50;
+    const quoteIconY = headerY + 84;
+    drawRoundRect(ctx, quoteIconX, quoteIconY, 46, 46, 12);
+    ctx.fillStyle = '#EFF6FF';
+    ctx.fill();
+    ctx.strokeStyle = '#DBEAFE';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#0053CF';
+    ctx.font = '900 36px Georgia, serif';
+    ctx.fillText('“', quoteIconX + 23, quoteIconY + 35);
+
+    // 7. Main Quote Text (Centered & Balanced)
+    ctx.fillStyle = '#0F172A';
+    ctx.font = '800 38px system-ui, -apple-system, sans-serif';
+    ctx.textAlign = 'center';
+
+    const words = item.quote.split(' ');
+    let line = '';
+    const lines: string[] = [];
+    const maxTextW = 780;
+
+    for (let n = 0; n < words.length; n++) {
+      const testLine = line + words[n] + ' ';
+      const metrics = ctx.measureText(testLine);
+      if (metrics.width > maxTextW && n > 0) {
+        lines.push(line);
+        line = words[n] + ' ';
+      } else {
+        line = testLine;
+      }
+    }
+    lines.push(line);
+
+    const lineHeight = 58;
+    const quoteCenterY = cardY + 440;
+    const startY = quoteCenterY - ((lines.length - 1) * lineHeight) / 2;
+    for (let i = 0; i < lines.length; i++) {
+      const isFirst = i === 0;
+      const isLast = i === lines.length - 1;
+      let textToRender = lines[i].trim();
+      if (isFirst && !textToRender.startsWith('“') && !textToRender.startsWith('"')) {
+        textToRender = '“' + textToRender;
+      }
+      if (isLast && !textToRender.endsWith('”') && !textToRender.endsWith('"')) {
+        textToRender = textToRender + '”';
+      }
+      ctx.fillText(textToRender, cardX + cardW / 2, startY + i * lineHeight);
+    }
+
+    // 8. Elegant Divider Line
+    const divY = cardY + cardH - 126;
+    ctx.strokeStyle = 'rgba(226, 232, 240, 0.9)';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(cardX + 50, divY);
+    ctx.lineTo(cardX + cardW - 50, divY);
+    ctx.stroke();
+
+    // 9. Footer: Author "USH Community of Traders" & Verified Channel
+    const footerY = divY + 44;
+    ctx.textAlign = 'left';
+    ctx.fillStyle = '#0F172A';
+    ctx.font = '900 23px system-ui, -apple-system, sans-serif';
+    ctx.fillText('USH Community of Traders', cardX + 50, footerY);
+
+    ctx.fillStyle = '#0053CF';
+    ctx.font = '700 15px "Courier New", monospace';
+    ctx.fillText(targetEmail, cardX + 50, footerY + 24);
+
+    // Right Footer Pill: Telegram Verified Channel
+    const tgPillW = 270;
+    const tgPillH = 38;
+    const tgPillX = cardX + cardW - 50 - tgPillW;
+    const tgPillY = footerY - 16;
+    drawRoundRect(ctx, tgPillX, tgPillY, tgPillW, tgPillH, 19);
+    ctx.fillStyle = '#F8FAFC';
+    ctx.fill();
+    ctx.strokeStyle = '#CBD5E1';
+    ctx.lineWidth = 1.2;
+    ctx.stroke();
+
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#0053CF';
+    ctx.font = '700 13px system-ui, -apple-system, sans-serif';
+    ctx.fillText('Official Telegram Community', tgPillX + tgPillW / 2, tgPillY + 24);
+
+    return { canvas, displayNum };
+  };
+
   // High-Resolution 1080x1080 Canvas Download
   const handleDownloadCard = async (item: QuoteItem, index: number) => {
     const cardId = item.id || `quote-${index}`;
     setDownloadingId(cardId);
 
     try {
-      const canvas = document.createElement('canvas');
-      canvas.width = 1080;
-      canvas.height = 1080;
-      const ctx = canvas.getContext('2d');
-
-      if (!ctx) {
+      const generated = await generateCardCanvas(item, index);
+      if (!generated) {
         showToast('Unable to generate card image');
-        setDownloadingId(null);
         return;
       }
 
-      // 1. Luxury Dark Obsidian / Emerald Slate Background
-      const bgGrad = ctx.createLinearGradient(0, 0, 1080, 1080);
-      bgGrad.addColorStop(0, '#090E17');
-      bgGrad.addColorStop(0.45, '#0E1726');
-      bgGrad.addColorStop(1, '#080C14');
-      ctx.fillStyle = bgGrad;
-      ctx.fillRect(0, 0, 1080, 1080);
-
-      // 2. Soft Ambient Radial Glow
-      const glowGrad = ctx.createRadialGradient(540, 480, 60, 540, 480, 520);
-      glowGrad.addColorStop(0, 'rgba(16, 185, 129, 0.16)');
-      glowGrad.addColorStop(0.5, 'rgba(0, 83, 207, 0.10)');
-      glowGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
-      ctx.fillStyle = glowGrad;
-      ctx.fillRect(0, 0, 1080, 1080);
-
-      // 3. Double Luxury Border Frame
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
-      ctx.lineWidth = 2;
-      ctx.strokeRect(48, 48, 984, 984);
-
-      ctx.strokeStyle = 'rgba(212, 175, 55, 0.45)';
-      ctx.lineWidth = 1;
-      ctx.strokeRect(60, 60, 960, 960);
-
-      // 4. Header: Draw Official Logo in Black & White with "Community of Traders"
-      const displayNum = (item.number || (index % quotes.length) + 1).toString().padStart(2, '0');
-
-      // Attempt to load official logo image onto canvas
-      try {
-        const img = new Image();
-        img.crossOrigin = 'anonymous';
-        await new Promise<void>((resolve) => {
-          img.onload = () => resolve();
-          img.onerror = () => resolve();
-          img.src = effectiveLogo;
-        });
-
-        if (img.complete && img.naturalWidth > 0) {
-          ctx.save();
-          // Black and white high-contrast filter on canvas
-          ctx.filter = 'grayscale(100%) contrast(140%) brightness(110%)';
-          const targetH = 60;
-          const targetW = (img.naturalWidth / img.naturalHeight) * targetH;
-          const drawW = Math.min(targetW, 110);
-          ctx.drawImage(img, 80, 100, drawW, targetH);
-          ctx.restore();
-
-          // Brand Title written exactly like top left corner
-          ctx.textAlign = 'left';
-          ctx.fillStyle = '#FFFFFF';
-          ctx.font = '900 32px system-ui, -apple-system, sans-serif';
-          ctx.fillText(brandName, 80 + drawW + 18, 136);
-
-          ctx.fillStyle = '#94A3B8';
-          ctx.font = '700 14px system-ui, -apple-system, sans-serif';
-          ctx.fillText('OFFICIAL TRADER CREED', 80 + drawW + 18, 160);
-        } else {
-          // Fallback typography
-          ctx.textAlign = 'left';
-          ctx.fillStyle = '#FFFFFF';
-          ctx.font = '900 32px system-ui, -apple-system, sans-serif';
-          ctx.fillText(brandName, 100, 140);
-        }
-      } catch {
-        ctx.textAlign = 'left';
-        ctx.fillStyle = '#FFFFFF';
-        ctx.font = '900 32px system-ui, -apple-system, sans-serif';
-        ctx.fillText(brandName, 100, 140);
-      }
-
-      // Top-Right Luxury Number
-      ctx.textAlign = 'right';
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
-      ctx.font = '700 28px "Courier New", monospace';
-      ctx.fillText(`N° ${displayNum}`, 980, 140);
-
-      // Quotation Mark Vector
-      ctx.textAlign = 'center';
-      ctx.fillStyle = 'rgba(0, 83, 207, 0.65)';
-      ctx.font = '900 120px Georgia, serif';
-      ctx.fillText('“', 540, 340);
-
-      // Quote Text Body with Text Wrapping
-      ctx.fillStyle = '#F8FAFC';
-      ctx.font = '700 40px system-ui, -apple-system, sans-serif';
-      ctx.textAlign = 'center';
-
-      const words = item.quote.split(' ');
-      let line = '';
-      const lines: string[] = [];
-      const maxWidth = 840;
-
-      for (let n = 0; n < words.length; n++) {
-        const testLine = line + words[n] + ' ';
-        const metrics = ctx.measureText(testLine);
-        if (metrics.width > maxWidth && n > 0) {
-          lines.push(line);
-          line = words[n] + ' ';
-        } else {
-          line = testLine;
-        }
-      }
-      lines.push(line);
-
-      const lineHeight = 60;
-      const startY = 500 - (lines.length * lineHeight) / 2;
-      for (let i = 0; i < lines.length; i++) {
-        ctx.fillText(lines[i].trim(), 540, startY + i * lineHeight);
-      }
-
-      // Elegant Divider Line
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
-      ctx.lineWidth = 1.5;
-      ctx.beginPath();
-      ctx.moveTo(200, 840);
-      ctx.lineTo(880, 840);
-      ctx.stroke();
-
-      // Footer: Author "USH Community of Traders" & Email
-      ctx.textAlign = 'center';
-      ctx.fillStyle = '#FFFFFF';
-      ctx.font = '900 30px system-ui, -apple-system, sans-serif';
-      ctx.fillText('USH Community of Traders', 540, 890);
-
-      ctx.fillStyle = '#60A5FA';
-      ctx.font = '700 20px "Courier New", monospace';
-      ctx.fillText(targetEmail, 540, 928);
-
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
-      ctx.font = '600 16px system-ui, -apple-system, sans-serif';
-      ctx.fillText('Official Telegram: t.me/+wHFuFFkA2i0xZTA8', 540, 964);
+      const { canvas, displayNum } = generated;
 
       // Download file
       const link = document.createElement('a');
@@ -243,30 +369,99 @@ export const QuoteGallerySlider: React.FC<QuoteGallerySliderProps> = ({
     }
   };
 
-  // Web Share or Clipboard Copy
-  const handleShareQuote = async (item: QuoteItem) => {
-    const displayNum = item.number ? item.number.toString().padStart(2, '0') : 'Wisdom';
-    const shareText = `"${item.quote}"\n\n— USH Community of Traders (${targetEmail})\n\nJoin our trading community: https://t.me/+wHFuFFkA2i0xZTA8`;
-
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: `USH Community of Traders Wisdom N° ${displayNum}`,
-          text: shareText,
-          url: 'https://t.me/+wHFuFFkA2i0xZTA8',
-        });
-        showToast('Shared successfully!');
-        return;
-      } catch {
-        // User dismissed or aborted share
-      }
-    }
+  // Web Share or Clipboard Copy (Shares the actual card image)
+  const handleShareQuote = async (item: QuoteItem, index: number) => {
+    const cardId = item.id || `quote-${index}`;
+    setSharingId(cardId);
 
     try {
-      await navigator.clipboard.writeText(shareText);
-      showToast('Quote copied to clipboard!');
-    } catch {
-      showToast('Could not copy to clipboard');
+      const generated = await generateCardCanvas(item, index);
+      if (!generated) {
+        showToast('Unable to prepare quote card');
+        return;
+      }
+
+      const { canvas, displayNum } = generated;
+
+      // Convert canvas to image Blob
+      const blob = await new Promise<Blob | null>((resolve) => {
+        canvas.toBlob((b) => resolve(b), 'image/png');
+      });
+
+      if (!blob) {
+        showToast('Could not generate image file');
+        return;
+      }
+
+      const fileName = `USH-Community-Quote-${displayNum}.png`;
+      const imageFile = new File([blob], fileName, { type: 'image/png' });
+      const captionText = `"${item.quote}"\n\n— USH Community of Traders\nJoin our community: https://t.me/+wHFuFFkA2i0xZTA8`;
+
+      // 1. First priority: Web Share API with Image File (Android / iOS WhatsApp, Telegram, etc.)
+      if (typeof navigator.canShare === 'function' && navigator.canShare({ files: [imageFile] })) {
+        try {
+          await navigator.share({
+            files: [imageFile],
+            title: `USH Community Wisdom N° ${displayNum}`,
+            text: captionText,
+          });
+          showToast('Card shared successfully!');
+          return;
+        } catch (shareErr: unknown) {
+          // If the user cancelled the share menu (AbortError), don't show error
+          if (shareErr instanceof Error && shareErr.name === 'AbortError') {
+            return;
+          }
+          console.warn('Share with file aborted or not handled, falling back to clipboard', shareErr);
+        }
+      }
+
+      // 2. Second priority: Copy actual image to Clipboard (Desktop Chrome, Edge, Safari)
+      if (typeof ClipboardItem !== 'undefined' && navigator.clipboard && navigator.clipboard.write) {
+        try {
+          const clipboardItem = new ClipboardItem({ 'image/png': blob });
+          await navigator.clipboard.write([clipboardItem]);
+          showToast('Quote image copied! Paste into WhatsApp or Telegram.');
+          return;
+        } catch (clipErr) {
+          console.warn('Clipboard image write failed:', clipErr);
+        }
+      }
+
+      // 3. Third priority: Text Web Share fallback if browser only shares text
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            title: `USH Community Wisdom N° ${displayNum}`,
+            text: captionText,
+            url: 'https://t.me/+wHFuFFkA2i0xZTA8',
+          });
+          showToast('Shared text successfully!');
+          return;
+        } catch (textShareErr: unknown) {
+          if (textShareErr instanceof Error && textShareErr.name === 'AbortError') {
+            return;
+          }
+        }
+      }
+
+      // 4. Fourth priority: Copy text to clipboard (NEVER trigger download on share!)
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        try {
+          await navigator.clipboard.writeText(captionText);
+          showToast('Quote text copied to clipboard! Paste into your chat.');
+          return;
+        } catch {
+          // ignore
+        }
+      }
+
+      showToast('Sharing not supported on this browser');
+    } catch (e) {
+      console.error('Error sharing quote image:', e);
+      showToast('Could not share quote image');
+    } finally {
+      setSharingId(null);
     }
   };
 
@@ -317,7 +512,7 @@ export const QuoteGallerySlider: React.FC<QuoteGallerySliderProps> = ({
           return (
             <div
               key={`${item.id || 'quote'}-${idx}`}
-              className="group relative shrink-0 w-[300px] sm:w-[350px] md:w-[380px] transition-all duration-300 hover:scale-[1.02]"
+              className="group relative shrink-0 w-[300px] sm:w-[350px] md:w-[380px] transition-all duration-300 hover:scale-[1.02] select-none"
             >
               {/* Layered Luxury Accent Shape Behind Card */}
               <div 
@@ -352,7 +547,7 @@ export const QuoteGallerySlider: React.FC<QuoteGallerySliderProps> = ({
                     </div>
                   </div>
 
-                  {/* Luxury Counting Number (No Hash Tags) */}
+                  {/* Luxury Counting Number */}
                   <div className="flex items-center gap-1.5 shrink-0">
                     <span className="font-mono text-[11px] sm:text-[12px] font-bold text-slate-700 px-2.5 py-0.5 bg-white rounded-md border border-slate-200 shadow-2xs">
                       {displayNum}
@@ -386,33 +581,42 @@ export const QuoteGallerySlider: React.FC<QuoteGallerySliderProps> = ({
 
                   {/* Right: Download and Share Action Icons */}
                   <div className="flex items-center gap-1.5 shrink-0">
-                    {/* Download Icon Button */}
+                    {/* Download Icon Button - ONLY downloads */}
                     <button
                       type="button"
                       onClick={(e) => {
                         e.stopPropagation();
                         handleDownloadCard(item, idx);
                       }}
-                      className="p-2 rounded-lg bg-slate-100 hover:bg-emerald-50 text-slate-700 hover:text-emerald-700 border border-slate-200 hover:border-emerald-300 transition-all cursor-pointer shadow-2xs"
+                      className="p-2 rounded-lg bg-slate-100 hover:bg-emerald-50 text-slate-700 hover:text-emerald-700 border border-slate-200 hover:border-emerald-300 transition-all cursor-pointer shadow-2xs disabled:opacity-60 active:scale-95"
                       title="Download Quote Card as Image"
                       aria-label="Download Quote Card"
-                      disabled={downloadingId === (item.id || `quote-${idx}`)}
+                      disabled={downloadingId === (item.id || `quote-${idx}`) || sharingId === (item.id || `quote-${idx}`)}
                     >
-                      <Download className="w-3.5 h-3.5" />
+                      {downloadingId === (item.id || `quote-${idx}`) ? (
+                        <Loader2 className="w-3.5 h-3.5 animate-spin text-emerald-600" />
+                      ) : (
+                        <Download className="w-3.5 h-3.5" />
+                      )}
                     </button>
 
-                    {/* Share Icon Button */}
+                    {/* Share Icon Button - ONLY shares, never downloads */}
                     <button
                       type="button"
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleShareQuote(item);
+                        handleShareQuote(item, idx);
                       }}
-                      className="p-2 rounded-lg bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-[#0053CF] border border-slate-200 hover:border-blue-300 transition-all cursor-pointer shadow-2xs"
-                      title="Share Quote"
-                      aria-label="Share Quote"
+                      className="p-2 rounded-lg bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-[#0053CF] border border-slate-200 hover:border-blue-300 transition-all cursor-pointer shadow-2xs disabled:opacity-60 active:scale-95"
+                      title="Share Quote Card Image"
+                      aria-label="Share Quote Card Image"
+                      disabled={downloadingId === (item.id || `quote-${idx}`) || sharingId === (item.id || `quote-${idx}`)}
                     >
-                      <Share2 className="w-3.5 h-3.5" />
+                      {sharingId === (item.id || `quote-${idx}`) ? (
+                        <Loader2 className="w-3.5 h-3.5 animate-spin text-[#0053CF]" />
+                      ) : (
+                        <Share2 className="w-3.5 h-3.5" />
+                      )}
                     </button>
                   </div>
                 </div>
