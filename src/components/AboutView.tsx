@@ -53,7 +53,7 @@ export const AboutView: React.FC<AboutViewProps> = ({
               <span className="text-[#0053CF]">Driven by Education.</span>
             </h1>
             <p className="font-inter text-[13.5px] sm:text-[16px] text-slate-600 leading-relaxed">
-              U.S.H Forex was founded with a singular purpose: to cut through the noise of the trading industry and provide institutional-grade insights paired with actionable education for the modern retail trader.
+              USH Community of Traders was founded with a singular purpose: to cut through the noise of the trading industry and provide institutional-grade insights paired with actionable education for the modern retail trader.
             </p>
             <div className="pt-1 sm:pt-2 flex flex-col sm:flex-row gap-2.5 sm:gap-3">
               <button

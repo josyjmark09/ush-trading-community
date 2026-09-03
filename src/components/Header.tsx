@@ -47,7 +47,7 @@ export const Header: React.FC<HeaderProps> = ({
   const navItems: { id: NavTab; label: string }[] = [
     { id: 'home', label: 'Home' },
     { id: 'about', label: 'About' },
-    { id: 'forex-news', label: 'Forex News' },
+    { id: 'quotes', label: 'Trading Quotes' },
     { id: 'testimonials', label: 'Reviews' },
     { id: 'broker', label: 'Recommended Broker' },
     { id: 'faq', label: 'FAQ' },
@@ -117,7 +117,7 @@ export const Header: React.FC<HeaderProps> = ({
             className="hidden sm:flex items-center gap-2 bg-[#0053CF] hover:bg-[#0040A2] text-white font-inter text-[13px] font-bold py-2.5 px-4.5 rounded-lg shadow-2xs transition-colors cursor-pointer whitespace-nowrap"
           >
             <Send className="w-4 h-4" />
-            <span>Join Free VIP Group</span>
+            <span>Join Community</span>
           </button>
 
           {/* Customer Support Telephone Icon Button */}

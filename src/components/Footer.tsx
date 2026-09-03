@@ -83,7 +83,7 @@ export const Footer: React.FC<FooterProps> = ({
                 className="inline-flex items-center gap-2 text-[12.5px] font-black text-[#0053CF] bg-white hover:bg-slate-50 px-3.5 py-2 rounded-md border border-slate-300 transition-colors cursor-pointer shadow-2xs"
               >
                 <Send className="w-3.5 h-3.5 text-[#0053CF]" />
-                <span>Join Our Free VIP Group</span>
+                <span>Join our trading community</span>
               </button>
             </div>
           </div>
@@ -107,7 +107,7 @@ export const Footer: React.FC<FooterProps> = ({
                   onClick={() => handleNav('vip-guide')}
                   className="text-slate-600 hover:text-[#0053CF] transition-colors cursor-pointer font-bold"
                 >
-                  VIP Group Guide
+                  Telegram Community Guide
                 </button>
               </li>
               <li>
@@ -129,10 +129,10 @@ export const Footer: React.FC<FooterProps> = ({
               </li>
               <li>
                 <button
-                  onClick={() => handleNav('forex-news', 'forex-news')}
+                  onClick={() => handleNav('quotes', 'quotes-gallery-1')}
                   className="text-slate-600 hover:text-slate-900 transition-colors cursor-pointer font-medium"
                 >
-                  Forex Factory News
+                  Trading Quotes
                 </button>
               </li>
               <li>

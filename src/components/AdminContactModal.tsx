@@ -36,7 +36,7 @@ export const AdminContactModal: React.FC<AdminContactModalProps> = ({
 
   if (!isOpen) return null;
 
-  const adminEmail = settings.social?.supportEmail || 'support@ushforex.com';
+  const adminEmail = settings.social?.supportEmail || 'ushforex@gmail.com';
   const partnerCode = settings.vipGuide?.partnerCode || '1046090975706890644';
 
   const handleCopyEmail = () => {

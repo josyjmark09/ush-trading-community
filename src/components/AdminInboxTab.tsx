@@ -226,7 +226,7 @@ export const AdminInboxTab: React.FC = () => {
       </div>
 
       {/* 3. Search & Filter Bar */}
-      <div className="bg-slate-50 p-2.5 sm:p-3 rounded-xl border border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-2.5">
+      <div className="bg-slate-50 p-2.5 sm:p-3 rounded-xl border border-slate-200 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5">
         <div className="relative w-full sm:w-80">
           <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
           <input
@@ -238,12 +238,12 @@ export const AdminInboxTab: React.FC = () => {
           />
         </div>
 
-        <div className="flex items-center gap-1.5 w-full sm:w-auto justify-between sm:justify-end overflow-x-auto pb-1 sm:pb-0">
+        <div className="flex items-center gap-1.5 flex-wrap">
           {(['all', 'new', 'in_progress', 'resolved'] as const).map((f) => (
             <button
               key={f}
               onClick={() => setFilter(f)}
-              className={`px-2.5 py-1 rounded-md text-[11.5px] font-bold capitalize transition-colors cursor-pointer shrink-0 ${
+              className={`px-2.5 py-1 rounded-md text-[11.5px] font-bold capitalize transition-colors cursor-pointer ${
                 filter === f
                   ? 'bg-[#0053CF] text-white shadow-2xs'
                   : 'bg-white text-slate-600 hover:bg-slate-200/80 border border-slate-200'
@@ -267,7 +267,7 @@ export const AdminInboxTab: React.FC = () => {
           <p className="text-[13px] text-slate-500 font-inter max-w-sm mx-auto">
             {searchQuery
               ? `No inquiries match "${searchQuery}". Try clearing the search query.`
-              : `There are currently no messages under the "${filter}" filter.`}
+              : `Your inbox is currently clear under the "${filter}" filter. Real customer inquiries from the contact form or VIP onboarding will appear here.`}
           </p>
         </div>
       ) : (
@@ -279,7 +279,7 @@ export const AdminInboxTab: React.FC = () => {
             return (
               <div
                 key={msg.id}
-                className={`bg-white rounded-xl sm:rounded-2xl border transition-all p-4 sm:p-5 shadow-xs ${
+                className={`bg-white rounded-xl sm:rounded-2xl border transition-all p-3.5 sm:p-5 shadow-xs ${
                   isUnread
                     ? 'border-blue-400/80 bg-blue-50/20 ring-1 ring-blue-400/30'
                     : 'border-slate-200'
@@ -292,7 +292,7 @@ export const AdminInboxTab: React.FC = () => {
                       {msg.name?.slice(0, 2).toUpperCase() || 'TR'}
                     </div>
 
-                    <div className="min-w-0">
+                    <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2 flex-wrap">
                         <h4 className="font-manrope font-extrabold text-[14.5px] sm:text-[15.5px] text-slate-900 leading-tight">
                           {msg.name}
@@ -343,9 +343,9 @@ export const AdminInboxTab: React.FC = () => {
                   </div>
 
                   {/* Exness Account ID and Quick Actions */}
-                  <div className="flex items-center gap-2 self-end sm:self-center shrink-0">
+                  <div className="flex items-center gap-1.5 flex-wrap sm:flex-nowrap pt-1 sm:pt-0 sm:self-center">
                     {msg.accountId && (
-                      <div className="inline-flex items-center gap-1.5 bg-slate-100 px-2.5 py-1 rounded-md border border-slate-300 text-[11.5px] font-mono text-slate-900">
+                      <div className="inline-flex items-center gap-1.5 bg-slate-100 px-2 py-1 rounded-md border border-slate-300 text-[11.5px] font-mono text-slate-900">
                         <Hash className="w-3 h-3 text-slate-500" />
                         <span className="font-bold">{msg.accountId}</span>
                         <button
@@ -371,7 +371,7 @@ export const AdminInboxTab: React.FC = () => {
                       title="Reply via Email"
                     >
                       <Mail className="w-3 h-3" />
-                      <span className="hidden xs:inline">Reply</span>
+                      <span>Reply</span>
                     </a>
 
                     <button

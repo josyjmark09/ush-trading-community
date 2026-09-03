@@ -19,7 +19,7 @@ export const TestimonialsView: React.FC<TestimonialsViewProps> = ({ onOpenTelegr
           Built on Real Consistency
         </h1>
         <p className="font-inter text-[15px] sm:text-[16px] text-slate-600 max-w-2xl mx-auto leading-relaxed">
-          Read genuine feedback from traders who joined the U.S.H Forex community to replace emotion with systematic execution.
+          Read genuine feedback from traders who joined the USH Community of Traders to replace emotion with systematic execution.
         </p>
       </section>
 
@@ -87,7 +87,7 @@ export const TestimonialsView: React.FC<TestimonialsViewProps> = ({ onOpenTelegr
                 className="inline-flex items-center gap-2 bg-[#0053CF] hover:bg-[#0040A2] text-white px-7 py-3 rounded-lg font-inter text-[14.5px] font-bold transition-colors cursor-pointer shadow-xs"
               >
                 <Send className="w-4 h-4" />
-                <span>Join Our Free VIP Group</span>
+                <span>Join our trading community</span>
               </button>
             </div>
           </div>

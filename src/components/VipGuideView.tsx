@@ -38,7 +38,10 @@ export const VipGuideView: React.FC<VipGuideViewProps> = ({ setActiveTab }) => {
 
   const partnerLink = settings.vipGuide?.partnerLink || "https://one.exnessonelink.com/a/yxxz5mlw1n";
   const partnerCode = settings.vipGuide?.partnerCode || "1046090975706890644";
-  const telegramUrl = settings.vipGuide?.vipTelegramUrl || settings.social?.telegramUrl || "https://t.me/ushforex_official";
+  const rawTg = settings.vipGuide?.vipTelegramUrl || settings.social?.telegramUrl;
+  const telegramUrl = (!rawTg || rawTg === 'https://t.me/ushforex_official')
+    ? 'https://t.me/+wHFuFFkA2i0xZTA8'
+    : rawTg;
 
   const handleCopyCode = () => {
     navigator.clipboard.writeText(partnerCode);
@@ -120,7 +123,7 @@ export const VipGuideView: React.FC<VipGuideViewProps> = ({ setActiveTab }) => {
           </div>
 
           <h1 className="font-manrope text-[24px] sm:text-[32px] md:text-[36px] font-black text-slate-900 tracking-tight leading-tight">
-            Join Our Free VIP Group
+            {settings.vipGuide?.title || "Join our trading community"}
           </h1>
 
           <p className="font-inter text-[13.5px] sm:text-[15px] text-slate-600 max-w-lg mx-auto leading-relaxed">
@@ -128,30 +131,17 @@ export const VipGuideView: React.FC<VipGuideViewProps> = ({ setActiveTab }) => {
           </p>
         </div>
 
-        {/* DIRECT TELEGRAM CTA BANNER - ZERO OBLIGATION ENTRY */}
-        <div className="w-full bg-[#0053CF] text-white rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-md border border-blue-600 mb-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="space-y-1 text-center sm:text-left">
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white/20 text-white text-[11px] font-extrabold tracking-wider uppercase">
-              <Send className="w-3 h-3" />
-              DIRECT ACCESS • NO DELAY
-            </span>
-            <h2 className="font-manrope text-[18px] sm:text-[21px] font-black leading-snug">
-              Proceed Directly to Telegram
-            </h2>
-            <p className="text-[12.5px] sm:text-[13px] text-blue-100 font-inter max-w-md">
-              No registration required! You can jump straight into the official Telegram channel right now. Opening an Exness broker account is completely optional.
-            </p>
-          </div>
-
+        {/* STANDALONE BLUE CTA: PROCEED TO TELEGRAM */}
+        <div className="w-full mb-6">
           <a
             href={telegramUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-6 py-3.5 bg-white hover:bg-slate-100 text-[#0053CF] font-inter font-black text-[14px] rounded-xl shadow-md transition-all cursor-pointer hover:scale-[1.02] active:scale-[0.98] shrink-0 whitespace-nowrap"
+            className="w-full inline-flex items-center justify-center gap-2 sm:gap-2.5 px-3 py-3 sm:px-6 sm:py-3.5 bg-[#0053CF] hover:bg-[#0042A6] text-white font-inter font-black text-[13px] sm:text-[15px] rounded-xl sm:rounded-2xl shadow-md hover:shadow-lg transition-all cursor-pointer hover:scale-[1.01] active:scale-[0.99] border border-blue-600 group"
           >
-            <Send className="w-4 h-4 text-[#0053CF]" />
-            <span>Proceed to Telegram Channel</span>
-            <ArrowRight className="w-4 h-4" />
+            <Send className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-white shrink-0 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+            <span className="whitespace-nowrap">Proceed to Telegram Channel</span>
+            <ArrowRight className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-white shrink-0 transition-transform group-hover:translate-x-1" />
           </a>
         </div>
 
@@ -371,7 +361,7 @@ export const VipGuideView: React.FC<VipGuideViewProps> = ({ setActiveTab }) => {
                       className="w-full flex items-center justify-center gap-2 py-3.5 px-4 bg-[#0053CF] hover:bg-[#0040A2] text-white font-inter font-bold text-[14px] rounded-md transition-colors shadow-sm cursor-pointer active:scale-99"
                     >
                       <Send className="w-4 h-4 shrink-0" />
-                      <span>Proceed to Telegram Channel</span>
+                      <span className="whitespace-nowrap">Proceed to Telegram Channel</span>
                     </button>
 
                     <div className="pt-1 flex items-center justify-between text-[11.5px] text-slate-500 font-inter">
@@ -564,7 +554,7 @@ export const VipGuideView: React.FC<VipGuideViewProps> = ({ setActiveTab }) => {
                       className="w-full flex items-center justify-center gap-2 py-3.5 px-4 bg-[#0053CF] hover:bg-[#0040A2] text-white font-inter font-bold text-[14px] rounded-md transition-colors shadow-sm cursor-pointer active:scale-99"
                     >
                       <Send className="w-4 h-4 shrink-0" />
-                      <span>Proceed to Telegram Channel</span>
+                      <span className="whitespace-nowrap">Proceed to Telegram Channel</span>
                     </button>
 
                     <div className="pt-1 flex items-center justify-between text-[11.5px] text-slate-500 font-inter">

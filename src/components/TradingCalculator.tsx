@@ -192,26 +192,26 @@ export const TradingCalculator: React.FC = () => {
   const handleCopySummary = () => {
     let text = '';
     if (activeTab === 'position') {
-      text = `U.S.H Trading Calculator - Position Size:
+      text = `USH Community of Traders Calculator - Position Size:
 Pair: ${selectedSymbol}
 Account Balance: $${accountBalance.toLocaleString()}
 Risk: ${riskType === 'percent' ? `${riskPercent}% ($${calculatedRiskMoney.toFixed(2)})` : `$${riskAmount}`}
 Stop Loss: ${stopLossPips} pips
 Recommended Lots: ${positionResults.lots} Lots (${positionResults.units.toLocaleString()} units)`;
     } else if (activeTab === 'pip') {
-      text = `U.S.H Pip Value Calculator:
+      text = `USH Community of Traders Pip Value Calculator:
 Pair: ${selectedSymbol}
 Trade Size: ${pipLotSize} Lots
 1 Pip Value: $${pipValueResults.pipValue}
 50 Pips: $${pipValueResults.fiftyPips}`;
     } else if (activeTab === 'pnl') {
-      text = `U.S.H Trade P&L:
+      text = `USH Community of Traders Trade P&L:
 Pair: ${selectedSymbol} (${orderType.toUpperCase()})
 Lots: ${pnlLots}
 Entry: ${entryPrice} | Exit: ${exitPrice}
 Result: ${pnlResults.pips} pips | ${pnlResults.isProfit ? '+' : ''}$${pnlResults.profit.toLocaleString()}`;
     } else {
-      text = `U.S.H Margin Calculator:
+      text = `USH Community of Traders Margin Calculator:
 Pair: ${selectedSymbol}
 Lots: ${marginLots} | Leverage: 1:${leverage}
 Required Margin: $${marginResults.requiredMargin.toLocaleString()}`;

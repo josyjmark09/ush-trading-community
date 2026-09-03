@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { X, Send, Copy, Check, ShieldCheck, Users, TrendingUp } from 'lucide-react';
+import { useSite } from '../context/SiteContext';
 
 interface TelegramModalProps {
   isOpen: boolean;
@@ -7,8 +8,12 @@ interface TelegramModalProps {
 }
 
 export const TelegramModal: React.FC<TelegramModalProps> = ({ isOpen, onClose }) => {
+  const { settings } = useSite();
   const [copied, setCopied] = useState(false);
-  const telegramUrl = "https://t.me/ushforex_official";
+  const rawUrl = settings.social?.telegramUrl || settings.vipGuide?.vipTelegramUrl;
+  const telegramUrl = (!rawUrl || rawUrl === 'https://t.me/ushforex_official') 
+    ? 'https://t.me/+wHFuFFkA2i0xZTA8' 
+    : rawUrl;
 
   if (!isOpen) return null;
 
@@ -40,7 +45,7 @@ export const TelegramModal: React.FC<TelegramModalProps> = ({ isOpen, onClose })
           </div>
           <div>
             <div className="flex items-center gap-1.5">
-              <h3 className="font-manrope text-[19px] font-black text-slate-900">U.S.H Forex Telegram</h3>
+              <h3 className="font-manrope text-[19px] font-black text-slate-900">USH Community of Traders Telegram</h3>
               <ShieldCheck className="w-4 h-4 text-[#0053CF]" />
             </div>
             <p className="font-inter text-[13px] text-slate-600">Official Free Community & Market Insights</p>

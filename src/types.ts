@@ -1,4 +1,4 @@
-export type NavTab = 'home' | 'about' | 'forex-news' | 'testimonials' | 'broker' | 'faq' | 'vip-guide';
+export type NavTab = 'home' | 'about' | 'quotes' | 'forex-news' | 'testimonials' | 'broker' | 'faq' | 'vip-guide';
 
 export interface Milestone {
   year: string;
@@ -228,6 +228,21 @@ export interface VipGuideSettings {
   supportHelpText?: string;
 }
 
+export interface QuoteItem {
+  id: string;
+  number?: number;
+  quote: string;
+  author?: string;
+  category?: string;
+}
+
+export interface QuoteGallerySettings {
+  sectionBadge: string;
+  title: string;
+  subtitle: string;
+  quotes: QuoteItem[];
+}
+
 export interface SiteSettings {
   branding: SiteBranding;
   hero: HeroSettings;
@@ -240,6 +255,8 @@ export interface SiteSettings {
   vipGuide?: VipGuideSettings;
   faqs: FAQItem[];
   social: SocialLinksSettings;
+  quoteGallery1?: QuoteGallerySettings;
+  quoteGallery2?: QuoteGallerySettings;
   moderation: {
     requireReviewApproval: boolean;
   };

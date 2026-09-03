@@ -111,19 +111,19 @@ export const FAQS: FAQItem[] = [
   {
     id: "faq-1",
     category: "Community",
-    question: "How do I join the U.S.H Forex Telegram Community?",
-    answer: "You can click any 'Join Telegram' button on this platform. Access to our public market breakdown channel is completely free, providing daily charts, macro overviews, and educational write-ups.",
+    question: "How do I join the USH Community of Traders Telegram?",
+    answer: "You can click any 'Join our trading community' button on this platform. Access to our public market breakdown channel is completely free, providing daily charts, macro overviews, and educational write-ups.",
   },
   {
     id: "faq-2",
     category: "Broker",
-    question: "Why does U.S.H Forex recommend Exness?",
+    question: "Why does USH Community of Traders recommend Exness?",
     answer: "We partner exclusively with top-tier regulated entities. Exness is overseen by tier-1 authorities including the FCA (UK), CySEC, and FSCA, offering ultra-low spreads from 0.0 pips, instant automated withdrawals, and execution speeds under 0.01 seconds.",
   },
   {
     id: "faq-3",
     category: "Trading",
-    question: "What is U.S.H Forex's core trading methodology?",
+    question: "What is USH Community of Traders' core trading methodology?",
     answer: "Our methodology centers on market structure, institutional order flow, liquidity imbalances, and strict multi-timeframe confirmation. We prioritize risk-to-reward ratios of 1:2.5 or higher and advocate for risking no more than 1% per setup.",
   },
   {

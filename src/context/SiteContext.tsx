@@ -6,9 +6,12 @@ import {
   Milestone, 
   PillarItem, 
   FAQItem,
-  InboxMessage 
+  InboxMessage,
+  QuoteGallerySettings,
+  QuoteItem
 } from '../types';
 import { TESTIMONIALS, FAQS, COMMUNITY_FEATURES, MILESTONES, VALUES } from '../data/mockData';
+import { DEFAULT_QUOTE_GALLERY_1, DEFAULT_QUOTE_GALLERY_2 } from '../data/quotesData';
 
 const SETTINGS_STORAGE_KEY = 'ush_site_settings_v2';
 const REVIEWS_STORAGE_KEY = 'ush_site_reviews_v3';
@@ -33,11 +36,11 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
     headingLine1: 'Trade With More Clarity.',
     headingLine2: 'Learn With a Community.',
     subtitle: 'Practical forex insights, market education and a growing trading community built to help traders approach the markets with greater structure and discipline.',
-    cta1Text: 'Join Our Free VIP Group',
+    cta1Text: 'Join our trading community',
     cta1Link: '',
     cta2Text: 'Recommended Broker Setup',
     cta2Link: 'https://one.exnessonelink.com/a/yxxz5mlw1n',
-    primaryCtaText: 'Join Our Free VIP Group',
+    primaryCtaText: 'Join our trading community',
     primaryCtaLink: '',
     secondaryCtaText: 'Recommended Broker Setup',
     secondaryCtaLink: 'https://one.exnessonelink.com/a/yxxz5mlw1n',
@@ -88,9 +91,9 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
     highlightText: 'A Community Built Around The Market.',
     titleLine1: 'More Than Signals.',
     titleHighlight: 'A Community Built Around The Market.',
-    subtitle: 'Join our free VIP group for daily institutional breakdowns, high-probability market structure setups, and direct guidance alongside experienced traders.',
-    description: 'Join our free VIP group for daily institutional breakdowns, high-probability market structure setups, and direct guidance alongside experienced traders.',
-    ctaText: 'Join Our Free VIP Group',
+    subtitle: 'Join our trading community for daily institutional breakdowns, high-probability market structure setups, and direct guidance alongside experienced traders.',
+    description: 'Join our trading community for daily institutional breakdowns, high-probability market structure setups, and direct guidance alongside experienced traders.',
+    ctaText: 'Join our trading community',
     ctaLink: '',
     communityImageUrl: '',
     chartImageUrl: '',
@@ -99,7 +102,7 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
     stat2Number: 'Daily',
     stat2Label: 'Market Breakdowns',
     stat3Number: '100%',
-    stat3Label: 'Free VIP Group Access',
+    stat3Label: 'Free Community Access',
     bulletPoints: [
       'Daily session previews across major FX pairs & Gold',
       'Strict risk management rules (1-2% risk per position)',
@@ -109,7 +112,7 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
     stats: [
       { number: '5,000+', label: 'Community Members' },
       { number: 'Daily', label: 'Market Breakdowns' },
-      { number: '100%', label: 'Free VIP Group Access' },
+      { number: '100%', label: 'Free Community Access' },
     ],
   },
   broker: {
@@ -123,11 +126,11 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
     partnerTag: 'Official Partner Broker',
     partnerLink: 'https://one.exnessonelink.com/a/yxxz5mlw1n',
     accountLink: 'https://one.exnessonelink.com/a/yxxz5mlw1n',
-    helpLink: 'https://t.me/ushforex_official',
+    helpLink: 'https://t.me/+wHFuFFkA2i0xZTA8',
     createAccountCtaText: 'Open Exness Account',
     createAccountCtaLink: 'https://one.exnessonelink.com/a/yxxz5mlw1n',
     supportHelpCtaText: 'Get VIP Setup Support on Telegram',
-    supportHelpCtaLink: 'https://t.me/ushforex_official',
+    supportHelpCtaLink: 'https://t.me/+wHFuFFkA2i0xZTA8',
     spreadsText: 'From 0.0 Pips',
     leverageText: 'Up to 1:Unlimited',
     withdrawalsText: 'Instant & Automated 24/7',
@@ -166,12 +169,12 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
     ],
   },
   vipGuide: {
-    title: 'Join Our Free VIP Group',
-    subtitle: 'Follow the instructions below to join our free VIP group, for both new and already existing Exness users',
+    title: 'Join our trading community',
+    subtitle: 'Follow the instructions below to join our trading community, for both new and already existing Exness users',
     partnerLink: 'https://one.exnessonelink.com/a/yxxz5mlw1n',
     partnerCode: '1046090975706890644',
-    vipTelegramUrl: 'https://t.me/ushforex_official',
-    adminTelegramUser: '@ushforex_official',
+    vipTelegramUrl: 'https://t.me/+wHFuFFkA2i0xZTA8',
+    adminTelegramUser: 'https://t.me/+wHFuFFkA2i0xZTA8',
     supportHelpText: 'Stay on the website until you complete the full registration process.',
   },
   about: {
@@ -259,6 +262,8 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
     twitterUrl: 'https://twitter.com/USHFOREX',
     discordUrl: '',
   },
+  quoteGallery1: DEFAULT_QUOTE_GALLERY_1,
+  quoteGallery2: DEFAULT_QUOTE_GALLERY_2,
   moderation: {
     requireReviewApproval: true,
   },
@@ -280,6 +285,11 @@ interface SiteContextType {
   closeAdmin: () => void;
   updateSettings: (newSettings: Partial<SiteSettings> | ((prev: SiteSettings) => SiteSettings)) => void;
   resetSettings: () => void;
+  updateQuoteGallery1: (gallery: Partial<QuoteGallerySettings>) => void;
+  updateQuoteGallery2: (gallery: Partial<QuoteGallerySettings>) => void;
+  addQuoteToGallery: (galleryNum: 1 | 2, quote: Omit<QuoteItem, 'id'>) => void;
+  deleteQuoteFromGallery: (galleryNum: 1 | 2, quoteId: string) => void;
+  updateQuoteInGallery: (galleryNum: 1 | 2, quoteId: string, updated: Partial<QuoteItem>) => void;
   approveReview: (id: string) => void;
   rejectReview: (id: string) => void;
   deleteReview: (id: string) => void;
@@ -311,18 +321,47 @@ export const SiteProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const mergedAbout = { ...DEFAULT_SITE_SETTINGS.about, ...(parsed.about || {}) };
         const mergedVipGuide = { ...DEFAULT_SITE_SETTINGS.vipGuide, ...(parsed.vipGuide || {}) };
 
-        // Upgrade legacy CTA texts if they were the old default
-        const upgradedCtaText = (!mergedHero.cta1Text || mergedHero.cta1Text === 'Join the Telegram Community' || mergedHero.cta1Text === 'Join Telegram')
-          ? 'Join Our Free VIP Group'
+        // Upgrade legacy CTA texts
+        const isLegacyCta = (text?: string) => 
+          !text || 
+          text === 'Join Our Free VIP Group' || 
+          text === 'Join the Telegram Community' || 
+          text === 'Join Telegram' ||
+          text.toLowerCase().includes('on telegram');
+
+        const upgradedCtaText = isLegacyCta(mergedHero.cta1Text)
+          ? 'Join our trading community'
           : mergedHero.cta1Text;
 
-        const upgradedCommunityCta = (!mergedCommunity.ctaText || mergedCommunity.ctaText === 'Join the Telegram Community' || mergedCommunity.ctaText === 'Join Telegram')
-          ? 'Join Our Free VIP Group'
+        const upgradedCommunityCta = isLegacyCta(mergedCommunity.ctaText)
+          ? 'Join our trading community'
           : mergedCommunity.ctaText;
+
+        // Ensure functional working Telegram links
+        const fixTelegramLink = (url?: string) => {
+          if (!url || url === 'https://t.me/ushforex_official' || url === '@ushforex_official') {
+            return 'https://t.me/+wHFuFFkA2i0xZTA8';
+          }
+          return url;
+        };
 
         return {
           ...DEFAULT_SITE_SETTINGS,
           ...parsed,
+          quoteGallery1: {
+            ...(parsed.quoteGallery1 || DEFAULT_QUOTE_GALLERY_1),
+            quotes: ((parsed.quoteGallery1?.quotes || DEFAULT_QUOTE_GALLERY_1.quotes) || []).map((q: any) => ({
+              ...q,
+              author: 'USH',
+            })),
+          },
+          quoteGallery2: {
+            ...(parsed.quoteGallery2 || DEFAULT_QUOTE_GALLERY_2),
+            quotes: ((parsed.quoteGallery2?.quotes || DEFAULT_QUOTE_GALLERY_2.quotes) || []).map((q: any) => ({
+              ...q,
+              author: 'USH',
+            })),
+          },
           branding: { 
             ...DEFAULT_SITE_SETTINGS.branding, 
             ...(parsed.branding || {}),
@@ -364,11 +403,19 @@ export const SiteProvider: React.FC<{ children: React.ReactNode }> = ({ children
             brokerTag: mergedBroker.brokerTag || mergedBroker.partnerTag || DEFAULT_SITE_SETTINGS.broker.brokerTag,
             partnerTag: mergedBroker.partnerTag || mergedBroker.brokerTag || DEFAULT_SITE_SETTINGS.broker.partnerTag,
             partnerLink: mergedBroker.partnerLink || DEFAULT_SITE_SETTINGS.broker.partnerLink,
+            accountLink: mergedBroker.accountLink || DEFAULT_SITE_SETTINGS.broker.accountLink,
+            helpLink: fixTelegramLink(mergedBroker.helpLink),
             createAccountCtaLink: mergedBroker.createAccountCtaLink || DEFAULT_SITE_SETTINGS.broker.createAccountCtaLink,
+            supportHelpCtaLink: fixTelegramLink(mergedBroker.supportHelpCtaLink),
             features: mergedBroker.features || mergedBroker.featuresList || DEFAULT_SITE_SETTINGS.broker.features,
             featuresList: mergedBroker.featuresList || mergedBroker.features || DEFAULT_SITE_SETTINGS.broker.featuresList,
           },
-          vipGuide: mergedVipGuide,
+          vipGuide: {
+            ...mergedVipGuide,
+            title: isLegacyCta(mergedVipGuide.title) ? 'Join our trading community' : (mergedVipGuide.title || 'Join our trading community'),
+            vipTelegramUrl: fixTelegramLink(mergedVipGuide.vipTelegramUrl),
+            adminTelegramUser: fixTelegramLink(mergedVipGuide.adminTelegramUser),
+          },
           about: {
             ...mergedAbout,
             headline: mergedAbout.headline || mergedAbout.title || DEFAULT_SITE_SETTINGS.about.headline,
@@ -382,7 +429,13 @@ export const SiteProvider: React.FC<{ children: React.ReactNode }> = ({ children
             values: mergedAbout.values || VALUES,
             pillars: mergedAbout.pillars || DEFAULT_SITE_SETTINGS.about.pillars,
           },
-          social: { ...DEFAULT_SITE_SETTINGS.social, ...(parsed.social || {}) },
+          social: { 
+            ...DEFAULT_SITE_SETTINGS.social, 
+            ...(parsed.social || {}),
+            supportEmail: 'ushforex@gmail.com',
+            telegramUrl: fixTelegramLink(parsed.social?.telegramUrl),
+            supportTelegram: fixTelegramLink(parsed.social?.supportTelegram),
+          },
           moderation: { ...DEFAULT_SITE_SETTINGS.moderation, ...(parsed.moderation || {}) },
           faqs: Array.isArray(parsed.faqs) && parsed.faqs.length > 0 ? parsed.faqs : DEFAULT_SITE_SETTINGS.faqs,
         };
@@ -472,6 +525,80 @@ export const SiteProvider: React.FC<{ children: React.ReactNode }> = ({ children
         about: { ...prev.about, ...(newSettings.about || {}) },
         social: { ...prev.social, ...(newSettings.social || {}) },
         moderation: { ...prev.moderation, ...(newSettings.moderation || {}) },
+        quoteGallery1: newSettings.quoteGallery1 ? { ...(prev.quoteGallery1 || DEFAULT_QUOTE_GALLERY_1), ...newSettings.quoteGallery1 } : (prev.quoteGallery1 || DEFAULT_QUOTE_GALLERY_1),
+        quoteGallery2: newSettings.quoteGallery2 ? { ...(prev.quoteGallery2 || DEFAULT_QUOTE_GALLERY_2), ...newSettings.quoteGallery2 } : (prev.quoteGallery2 || DEFAULT_QUOTE_GALLERY_2),
+      };
+    });
+  };
+
+  const updateQuoteGallery1 = (gallery: Partial<QuoteGallerySettings>) => {
+    setSettings((prev) => ({
+      ...prev,
+      quoteGallery1: {
+        ...(prev.quoteGallery1 || DEFAULT_QUOTE_GALLERY_1),
+        ...gallery,
+      },
+    }));
+  };
+
+  const updateQuoteGallery2 = (gallery: Partial<QuoteGallerySettings>) => {
+    setSettings((prev) => ({
+      ...prev,
+      quoteGallery2: {
+        ...(prev.quoteGallery2 || DEFAULT_QUOTE_GALLERY_2),
+        ...gallery,
+      },
+    }));
+  };
+
+  const addQuoteToGallery = (galleryNum: 1 | 2, quote: Omit<QuoteItem, 'id'>) => {
+    const key = galleryNum === 1 ? 'quoteGallery1' : 'quoteGallery2';
+    const fallback = galleryNum === 1 ? DEFAULT_QUOTE_GALLERY_1 : DEFAULT_QUOTE_GALLERY_2;
+    const current = settings[key] || fallback;
+    const nextNumber = (current.quotes.length > 0 ? Math.max(...current.quotes.map(q => q.number || 0)) : 0) + 1;
+    const newQuote: QuoteItem = {
+      ...quote,
+      id: `q-${galleryNum}-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+      number: quote.number ?? nextNumber,
+    };
+    setSettings((prev) => {
+      const active = prev[key] || fallback;
+      return {
+        ...prev,
+        [key]: {
+          ...active,
+          quotes: [newQuote, ...active.quotes],
+        },
+      };
+    });
+  };
+
+  const deleteQuoteFromGallery = (galleryNum: 1 | 2, quoteId: string) => {
+    const key = galleryNum === 1 ? 'quoteGallery1' : 'quoteGallery2';
+    const fallback = galleryNum === 1 ? DEFAULT_QUOTE_GALLERY_1 : DEFAULT_QUOTE_GALLERY_2;
+    setSettings((prev) => {
+      const current = prev[key] || fallback;
+      return {
+        ...prev,
+        [key]: {
+          ...current,
+          quotes: current.quotes.filter((q) => q.id !== quoteId),
+        },
+      };
+    });
+  };
+
+  const updateQuoteInGallery = (galleryNum: 1 | 2, quoteId: string, updated: Partial<QuoteItem>) => {
+    const key = galleryNum === 1 ? 'quoteGallery1' : 'quoteGallery2';
+    const fallback = galleryNum === 1 ? DEFAULT_QUOTE_GALLERY_1 : DEFAULT_QUOTE_GALLERY_2;
+    setSettings((prev) => {
+      const current = prev[key] || fallback;
+      return {
+        ...prev,
+        [key]: {
+          ...current,
+          quotes: current.quotes.map((q) => (q.id === quoteId ? { ...q, ...updated } : q)),
+        },
       };
     });
   };
@@ -623,6 +750,11 @@ export const SiteProvider: React.FC<{ children: React.ReactNode }> = ({ children
         closeAdmin,
         updateSettings,
         resetSettings,
+        updateQuoteGallery1,
+        updateQuoteGallery2,
+        addQuoteToGallery,
+        deleteQuoteFromGallery,
+        updateQuoteInGallery,
         approveReview,
         rejectReview,
         deleteReview,

@@ -44,7 +44,10 @@ export const VipGuideModal: React.FC<VipGuideModalProps> = ({
 
   const partnerLink = settings.vipGuide?.partnerLink || "https://one.exnessonelink.com/a/yxxz5mlw1n";
   const partnerCode = settings.vipGuide?.partnerCode || "1046090975706890644";
-  const telegramUrl = settings.vipGuide?.vipTelegramUrl || settings.social?.telegramUrl || "https://t.me/ushforex_official";
+  const rawTg = settings.vipGuide?.vipTelegramUrl || settings.social?.telegramUrl;
+  const telegramUrl = (!rawTg || rawTg === 'https://t.me/ushforex_official')
+    ? 'https://t.me/+wHFuFFkA2i0xZTA8'
+    : rawTg;
 
   const handleCopyCode = () => {
     navigator.clipboard.writeText(partnerCode);
@@ -115,7 +118,7 @@ export const VipGuideModal: React.FC<VipGuideModalProps> = ({
           </div>
 
           <h2 className="font-manrope text-[22px] sm:text-[26px] md:text-[28px] font-black text-slate-900 leading-tight tracking-tight">
-            Join Our Free VIP Group
+            {settings.vipGuide?.title || "Join our trading community"}
           </h2>
 
           <p className="font-inter text-[13px] sm:text-[14px] text-slate-600 leading-relaxed">
@@ -123,25 +126,17 @@ export const VipGuideModal: React.FC<VipGuideModalProps> = ({
           </p>
         </div>
 
-        {/* DIRECT TELEGRAM CTA BANNER */}
-        <div className="w-full bg-[#0053CF] text-white rounded-xl p-3.5 sm:p-4 shadow-sm border border-blue-600 mb-4 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <div className="space-y-0.5 text-center sm:text-left">
-            <div className="font-manrope font-black text-[15px] sm:text-[16px]">
-              Direct Access to Telegram Channel
-            </div>
-            <p className="text-[12px] text-blue-100 font-inter">
-              No registration needed. Exness account opening is optional.
-            </p>
-          </div>
-
+        {/* STANDALONE BLUE CTA: PROCEED TO TELEGRAM */}
+        <div className="w-full mb-4">
           <a
             href={telegramUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-white hover:bg-slate-100 text-[#0053CF] font-inter font-black text-[13px] rounded-lg shadow-sm transition-all cursor-pointer shrink-0 whitespace-nowrap"
+            className="w-full inline-flex items-center justify-center gap-2 sm:gap-2.5 px-3 py-3 sm:px-5 sm:py-3.5 bg-[#0053CF] hover:bg-[#0042A6] text-white font-inter font-black text-[13px] sm:text-[14.5px] rounded-xl shadow-md hover:shadow-lg transition-all cursor-pointer border border-blue-600 group"
           >
-            <Send className="w-3.5 h-3.5 text-[#0053CF]" />
-            <span>Proceed to Telegram Channel</span>
+            <Send className="w-4 h-4 text-white shrink-0 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+            <span className="whitespace-nowrap">Proceed to Telegram Channel</span>
+            <ArrowRight className="w-4 h-4 text-white shrink-0 transition-transform group-hover:translate-x-1" />
           </a>
         </div>
 
@@ -277,7 +272,7 @@ export const VipGuideModal: React.FC<VipGuideModalProps> = ({
                     className="flex items-center justify-center gap-2 px-4 py-2 bg-[#0053CF] hover:bg-[#0040A2] text-white font-inter font-bold text-[13px] rounded-lg transition-colors shadow-2xs cursor-pointer shrink-0"
                   >
                     <Send className="w-3.5 h-3.5" />
-                    <span>Proceed to Telegram Channel</span>
+                    <span className="whitespace-nowrap">Proceed to Telegram Channel</span>
                   </button>
                 </div>
                 {submittedId && (
@@ -456,7 +451,7 @@ export const VipGuideModal: React.FC<VipGuideModalProps> = ({
                     className="flex items-center justify-center gap-2 px-5 py-2.5 bg-[#0053CF] hover:bg-[#0040A2] text-white font-inter font-bold text-[13px] rounded-lg transition-colors shadow-2xs cursor-pointer shrink-0"
                   >
                     <Send className="w-3.5 h-3.5" />
-                    <span>Proceed to Telegram Channel</span>
+                    <span className="whitespace-nowrap">Proceed to Telegram Channel</span>
                   </button>
                 </div>
                 {submittedId && (

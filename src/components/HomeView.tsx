@@ -22,7 +22,7 @@ import {
 import { useSite } from '../context/SiteContext';
 import { LiveQuotesTicker } from './LiveQuotesTicker';
 import { ReviewsSection } from './ReviewsSection';
-import { ForexFactoryNews } from './ForexFactoryNews';
+import { QuoteGallerySlider } from './QuoteGallerySlider';
 import { TradingCalculator } from './TradingCalculator';
 import { APP_IMAGES } from '../data/mockData';
 import { ExnessLogo } from './ExnessLogo';
@@ -201,7 +201,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
               className="w-full sm:w-auto flex items-center justify-center gap-2.5 bg-[#0053CF] hover:bg-[#0040A2] text-white px-8 py-3.5 sm:py-4 rounded-lg font-inter text-[15px] sm:text-[16px] font-bold shadow-sm hover:shadow transition-all cursor-pointer"
             >
               <Send className="w-4 h-4" />
-              <span>{settings.hero?.cta1Text || settings.hero?.primaryCtaText || "Join Our Free VIP Group"}</span>
+              <span>{settings.hero?.cta1Text || settings.hero?.primaryCtaText || "Join our trading community"}</span>
             </button>
           </div>
         </div>
@@ -212,20 +212,31 @@ export const HomeView: React.FC<HomeViewProps> = ({
         </div>
       </section>
 
-      {/* 3. Forex Factory Live Calendar & News (Placed directly BEFORE the Reviews page) */}
-      <div id="forex-news" className="scroll-mt-24">
-        <ForexFactoryNews />
-      </div>
-
-      {/* 4. Reviews & Experiences Section */}
+      {/* 3. Reviews & Experiences Section (Moved immediately after the TradingView chart) */}
       <div id="testimonials" className="scroll-mt-24">
         <ReviewsSection />
       </div>
 
-      {/* 5. Trading Calculator (Placed directly UNDER the Reviews page) */}
+      {/* 4. Interactive Trading Quote Gallery 1: Wisdom on the Charts */}
+      {settings.quoteGallery1 && (
+        <QuoteGallerySlider 
+          gallery={settings.quoteGallery1} 
+          galleryId="quotes-gallery-1" 
+        />
+      )}
+
+      {/* 5. Trading Calculator (Positions between the two galleries for optimal pacing) */}
       <div id="calculator" className="scroll-mt-24">
         <TradingCalculator />
       </div>
+
+      {/* 6. Interactive Trading Quote Gallery 2: The Trader's Creed (Placed AFTER the calculator) */}
+      {settings.quoteGallery2 && (
+        <QuoteGallerySlider 
+          gallery={settings.quoteGallery2} 
+          galleryId="quotes-gallery-2" 
+        />
+      )}
 
       {/* 4. Features Grid ("WHAT YOU GET") */}
       <section id="features" className="px-3 sm:px-6 md:px-8 max-w-[1200px] mx-auto w-full scroll-mt-24">
@@ -302,7 +313,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
                 className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-[#0053CF] hover:bg-[#0040A2] text-white px-6 sm:px-7 py-2.5 sm:py-3 rounded-lg font-inter text-[14px] font-bold shadow-xs transition-colors cursor-pointer"
               >
                 <Send className="w-4 h-4" />
-                <span>{settings.community?.ctaText || "Join Our Free VIP Group"}</span>
+                <span>{settings.community?.ctaText || "Join our trading community"}</span>
               </button>
             </div>
           </div>
@@ -335,7 +346,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
               {settings.about?.headline || settings.about?.title || "Built by Traders. Driven by Discipline."}
             </h2>
             <p className="font-inter text-[13.5px] sm:text-[15px] text-slate-600 leading-relaxed">
-              {settings.about?.storyParagraph1 || settings.about?.description || "U.S.H Forex was established with a singular objective: to cut through the hype of modern retail trading and provide structured, objective analysis grounded in institutional market structure."}
+              {settings.about?.storyParagraph1 || settings.about?.description || "USH Community of Traders was established with a singular objective: to cut through the hype of modern retail trading and provide structured, objective analysis grounded in institutional market structure."}
             </p>
             {settings.about?.storyParagraph2 && (
               <p className="font-inter text-[13.5px] sm:text-[15px] text-slate-600 leading-relaxed">

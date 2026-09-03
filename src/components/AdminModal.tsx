@@ -24,10 +24,12 @@ import {
   Database, 
   Sparkles,
   MessageSquare,
-  Inbox
+  Inbox,
+  Quote
 } from 'lucide-react';
 import { ReviewItem, FAQItem } from '../types';
 import { AdminInboxTab } from './AdminInboxTab';
+import { AdminQuotesTab } from './AdminQuotesTab';
 
 const COUNTRIES_LIST不易 = [
   { name: 'United Kingdom', code: 'gb' },
@@ -67,7 +69,7 @@ export const AdminModal: React.FC = () => {
     importSettingsJson,
   } = useSite();
 
-  const [activeTab, setActiveTab] = useState<'inbox' | 'branding' | 'hero' | 'reviews' | 'features' | 'community' | 'broker' | 'about' | 'faqs' | 'social' | 'backup'>('inbox');
+  const [activeTab, setActiveTab] = useState<'inbox' | 'branding' | 'hero' | 'reviews' | 'features' | 'community' | 'broker' | 'about' | 'faqs' | 'quotes' | 'social' | 'backup'>('inbox');
   const [saveSuccessToast, setSaveSuccessToast] = useState(false);
 
   // Local draft state for settings to allow fine-grained live editing
@@ -338,6 +340,7 @@ export const AdminModal: React.FC = () => {
             { id: 'broker', label: 'Broker Setup', icon: ShieldCheck },
             { id: 'about', label: 'About & Pillars', icon: BookOpen },
             { id: 'faqs', label: 'FAQs', icon: HelpCircle },
+            { id: 'quotes', label: 'Quote Galleries', icon: Quote },
             { id: 'social', label: 'Links & Socials', icon: LinkIcon },
             { id: 'backup', label: 'Backup & Reset', icon: Database },
           ].map((tab) => {
@@ -958,7 +961,7 @@ export const AdminModal: React.FC = () => {
                       </div>
 
                       {/* Action buttons */}
-                      <div className="flex items-center gap-1.5 shrink-0 self-end sm:self-auto">
+                      <div className="flex items-center gap-1.5 flex-wrap pt-1 sm:pt-0 sm:shrink-0">
                         {item.status !== 'approved' && (
                           <button
                             onClick={() => approveReview(item.id)}
@@ -1322,10 +1325,10 @@ export const AdminModal: React.FC = () => {
                           ...prev,
                           vipGuide: {
                             ...(prev.vipGuide || {
-                              title: 'Join Our Free VIP Group',
-                              subtitle: 'Follow the instructions below to join our free VIP group, for both new and already existing Exness users',
+                              title: 'Join our trading community',
+                              subtitle: 'Follow the instructions below to join our trading community, for both new and already existing Exness users',
                               partnerLink: 'https://one.exnessonelink.com/a/yxxz5mlw1n',
-                              vipTelegramUrl: 'https://t.me/ushforex_official',
+                              vipTelegramUrl: 'https://t.me/+wHFuFFkA2i0xZTA8',
                             }),
                             partnerCode: val,
                           },
@@ -1334,10 +1337,10 @@ export const AdminModal: React.FC = () => {
                           ...prev,
                           vipGuide: {
                             ...(prev.vipGuide || {
-                              title: 'Join Our Free VIP Group',
-                              subtitle: 'Follow the instructions below to join our free VIP group, for both new and already existing Exness users',
+                              title: 'Join our trading community',
+                              subtitle: 'Follow the instructions below to join our trading community, for both new and already existing Exness users',
                               partnerLink: 'https://one.exnessonelink.com/a/yxxz5mlw1n',
-                              vipTelegramUrl: 'https://t.me/ushforex_official',
+                              vipTelegramUrl: 'https://t.me/+wHFuFFkA2i0xZTA8',
                             }),
                             partnerCode: val,
                           },
@@ -1348,18 +1351,18 @@ export const AdminModal: React.FC = () => {
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-[12px] font-bold text-slate-700 block">VIP Telegram Admin Contact URL</label>
+                    <label className="text-[12px] font-bold text-slate-700 block">Telegram Channel / Admin Contact URL</label>
                     <input
                       type="url"
-                      value={draft.vipGuide?.vipTelegramUrl || 'https://t.me/ushforex_official'}
+                      value={draft.vipGuide?.vipTelegramUrl || 'https://t.me/+wHFuFFkA2i0xZTA8'}
                       onChange={(e) => {
                         const val = e.target.value;
                         setDraft((prev) => ({
                           ...prev,
                           vipGuide: {
                             ...(prev.vipGuide || {
-                              title: 'Join Our Free VIP Group',
-                              subtitle: 'Follow the instructions below to join our free VIP group, for both new and already existing Exness users',
+                              title: 'Join our trading community',
+                              subtitle: 'Follow the instructions below to join our trading community, for both new and already existing Exness users',
                               partnerLink: 'https://one.exnessonelink.com/a/yxxz5mlw1n',
                               partnerCode: '1046090975706890644',
                             }),
@@ -1370,8 +1373,8 @@ export const AdminModal: React.FC = () => {
                           ...prev,
                           vipGuide: {
                             ...(prev.vipGuide || {
-                              title: 'Join Our Free VIP Group',
-                              subtitle: 'Follow the instructions below to join our free VIP group, for both new and already existing Exness users',
+                              title: 'Join our trading community',
+                              subtitle: 'Follow the instructions below to join our trading community, for both new and already existing Exness users',
                               partnerLink: 'https://one.exnessonelink.com/a/yxxz5mlw1n',
                               partnerCode: '1046090975706890644',
                             }),
@@ -1571,6 +1574,13 @@ export const AdminModal: React.FC = () => {
                   </div>
                 ))}
               </div>
+            </div>
+          )}
+
+          {/* TAB 8.5: INTERACTIVE TRADING QUOTE GALLERIES */}
+          {activeTab === 'quotes' && (
+            <div className="animate-in fade-in">
+              <AdminQuotesTab />
             </div>
           )}
 

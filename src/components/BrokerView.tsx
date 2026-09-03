@@ -33,7 +33,7 @@ export const BrokerView: React.FC<BrokerViewProps> = ({
           Recommended Broker Setup
         </h1>
         <p className="font-inter text-[13.5px] sm:text-[16px] text-slate-600 max-w-2xl mx-auto leading-relaxed px-1">
-          At U.S.H Forex, execution quality, raw zero-spread liquidity, and instant withdrawals are non-negotiable. That is why our community trades on Exness.
+          At USH Community of Traders, execution quality, raw zero-spread liquidity, and instant withdrawals are non-negotiable. That is why our community trades on Exness.
         </p>
       </section>
 

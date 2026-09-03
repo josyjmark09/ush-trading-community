@@ -106,7 +106,7 @@ export const SOCIAL_CHANNELS_DATA: Record<SocialPlatformType, {
     renderLogo: (sizeClass = 'w-11 h-11') => <TelegramLogo className={sizeClass} />,
     channels: [
       {
-        title: 'USH Forex Community',
+        title: 'USH Community of Traders',
         url: 'https://t.me/+wHFuFFkA2i0xZTA8',
         isMain: true,
       }
