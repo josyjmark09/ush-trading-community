@@ -49,42 +49,94 @@ export const TradingCalculator: React.FC = () => {
   const [selectedSymbol, setSelectedSymbol] = useState<string>('EUR/USD');
   const [accountCurrency, setAccountCurrency] = useState<string>('USD');
 
-  // Position Size State
-  const [accountBalance, setAccountBalance] = useState<number>(10000);
+  // String states for inputs: allows users to backspace cleanly, clear everything, and type custom digits without snapping
+  const [accountBalanceStr, setAccountBalanceStr] = useState<string>('10000');
   const [riskType, setRiskType] = useState<'percent' | 'fixed'>('percent');
-  const [riskPercent, setRiskPercent] = useState<number>(1.0);
-  const [riskAmount, setRiskAmount] = useState<number>(100);
-  const [stopLossPips, setStopLossPips] = useState<number>(20);
+  const [riskPercentStr, setRiskPercentStr] = useState<string>('1.0');
+  const [riskAmountStr, setRiskAmountStr] = useState<string>('100');
+  const [stopLossPipsStr, setStopLossPipsStr] = useState<string>('20');
 
   // Pip Calculator State
-  const [pipLotSize, setPipLotSize] = useState<number>(1.0);
+  const [pipLotSizeStr, setPipLotSizeStr] = useState<string>('1.0');
 
   // P&L State
   const [orderType, setOrderType] = useState<'buy' | 'sell'>('buy');
-  const [pnlLots, setPnlLots] = useState<number>(1.0);
-  const [entryPrice, setEntryPrice] = useState<number>(1.0850);
-  const [exitPrice, setExitPrice] = useState<number>(1.0900);
+  const [pnlLotsStr, setPnlLotsStr] = useState<string>('1.0');
+  const [entryPriceStr, setEntryPriceStr] = useState<string>('1.0850');
+  const [exitPriceStr, setExitPriceStr] = useState<string>('1.0900');
 
   // Margin State
-  const [marginLots, setMarginLots] = useState<number>(1.0);
+  const [marginLotsStr, setMarginLotsStr] = useState<string>('1.0');
   const [leverage, setLeverage] = useState<number>(500);
+
+  // Currency Symbol
+  const currencySymbol = useMemo(() => {
+    switch (accountCurrency) {
+      case 'EUR': return '€';
+      case 'GBP': return '£';
+      case 'NGN': return '₦';
+      case 'ZAR': return 'R';
+      default: return '$';
+    }
+  }, [accountCurrency]);
+
+  // Derived numeric values for calculations
+  const accountBalance = parseFloat(accountBalanceStr) || 0;
+  const riskPercent = parseFloat(riskPercentStr) || 0;
+  const riskAmount = parseFloat(riskAmountStr) || 0;
+  const stopLossPips = parseFloat(stopLossPipsStr) || 0;
+  const pipLotSize = parseFloat(pipLotSizeStr) || 0;
+  const pnlLots = parseFloat(pnlLotsStr) || 0;
+  const entryPrice = parseFloat(entryPriceStr) || 0;
+  const exitPrice = parseFloat(exitPriceStr) || 0;
+  const marginLots = parseFloat(marginLotsStr) || 0;
+
+  // Generic numeric change handler that allows empty string and partial decimals
+  const handleNumericChange = (setter: React.Dispatch<React.SetStateAction<string>>) => (e: React.ChangeEvent<HTMLInputElement>) => {
+    const raw = e.target.value.replace(',', '.');
+    // Allow empty string, or any valid partial decimal number (e.g. "", "0", "0.", ".5", "123.45")
+    if (raw === '' || /^\d*\.?\d*$/.test(raw)) {
+      setter(raw);
+    }
+  };
 
   const instrument = useMemo(() => {
     return INSTRUMENTS.find((i) => i.symbol === selectedSymbol) || INSTRUMENTS[0];
   }, [selectedSymbol]);
+
+  // Institutional pip value calculation per 1 standard lot
+  const getPipValuePerLot = (inst: InstrumentInfo, currentPrice?: number) => {
+    const price = currentPrice && currentPrice > 0 ? currentPrice : inst.standardPrice;
+    if (inst.symbol === 'USD/JPY') {
+      return (0.01 / price) * inst.contractSize;
+    }
+    if (inst.symbol === 'USD/CAD' || inst.symbol === 'USD/CHF') {
+      return (inst.pipSize / price) * inst.contractSize;
+    }
+    if (inst.symbol === 'EUR/GBP') {
+      // 10 GBP per pip converted to USD (~1.2980)
+      return 10 * 1.2980;
+    }
+    if (inst.symbol === 'GBP/JPY') {
+      // 1000 JPY per pip converted to USD (~154.20)
+      return (0.01 / 154.20) * inst.contractSize;
+    }
+    // Pairs quoted in USD (EUR/USD, GBP/USD, AUD/USD, NZD/USD, XAU/USD, BTC/USD, US30)
+    return inst.contractSize * inst.pipSize;
+  };
 
   // Handle instrument change
   const handleInstrumentChange = (symbol: string) => {
     setSelectedSymbol(symbol);
     const found = INSTRUMENTS.find((i) => i.symbol === symbol);
     if (found) {
-      setEntryPrice(found.standardPrice);
+      setEntryPriceStr(found.standardPrice.toString());
       if (found.category === 'forex') {
-        setExitPrice(Number((found.standardPrice + found.pipSize * 50).toFixed(found.pipDecimals)));
+        setExitPriceStr(Number((found.standardPrice + found.pipSize * 50).toFixed(found.pipDecimals)).toString());
       } else if (found.category === 'metal') {
-        setExitPrice(Number((found.standardPrice + 10.0).toFixed(2)));
+        setExitPriceStr(Number((found.standardPrice + 10.0).toFixed(2)).toString());
       } else {
-        setExitPrice(Number((found.standardPrice + 200).toFixed(2)));
+        setExitPriceStr(Number((found.standardPrice + 200).toFixed(2)).toString());
       }
     }
   };
@@ -102,21 +154,10 @@ export const TradingCalculator: React.FC = () => {
       return { lots: 0, miniLots: 0, microLots: 0, units: 0, pipValuePerLot: 0 };
     }
 
-    // Value of 1 pip for 1 standard lot
-    let pipValuePerLot = 10; // default for EUR/USD with USD account
-    if (instrument.symbol === 'USD/JPY') {
-      pipValuePerLot = (0.01 / instrument.standardPrice) * instrument.contractSize;
-    } else if (instrument.symbol === 'XAU/USD') {
-      pipValuePerLot = instrument.contractSize * instrument.pipSize; // 100 * 0.10 = $10
-    } else if (instrument.symbol === 'BTC/USD' || instrument.symbol === 'US30') {
-      pipValuePerLot = instrument.contractSize * instrument.pipSize; // $1
-    } else {
-      pipValuePerLot = instrument.contractSize * instrument.pipSize; // $10 for standard majors
-    }
-
+    const pipValuePerLot = getPipValuePerLot(instrument);
     const totalPipValueRequired = calculatedRiskMoney / stopLossPips;
     const rawLots = totalPipValueRequired / pipValuePerLot;
-    const lots = Math.max(0.01, Math.floor(rawLots * 100) / 100);
+    const lots = Math.max(0, Math.round(rawLots * 100) / 100);
     const units = Math.round(lots * instrument.contractSize);
 
     return {
@@ -130,17 +171,7 @@ export const TradingCalculator: React.FC = () => {
 
   // Calculations for Pip Value
   const pipValueResults = useMemo(() => {
-    let basePipVal = 10;
-    if (instrument.symbol === 'USD/JPY') {
-      basePipVal = (0.01 / instrument.standardPrice) * instrument.contractSize;
-    } else if (instrument.symbol === 'XAU/USD') {
-      basePipVal = instrument.contractSize * instrument.pipSize;
-    } else if (instrument.symbol === 'BTC/USD' || instrument.symbol === 'US30') {
-      basePipVal = instrument.contractSize * instrument.pipSize;
-    } else {
-      basePipVal = instrument.contractSize * instrument.pipSize;
-    }
-
+    const basePipVal = getPipValuePerLot(instrument);
     const valueForTrade = basePipVal * pipLotSize;
     return {
       pipValue: Number(valueForTrade.toFixed(2)),
@@ -152,19 +183,13 @@ export const TradingCalculator: React.FC = () => {
 
   // Calculations for P&L
   const pnlResults = useMemo(() => {
+    if (entryPrice <= 0 || exitPrice <= 0 || pnlLots <= 0) {
+      return { pips: 0, profit: 0, isProfit: true, roi: 0 };
+    }
+
     const priceDiff = orderType === 'buy' ? exitPrice - entryPrice : entryPrice - exitPrice;
     const pips = priceDiff / instrument.pipSize;
-    
-    let pipValPerLot = 10;
-    if (instrument.symbol === 'USD/JPY') {
-      pipValPerLot = (0.01 / exitPrice) * instrument.contractSize;
-    } else if (instrument.symbol === 'XAU/USD') {
-      pipValPerLot = instrument.contractSize * instrument.pipSize;
-    } else if (instrument.symbol === 'BTC/USD' || instrument.symbol === 'US30') {
-      pipValPerLot = instrument.contractSize * instrument.pipSize;
-    } else {
-      pipValPerLot = instrument.contractSize * instrument.pipSize;
-    }
+    const pipValPerLot = getPipValuePerLot(instrument, exitPrice);
 
     const totalProfit = pips * pipValPerLot * pnlLots;
     const notionalValue = entryPrice * instrument.contractSize * pnlLots;
@@ -180,6 +205,9 @@ export const TradingCalculator: React.FC = () => {
 
   // Calculations for Margin
   const marginResults = useMemo(() => {
+    if (marginLots <= 0 || leverage <= 0) {
+      return { notional: 0, requiredMargin: 0, leverageRatio: `1:${leverage}` };
+    }
     const notional = marginLots * instrument.contractSize * instrument.standardPrice;
     const requiredMargin = notional / leverage;
     return {
@@ -194,27 +222,27 @@ export const TradingCalculator: React.FC = () => {
     if (activeTab === 'position') {
       text = `USH Community of Traders Calculator - Position Size:
 Pair: ${selectedSymbol}
-Account Balance: $${accountBalance.toLocaleString()}
-Risk: ${riskType === 'percent' ? `${riskPercent}% ($${calculatedRiskMoney.toFixed(2)})` : `$${riskAmount}`}
+Account Balance: ${currencySymbol}${accountBalance.toLocaleString()}
+Risk: ${riskType === 'percent' ? `${riskPercent}% (${currencySymbol}${calculatedRiskMoney.toFixed(2)})` : `${currencySymbol}${riskAmount}`}
 Stop Loss: ${stopLossPips} pips
 Recommended Lots: ${positionResults.lots} Lots (${positionResults.units.toLocaleString()} units)`;
     } else if (activeTab === 'pip') {
       text = `USH Community of Traders Pip Value Calculator:
 Pair: ${selectedSymbol}
 Trade Size: ${pipLotSize} Lots
-1 Pip Value: $${pipValueResults.pipValue}
-50 Pips: $${pipValueResults.fiftyPips}`;
+1 Pip Value: ${currencySymbol}${pipValueResults.pipValue}
+50 Pips: ${currencySymbol}${pipValueResults.fiftyPips}`;
     } else if (activeTab === 'pnl') {
       text = `USH Community of Traders Trade P&L:
 Pair: ${selectedSymbol} (${orderType.toUpperCase()})
 Lots: ${pnlLots}
 Entry: ${entryPrice} | Exit: ${exitPrice}
-Result: ${pnlResults.pips} pips | ${pnlResults.isProfit ? '+' : ''}$${pnlResults.profit.toLocaleString()}`;
+Result: ${pnlResults.pips} pips | ${pnlResults.isProfit ? '+' : ''}${currencySymbol}${pnlResults.profit.toLocaleString()}`;
     } else {
       text = `USH Community of Traders Margin Calculator:
 Pair: ${selectedSymbol}
 Lots: ${marginLots} | Leverage: 1:${leverage}
-Required Margin: $${marginResults.requiredMargin.toLocaleString()}`;
+Required Margin: ${currencySymbol}${marginResults.requiredMargin.toLocaleString()}`;
     }
 
     navigator.clipboard.writeText(text);
@@ -223,13 +251,14 @@ Required Margin: $${marginResults.requiredMargin.toLocaleString()}`;
   };
 
   const handleReset = () => {
-    setAccountBalance(10000);
+    setAccountBalanceStr('10000');
     setRiskType('percent');
-    setRiskPercent(1.0);
-    setStopLossPips(20);
-    setPipLotSize(1.0);
-    setPnlLots(1.0);
-    setMarginLots(1.0);
+    setRiskPercentStr('1.0');
+    setRiskAmountStr('100');
+    setStopLossPipsStr('20');
+    setPipLotSizeStr('1.0');
+    setPnlLotsStr('1.0');
+    setMarginLotsStr('1.0');
     setLeverage(500);
     handleInstrumentChange('EUR/USD');
   };
@@ -361,26 +390,26 @@ Required Margin: $${marginResults.requiredMargin.toLocaleString()}`;
                           <button
                             key={val}
                             type="button"
-                            onClick={() => setAccountBalance(val)}
+                            onClick={() => setAccountBalanceStr(val.toString())}
                             className={`text-[11px] px-2.5 py-1 sm:py-0.5 rounded-md font-bold transition-colors cursor-pointer shrink-0 ${
                               accountBalance === val 
                                 ? 'bg-[#0053CF] text-white shadow-2xs' 
                                 : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                             }`}
                           >
-                            ${val.toLocaleString()}
+                            {currencySymbol}{val.toLocaleString()}
                           </button>
                         ))}
                       </div>
                     </div>
                     <div className="relative">
-                      <span className="absolute left-3 top-2.5 text-slate-400 font-bold">$</span>
+                      <span className="absolute left-3 top-2.5 text-slate-400 font-bold">{currencySymbol}</span>
                       <input
-                        type="number"
-                        min="1"
-                        step="100"
-                        value={accountBalance}
-                        onChange={(e) => setAccountBalance(Math.max(0, Number(e.target.value)))}
+                        type="text"
+                        inputMode="decimal"
+                        value={accountBalanceStr}
+                        onChange={handleNumericChange(setAccountBalanceStr)}
+                        placeholder="10000"
                         className="w-full pl-7 pr-3 py-2 bg-white border border-slate-300 rounded-xl text-[16px] sm:text-[13.5px] font-inter font-bold text-slate-900 focus:border-[#0053CF] outline-hidden min-h-[42px] sm:min-h-0"
                       />
                     </div>
@@ -413,25 +442,24 @@ Required Margin: $${marginResults.requiredMargin.toLocaleString()}`;
                               : 'text-slate-600 hover:text-slate-900'
                           }`}
                         >
-                          Fixed Cash ($)
+                          Fixed Cash ({currencySymbol})
                         </button>
                       </div>
                     </div>
 
                     <div className="space-y-1">
                       <label className="text-[12px] font-bold text-slate-800 font-inter">
-                        {riskType === 'percent' ? 'Risk Percentage' : 'Fixed Cash Risk'}
+                        {riskType === 'percent' ? 'Risk Percentage' : `Fixed Cash Risk (${currencySymbol})`}
                       </label>
                       {riskType === 'percent' ? (
                         <div>
                           <div className="relative">
                             <input
-                              type="number"
-                              min="0.1"
-                              max="100"
-                              step="0.1"
-                              value={riskPercent}
-                              onChange={(e) => setRiskPercent(Math.max(0.1, Number(e.target.value)))}
+                              type="text"
+                              inputMode="decimal"
+                              value={riskPercentStr}
+                              onChange={handleNumericChange(setRiskPercentStr)}
+                              placeholder="1.0"
                               className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-[16px] sm:text-[13.5px] font-inter font-bold text-slate-900 focus:border-[#0053CF] outline-hidden min-h-[42px] sm:min-h-0"
                             />
                             <span className="absolute right-3 top-2.5 text-slate-400 font-bold">%</span>
@@ -441,7 +469,7 @@ Required Margin: $${marginResults.requiredMargin.toLocaleString()}`;
                               <button
                                 key={p}
                                 type="button"
-                                onClick={() => setRiskPercent(p)}
+                                onClick={() => setRiskPercentStr(p.toString())}
                                 className={`text-[11px] px-2 py-1 sm:py-0.5 rounded font-bold cursor-pointer shrink-0 transition-colors ${
                                   riskPercent === p ? 'bg-[#0053CF] text-white shadow-2xs' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                                 }`}
@@ -453,13 +481,13 @@ Required Margin: $${marginResults.requiredMargin.toLocaleString()}`;
                         </div>
                       ) : (
                         <div className="relative">
-                          <span className="absolute left-3 top-2.5 text-slate-400 font-bold">$</span>
+                          <span className="absolute left-3 top-2.5 text-slate-400 font-bold">{currencySymbol}</span>
                           <input
-                            type="number"
-                            min="1"
-                            step="10"
-                            value={riskAmount}
-                            onChange={(e) => setRiskAmount(Math.max(1, Number(e.target.value)))}
+                            type="text"
+                            inputMode="decimal"
+                            value={riskAmountStr}
+                            onChange={handleNumericChange(setRiskAmountStr)}
+                            placeholder="100"
                             className="w-full pl-7 pr-3 py-2 bg-white border border-slate-300 rounded-xl text-[16px] sm:text-[13.5px] font-inter font-bold text-slate-900 focus:border-[#0053CF] outline-hidden min-h-[42px] sm:min-h-0"
                           />
                         </div>
@@ -478,7 +506,7 @@ Required Margin: $${marginResults.requiredMargin.toLocaleString()}`;
                           <button
                             key={p}
                             type="button"
-                            onClick={() => setStopLossPips(p)}
+                            onClick={() => setStopLossPipsStr(p.toString())}
                             className={`text-[11px] px-2.5 py-1 sm:py-0.5 rounded-md font-bold cursor-pointer shrink-0 transition-colors ${
                               stopLossPips === p ? 'bg-[#0053CF] text-white shadow-2xs' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                             }`}
@@ -489,11 +517,11 @@ Required Margin: $${marginResults.requiredMargin.toLocaleString()}`;
                       </div>
                     </div>
                     <input
-                      type="number"
-                      min="1"
-                      step="1"
-                      value={stopLossPips}
-                      onChange={(e) => setStopLossPips(Math.max(1, Number(e.target.value)))}
+                      type="text"
+                      inputMode="decimal"
+                      value={stopLossPipsStr}
+                      onChange={handleNumericChange(setStopLossPipsStr)}
+                      placeholder="20"
                       className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-[16px] sm:text-[13.5px] font-inter font-bold text-slate-900 focus:border-[#0053CF] outline-hidden min-h-[42px] sm:min-h-0"
                     />
                   </div>
@@ -512,7 +540,7 @@ Required Margin: $${marginResults.requiredMargin.toLocaleString()}`;
                         <button
                           key={lots}
                           type="button"
-                          onClick={() => setPipLotSize(lots)}
+                          onClick={() => setPipLotSizeStr(lots.toString())}
                           className={`text-[11.5px] px-2.5 py-1 rounded-md font-bold cursor-pointer shrink-0 transition-colors ${
                             pipLotSize === lots ? 'bg-[#0053CF] text-white shadow-2xs' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                           }`}
@@ -522,11 +550,11 @@ Required Margin: $${marginResults.requiredMargin.toLocaleString()}`;
                       ))}
                     </div>
                     <input
-                      type="number"
-                      min="0.01"
-                      step="0.01"
-                      value={pipLotSize}
-                      onChange={(e) => setPipLotSize(Math.max(0.01, Number(e.target.value)))}
+                      type="text"
+                      inputMode="decimal"
+                      value={pipLotSizeStr}
+                      onChange={handleNumericChange(setPipLotSizeStr)}
+                      placeholder="1.0"
                       className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-[16px] sm:text-[13.5px] font-inter font-bold text-slate-900 focus:border-[#0053CF] outline-hidden min-h-[42px] sm:min-h-0"
                     />
                   </div>
@@ -573,11 +601,11 @@ Required Margin: $${marginResults.requiredMargin.toLocaleString()}`;
                         Position Volume (Lots)
                       </label>
                       <input
-                        type="number"
-                        min="0.01"
-                        step="0.01"
-                        value={pnlLots}
-                        onChange={(e) => setPnlLots(Math.max(0.01, Number(e.target.value)))}
+                        type="text"
+                        inputMode="decimal"
+                        value={pnlLotsStr}
+                        onChange={handleNumericChange(setPnlLotsStr)}
+                        placeholder="1.0"
                         className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-[16px] sm:text-[13.5px] font-inter font-bold text-slate-900 focus:border-[#0053CF] outline-hidden min-h-[42px] sm:min-h-0"
                       />
                     </div>
@@ -589,10 +617,11 @@ Required Margin: $${marginResults.requiredMargin.toLocaleString()}`;
                         Open (Entry) Price
                       </label>
                       <input
-                        type="number"
-                        step="any"
-                        value={entryPrice}
-                        onChange={(e) => setEntryPrice(Number(e.target.value))}
+                        type="text"
+                        inputMode="decimal"
+                        value={entryPriceStr}
+                        onChange={handleNumericChange(setEntryPriceStr)}
+                        placeholder={instrument.standardPrice.toString()}
                         className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-[16px] sm:text-[13.5px] font-inter font-bold text-slate-900 focus:border-[#0053CF] outline-hidden min-h-[42px] sm:min-h-0"
                       />
                     </div>
@@ -602,10 +631,11 @@ Required Margin: $${marginResults.requiredMargin.toLocaleString()}`;
                         Close (Exit) Price
                       </label>
                       <input
-                        type="number"
-                        step="any"
-                        value={exitPrice}
-                        onChange={(e) => setExitPrice(Number(e.target.value))}
+                        type="text"
+                        inputMode="decimal"
+                        value={exitPriceStr}
+                        onChange={handleNumericChange(setExitPriceStr)}
+                        placeholder="1.0900"
                         className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-[16px] sm:text-[13.5px] font-inter font-bold text-slate-900 focus:border-[#0053CF] outline-hidden min-h-[42px] sm:min-h-0"
                       />
                     </div>
@@ -622,11 +652,11 @@ Required Margin: $${marginResults.requiredMargin.toLocaleString()}`;
                         Trade Size (Lots)
                       </label>
                       <input
-                        type="number"
-                        min="0.01"
-                        step="0.01"
-                        value={marginLots}
-                        onChange={(e) => setMarginLots(Math.max(0.01, Number(e.target.value)))}
+                        type="text"
+                        inputMode="decimal"
+                        value={marginLotsStr}
+                        onChange={handleNumericChange(setMarginLotsStr)}
+                        placeholder="1.0"
                         className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-[16px] sm:text-[13.5px] font-inter font-bold text-slate-900 focus:border-[#0053CF] outline-hidden min-h-[42px] sm:min-h-0"
                       />
                     </div>
@@ -722,7 +752,7 @@ Required Margin: $${marginResults.requiredMargin.toLocaleString()}`;
                         <span className="text-[10.5px] sm:text-[11px] text-slate-400 font-medium block truncate">Cash at Risk</span>
                         <div className="mt-1 min-w-0">
                           <span className="text-[16px] sm:text-[19px] font-black text-rose-400 font-manrope block leading-tight truncate">
-                            ${calculatedRiskMoney.toFixed(2)}
+                            {currencySymbol}{calculatedRiskMoney.toFixed(2)}
                           </span>
                           <span className="text-[10px] sm:text-[10.5px] text-slate-400 font-inter mt-0.5 block truncate">
                             {riskType === 'percent' ? `${riskPercent}% of balance` : 'Fixed cash risk'}
@@ -734,7 +764,7 @@ Required Margin: $${marginResults.requiredMargin.toLocaleString()}`;
                         <span className="text-[10.5px] sm:text-[11px] text-slate-400 font-medium block truncate">Pip Value (Total)</span>
                         <div className="mt-1 min-w-0">
                           <span className="text-[16px] sm:text-[19px] font-black text-sky-400 font-manrope block leading-tight truncate">
-                            ${(positionResults.lots * positionResults.pipValuePerLot).toFixed(2)}
+                            {currencySymbol}{(positionResults.lots * positionResults.pipValuePerLot).toFixed(2)}
                           </span>
                           <span className="text-[10px] sm:text-[10.5px] text-slate-400 font-inter mt-0.5 block truncate">
                             per pip movement
@@ -770,7 +800,7 @@ Required Margin: $${marginResults.requiredMargin.toLocaleString()}`;
                       </span>
                       <div className="flex items-baseline gap-2 mt-1">
                         <span className="text-[28px] sm:text-[36px] font-manrope font-black text-white leading-none">
-                          ${pipValueResults.pipValue.toFixed(2)}
+                          {currencySymbol}{pipValueResults.pipValue.toFixed(2)}
                         </span>
                         <span className="text-[13px] font-bold text-sky-400 font-inter">
                           per 1 pip
@@ -784,15 +814,15 @@ Required Margin: $${marginResults.requiredMargin.toLocaleString()}`;
                     <div className="space-y-2 pt-1">
                       <div className="flex justify-between items-center p-2.5 rounded-lg bg-slate-800/60 border border-slate-700/60 text-[12.5px]">
                         <span className="text-slate-300 font-inter">10 Pips Move:</span>
-                        <span className="font-bold text-white font-mono">${pipValueResults.tenPips.toFixed(2)}</span>
+                        <span className="font-bold text-white font-mono">{currencySymbol}{pipValueResults.tenPips.toFixed(2)}</span>
                       </div>
                       <div className="flex justify-between items-center p-2.5 rounded-lg bg-slate-800/60 border border-slate-700/60 text-[12.5px]">
                         <span className="text-slate-300 font-inter">50 Pips Move:</span>
-                        <span className="font-bold text-white font-mono">${pipValueResults.fiftyPips.toFixed(2)}</span>
+                        <span className="font-bold text-white font-mono">{currencySymbol}{pipValueResults.fiftyPips.toFixed(2)}</span>
                       </div>
                       <div className="flex justify-between items-center p-2.5 rounded-lg bg-slate-800/60 border border-slate-700/60 text-[12.5px]">
                         <span className="text-slate-300 font-inter">100 Pips Move:</span>
-                        <span className="font-bold text-white font-mono">${pipValueResults.hundredPips.toFixed(2)}</span>
+                        <span className="font-bold text-white font-mono">{currencySymbol}{pipValueResults.hundredPips.toFixed(2)}</span>
                       </div>
                     </div>
                   </div>
@@ -807,7 +837,7 @@ Required Margin: $${marginResults.requiredMargin.toLocaleString()}`;
                       </span>
                       <div className="flex items-baseline gap-2 mt-1">
                         <span className={`text-[28px] sm:text-[36px] font-manrope font-black leading-none ${pnlResults.isProfit ? 'text-emerald-400' : 'text-rose-400'}`}>
-                          {pnlResults.isProfit ? '+' : ''}${pnlResults.profit.toLocaleString()}
+                          {pnlResults.isProfit ? '+' : ''}{currencySymbol}{pnlResults.profit.toLocaleString()}
                         </span>
                       </div>
                       <div className="text-[12px] text-slate-300 font-mono mt-1">
@@ -842,7 +872,7 @@ Required Margin: $${marginResults.requiredMargin.toLocaleString()}`;
                       </span>
                       <div className="flex items-baseline gap-2 mt-1">
                         <span className="text-[28px] sm:text-[36px] font-manrope font-black text-white leading-none">
-                          ${marginResults.requiredMargin.toLocaleString()}
+                          {currencySymbol}{marginResults.requiredMargin.toLocaleString()}
                         </span>
                       </div>
                       <div className="text-[12px] text-slate-300 font-mono mt-1">
@@ -853,7 +883,7 @@ Required Margin: $${marginResults.requiredMargin.toLocaleString()}`;
                     <div className="p-3 bg-slate-800/50 rounded-xl border border-slate-700/60 space-y-2 text-[12px] font-inter">
                       <div className="flex justify-between">
                         <span className="text-slate-400">Total Notional Value:</span>
-                        <span className="font-bold text-white font-mono">${marginResults.notional.toLocaleString()}</span>
+                        <span className="font-bold text-white font-mono">{currencySymbol}{marginResults.notional.toLocaleString()}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-slate-400">Margin Deposit Rate:</span>

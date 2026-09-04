@@ -6,7 +6,9 @@ import {
   Download, 
   Share2, 
   Check, 
-  Loader2
+  Loader2,
+  X,
+  Smartphone
 } from 'lucide-react';
 import { useSite } from '../context/SiteContext';
 import ushLogoPng from './ush logo.png';
@@ -29,6 +31,7 @@ export const QuoteGallerySlider: React.FC<QuoteGallerySliderProps> = ({
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
   const [sharingId, setSharingId] = useState<string | null>(null);
+  const [mobilePreview, setMobilePreview] = useState<{ url: string; displayNum: string; blob: Blob; quoteText: string } | null>(null);
 
   const quotes = gallery.quotes || [];
   // Duplicate array so it continuously loops with zero seam
@@ -344,7 +347,7 @@ export const QuoteGallerySlider: React.FC<QuoteGallerySliderProps> = ({
     return { canvas, displayNum };
   };
 
-  // High-Resolution 1080x1080 Canvas Download
+  // High-Resolution 1080x1080 Canvas Download & Mobile Save
   const handleDownloadCard = async (item: QuoteItem, index: number) => {
     const cardId = item.id || `quote-${index}`;
     setDownloadingId(cardId);
@@ -358,13 +361,65 @@ export const QuoteGallerySlider: React.FC<QuoteGallerySliderProps> = ({
 
       const { canvas, displayNum } = generated;
 
-      // Download file
-      const link = document.createElement('a');
-      link.download = `USH-Community-of-Traders-Quote-${displayNum}.png`;
-      link.href = canvas.toDataURL('image/png');
-      link.click();
+      // Convert canvas to Blob
+      const blob = await new Promise<Blob | null>((resolve) => {
+        canvas.toBlob((b) => resolve(b), 'image/png');
+      });
 
-      showToast(`Downloaded Quote N° ${displayNum}!`);
+      if (!blob) {
+        showToast('Unable to create image file');
+        return;
+      }
+
+      const fileName = `USH-Community-of-Traders-Quote-${displayNum}.png`;
+      const blobUrl = URL.createObjectURL(blob);
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+      const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+      // On iOS devices:
+      // iOS Safari and WebKit famously block programmatic `<a download>.click()`.
+      // The native iOS way to save directly to the Photos app is Web Share with files,
+      // or opening the image preview for 1-tap "Save to Photos".
+      if (isIOS) {
+        const imageFile = new File([blob], fileName, { type: 'image/png' });
+        if (typeof navigator.canShare === 'function' && navigator.canShare({ files: [imageFile] })) {
+          try {
+            await navigator.share({
+              files: [imageFile],
+              title: `USH Community Quote N° ${displayNum}`,
+            });
+            showToast(`Quote N° ${displayNum} saved/shared!`);
+            return;
+          } catch (shareErr) {
+            if (shareErr instanceof Error && shareErr.name === 'AbortError') {
+              // User dismissed sheet
+              return;
+            }
+          }
+        }
+        // Fallback for iOS or in-app browser: Open high-res preview modal with long-press tip
+        setMobilePreview({ url: blobUrl, displayNum, blob, quoteText: item.quote });
+        return;
+      }
+
+      // On Android and Desktop:
+      // Programmatic blob anchor attached to document.body ensures download works on Chrome/Edge/Firefox
+      const link = document.createElement('a');
+      link.download = fileName;
+      link.href = blobUrl;
+      document.body.appendChild(link);
+      link.click();
+      setTimeout(() => {
+        document.body.removeChild(link);
+      }, 1000);
+
+      // If on Android mobile in-app browser where download may be restricted, also offer preview
+      if (isMobile) {
+        showToast(`Download started! If not saved, tap to preview.`);
+      } else {
+        showToast(`Downloaded Quote N° ${displayNum}!`);
+      }
     } catch (e) {
       console.error('Error generating card image:', e);
       showToast('Error generating image');
@@ -639,6 +694,107 @@ export const QuoteGallerySlider: React.FC<QuoteGallerySliderProps> = ({
           );
         })}
       </div>
+
+      {/* Mobile Image Preview & Save Modal */}
+      {mobilePreview && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/80 backdrop-blur-xs animate-soft-fade"
+          onClick={() => setMobilePreview(null)}
+        >
+          <div 
+            className="bg-white rounded-2xl max-w-sm w-full p-4 shadow-2xl border border-slate-200 relative flex flex-col max-h-[92vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="flex items-center justify-between pb-2.5 border-b border-slate-100 mb-3">
+              <div>
+                <h3 className="font-manrope text-[15px] font-black text-slate-900">
+                  Save Quote N° {mobilePreview.displayNum}
+                </h3>
+                <p className="text-[11px] text-slate-500 font-inter">
+                  Official USH Community Trader Creed
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setMobilePreview(null)}
+                className="text-slate-400 hover:text-slate-700 p-1.5 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer shrink-0"
+                aria-label="Close"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Rendered High-Res Card Image */}
+            <div className="rounded-xl overflow-hidden border border-slate-200 bg-slate-900 p-1 mb-3">
+              <img 
+                src={mobilePreview.url} 
+                alt={`Quote ${mobilePreview.displayNum}`} 
+                className="w-full h-auto rounded-lg shadow-inner select-none pointer-events-auto"
+              />
+            </div>
+
+            {/* Mobile Instructions Tip */}
+            <div className="p-2.5 bg-amber-50 border border-amber-200/90 rounded-xl mb-3 text-[11.5px] text-amber-900 font-inter leading-relaxed flex items-start gap-2">
+              <Smartphone className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+              <span>
+                <strong>Mobile tip:</strong> Press and hold the image above, then choose <strong>"Save to Photos"</strong> or <strong>"Download Image"</strong>.
+              </span>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex gap-2">
+              {typeof navigator.share === 'function' && (
+                <button
+                  type="button"
+                  onClick={async () => {
+                    const file = new File(
+                      [mobilePreview.blob], 
+                      `USH-Community-Quote-${mobilePreview.displayNum}.png`, 
+                      { type: 'image/png' }
+                    );
+                    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                      try {
+                        await navigator.share({
+                          files: [file],
+                          title: `USH Community Quote N° ${mobilePreview.displayNum}`,
+                          text: `"${mobilePreview.quoteText}" — USH Community of Traders`,
+                        });
+                        setMobilePreview(null);
+                        showToast(`Saved Quote N° ${mobilePreview.displayNum}!`);
+                      } catch (err) {
+                        if (err instanceof Error && err.name === 'AbortError') return;
+                      }
+                    }
+                  }}
+                  className="flex-1 py-2.5 px-3 rounded-xl bg-[#0053CF] hover:bg-[#0046b0] text-white font-manrope font-bold text-[12.5px] flex items-center justify-center gap-1.5 shadow-sm active:scale-98 cursor-pointer transition-colors"
+                >
+                  <Share2 className="w-4 h-4" />
+                  <span>Save to Photos</span>
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => {
+                  const link = document.createElement('a');
+                  link.download = `USH-Community-of-Traders-Quote-${mobilePreview.displayNum}.png`;
+                  link.href = mobilePreview.url;
+                  document.body.appendChild(link);
+                  link.click();
+                  setTimeout(() => {
+                    document.body.removeChild(link);
+                  }, 1000);
+                  showToast('Download started!');
+                }}
+                className="flex-1 py-2.5 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-manrope font-bold text-[12.5px] flex items-center justify-center gap-1.5 active:scale-98 cursor-pointer transition-colors"
+              >
+                <Download className="w-4 h-4" />
+                <span>Direct File</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 };
