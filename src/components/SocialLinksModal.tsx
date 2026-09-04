@@ -77,12 +77,10 @@ export const SOCIAL_CHANNELS_DATA: Record<SocialPlatformType, {
       {
         title: 'Kings Forex',
         url: 'https://www.instagram.com/kingsforex01?igsi=OG8ydWJ1ZHFsMHk5&utm_source=qr',
-        isMain: true,
       },
       {
         title: 'USH FX',
         url: 'https://www.instagram.com/ush.fx?igsi=MTEwZHJrcTljMDMyNw==',
-        isMain: false,
       }
     ]
   },
@@ -93,12 +91,10 @@ export const SOCIAL_CHANNELS_DATA: Record<SocialPlatformType, {
       {
         title: 'Kings Trader',
         url: 'https://www.snapchat.com/add/kingstrader?share_id=fmGNTTpNRt2kevVID5coag&locale=en_NG',
-        isMain: true,
       },
       {
-        title: 'Kings Snapchat 2',
+        title: 'USH',
         url: 'https://snapchat.com/t/ZKRE8Ycf',
-        isMain: false,
       }
     ]
   },
@@ -156,48 +152,55 @@ export const SocialLinksModal: React.FC<SocialLinksModalProps> = ({
 
         {/* Channels Grid: Mobile stacked list / desktop side-by-side */}
         <div className={`grid gap-2.5 sm:gap-3 ${data.channels.length === 3 ? 'grid-cols-1 sm:grid-cols-3' : 'grid-cols-1 sm:grid-cols-2'}`}>
-          {data.channels.map((channel, idx) => (
-            <a
-              key={idx}
-              href={channel.url}
-              target={platform === 'telegram' && isMobileDevice() ? '_self' : '_blank'}
-              rel="noopener noreferrer"
-              onClick={(e) => {
-                if (platform === 'telegram') {
-                  openTelegram(channel.url, e);
-                }
-                onClose();
-              }}
-              className={`relative flex flex-col items-center justify-center p-3.5 sm:p-4 rounded-xl border transition-all group cursor-pointer active:scale-98 text-center ${
-                channel.isMain 
-                  ? 'bg-blue-50/50 border-[#0053CF] shadow-xs hover:bg-blue-50/80 hover:shadow-md ring-1 ring-[#0053CF]/20' 
-                  : 'border-slate-200 bg-slate-50/80 hover:bg-slate-100/90 hover:border-slate-300 shadow-2xs'
-              }`}
-            >
-              {/* "Main Account" written right on top */}
-              <div className="mb-2">
-                <span className={`inline-block text-[10px] sm:text-[10.5px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full ${
-                  channel.isMain 
-                    ? 'bg-[#0053CF] text-white shadow-2xs' 
-                    : 'bg-slate-200 text-slate-600'
+          {data.channels.map((channel, idx) => {
+            const showMainTag = platform !== 'instagram' && platform !== 'snapchat' && channel.isMain !== undefined;
+            const isMain = showMainTag && !!channel.isMain;
+
+            return (
+              <a
+                key={idx}
+                href={channel.url}
+                target={platform === 'telegram' && isMobileDevice() ? '_self' : '_blank'}
+                rel="noopener noreferrer"
+                onClick={(e) => {
+                  if (platform === 'telegram') {
+                    openTelegram(channel.url, e);
+                  }
+                  onClose();
+                }}
+                className={`relative flex flex-col items-center justify-center p-3.5 sm:p-4 rounded-xl border transition-all group cursor-pointer active:scale-98 text-center ${
+                  isMain 
+                    ? 'bg-blue-50/50 border-[#0053CF] shadow-xs hover:bg-blue-50/80 hover:shadow-md ring-1 ring-[#0053CF]/20' 
+                    : 'border-slate-200 bg-slate-50/80 hover:bg-slate-100/90 hover:border-slate-300 shadow-2xs'
+                }`}
+              >
+                {/* Main/Backup Badge - hidden for Instagram & Snapchat */}
+                {showMainTag && (
+                  <div className="mb-2">
+                    <span className={`inline-block text-[10px] sm:text-[10.5px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full ${
+                      isMain 
+                        ? 'bg-[#0053CF] text-white shadow-2xs' 
+                        : 'bg-slate-200 text-slate-600'
+                    }`}>
+                      {isMain ? 'Main Account' : 'Backup Account'}
+                    </span>
+                  </div>
+                )}
+
+                {/* Logo */}
+                <div className="mb-2 transition-transform group-hover:scale-105">
+                  {data.renderLogo('w-10 h-10 sm:w-11 sm:h-11 drop-shadow-xs')}
+                </div>
+
+                {/* Account Title */}
+                <span className={`font-manrope text-[13.5px] sm:text-[14px] font-bold leading-tight ${
+                  isMain ? 'text-[#0053CF]' : 'text-slate-900 group-hover:text-[#0053CF]'
                 }`}>
-                  {channel.isMain ? 'Main Account' : 'Backup Account'}
+                  {channel.title}
                 </span>
-              </div>
-
-              {/* Logo */}
-              <div className="mb-2 transition-transform group-hover:scale-105">
-                {data.renderLogo('w-10 h-10 sm:w-11 sm:h-11 drop-shadow-xs')}
-              </div>
-
-              {/* Account Title */}
-              <span className={`font-manrope text-[13.5px] sm:text-[14px] font-bold leading-tight ${
-                channel.isMain ? 'text-[#0053CF]' : 'text-slate-900 group-hover:text-[#0053CF]'
-              }`}>
-                {channel.title}
-              </span>
-            </a>
-          ))}
+              </a>
+            );
+          })}
         </div>
       </div>
     </div>

@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { NavTab } from '../types';
-import { Send, Phone, Menu, X, ChevronRight } from 'lucide-react';
+import { Send, Phone, Menu, X, ChevronRight, ExternalLink } from 'lucide-react';
 import { useSite } from '../context/SiteContext';
 import logoSvg from './image 1.svg';
 
@@ -56,8 +56,14 @@ export const Header: React.FC<HeaderProps> = ({
     handleNavClick('home');
   };
 
-  const navItems: { id: NavTab; label: string }[] = [
+  const navItems: Array<{
+    id?: NavTab;
+    label: string;
+    href?: string;
+    isExternal?: boolean;
+  }> = [
     { id: 'home', label: 'Home' },
+    { label: 'Forex Factory', href: 'https://www.forexfactory.com', isExternal: true },
     { id: 'about', label: 'About' },
     { id: 'quotes', label: 'Trading Quotes' },
     { id: 'testimonials', label: 'Reviews' },
@@ -104,11 +110,26 @@ export const Header: React.FC<HeaderProps> = ({
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center gap-6">
           {navItems.map((item) => {
-            const isActive = activeTab === item.id;
+            if (item.href) {
+              return (
+                <a
+                  key={item.label}
+                  href={item.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-inter text-[13.5px] leading-[20px] transition-colors py-1 relative font-bold whitespace-nowrap cursor-pointer text-slate-700 hover:text-[#0053CF] inline-flex items-center gap-1"
+                >
+                  <span>{item.label}</span>
+                  <ExternalLink className="w-3 h-3 text-slate-400" />
+                </a>
+              );
+            }
+
+            const isActive = item.id ? activeTab === item.id : false;
             return (
               <button
-                key={item.id}
-                onClick={() => handleNavClick(item.id)}
+                key={item.id || item.label}
+                onClick={() => item.id && handleNavClick(item.id)}
                 className={`font-inter text-[13.5px] leading-[20px] transition-colors py-1 relative font-bold whitespace-nowrap cursor-pointer ${
                   isActive
                     ? 'text-[#0053CF]'
@@ -168,11 +189,27 @@ export const Header: React.FC<HeaderProps> = ({
         <div className="md:hidden bg-white border-b border-slate-300 shadow-lg animate-soft-entry">
           <div className="px-4 py-3 space-y-1">
             {navItems.map((item) => {
-              const isActive = activeTab === item.id;
+              if (item.href) {
+                return (
+                  <a
+                    key={item.label}
+                    href={item.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-[14.5px] font-bold transition-colors cursor-pointer text-slate-700 hover:bg-slate-50 hover:text-slate-900"
+                  >
+                    <span>{item.label}</span>
+                    <ExternalLink className="w-4 h-4 text-slate-400" />
+                  </a>
+                );
+              }
+
+              const isActive = item.id ? activeTab === item.id : false;
               return (
                 <button
-                  key={item.id}
-                  onClick={() => handleNavClick(item.id)}
+                  key={item.id || item.label}
+                  onClick={() => item.id && handleNavClick(item.id)}
                   className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-[14.5px] font-bold transition-colors cursor-pointer ${
                     isActive
                       ? 'bg-blue-50 text-[#0053CF] font-black'
