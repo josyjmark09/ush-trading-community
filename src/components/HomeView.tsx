@@ -29,6 +29,7 @@ import { ExnessLogo } from './ExnessLogo';
 import { TradingViewChart } from './TradingViewChart';
 import { ServicesSection } from './ServicesSection';
 import { openTelegram } from '../utils/telegramLink';
+import { NavTab } from '../types';
 import chartImage2 from './image 2.png';
 import chartImage3 from './image 3.png';
 
@@ -37,6 +38,7 @@ interface HomeViewProps {
   onOpenBroker: () => void;
   onOpenContact: () => void;
   onOpenVipGuide?: () => void;
+  setActiveTab?: (tab: NavTab) => void;
 }
 
 const getFeatureIcon = (iconName?: string) => {
@@ -598,7 +600,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
               placeholder="Search questions..."
               value={faqSearchQuery}
               onChange={(e) => setFaqSearchQuery(e.target.value)}
-              className="w-full bg-white border border-slate-300 focus:border-[#0053CF] rounded-lg pl-9 pr-3.5 py-2 text-[13px] text-slate-900 placeholder-slate-400 outline-none shadow-2xs font-inter"
+              className="w-full bg-white border border-slate-300 focus:border-[#0053CF] rounded-lg pl-9 pr-3.5 py-2 text-[16px] sm:text-[13px] text-slate-900 placeholder-slate-400 outline-none shadow-2xs font-inter min-h-[42px] sm:min-h-0"
             />
           </div>
 

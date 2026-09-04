@@ -220,7 +220,7 @@ export const VipGuideModal: React.FC<VipGuideModalProps> = ({
               </div>
 
               {/* Partner Code Callout */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-3 py-2 rounded-lg bg-slate-50 border border-slate-200 text-slate-800 text-[12px] font-inter">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-3 py-2.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-800 text-[12px] font-inter">
                 <span className="text-slate-600 font-medium">
                   Partner code to use during sign up &ndash;{' '}
                   <strong className="font-mono text-[12.5px] text-[#0053CF] font-bold tracking-wide select-all">
@@ -230,7 +230,7 @@ export const VipGuideModal: React.FC<VipGuideModalProps> = ({
                 <button
                   type="button"
                   onClick={handleCopyCode}
-                  className="inline-flex items-center justify-center gap-1 px-2.5 py-1 text-[11px] font-bold bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 rounded transition-all shrink-0 cursor-pointer shadow-2xs active:scale-95"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-1 px-3 py-1.5 sm:py-1 text-[12px] sm:text-[11px] font-bold bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 rounded transition-all shrink-0 cursor-pointer shadow-2xs active:scale-95 min-h-[36px] sm:min-h-0"
                   title="Copy Partner Code"
                 >
                   {copiedCode ? (
@@ -293,7 +293,7 @@ export const VipGuideModal: React.FC<VipGuideModalProps> = ({
                     placeholder="Exness Account ID (Optional - e.g. 19284712)"
                     value={accountId}
                     onChange={(e) => setAccountId(e.target.value)}
-                    className="flex-1 px-3 py-2 bg-white border border-slate-300 rounded-lg text-[13px] font-inter focus:outline-hidden focus:border-[#0053CF]"
+                    className="flex-1 px-3 py-2 bg-white border border-slate-300 rounded-lg text-[16px] sm:text-[13px] font-inter focus:outline-hidden focus:border-[#0053CF] min-h-[42px] sm:min-h-0"
                   />
                   <button
                     type="submit"

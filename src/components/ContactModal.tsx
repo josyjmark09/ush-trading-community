@@ -232,7 +232,7 @@ export const ContactModal: React.FC<ContactModalProps> = ({ isOpen, type, onClos
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     placeholder="e.g., Alex Vance"
-                    className="w-full bg-white border border-slate-300 focus:border-[#0053CF] rounded-lg px-3.5 py-2 text-[13.5px] text-slate-900 outline-hidden font-inter"
+                    className="w-full bg-white border border-slate-300 focus:border-[#0053CF] rounded-lg px-3.5 py-2 text-[16px] sm:text-[13.5px] text-slate-900 outline-hidden font-inter min-h-[42px] sm:min-h-0"
                   />
                 </div>
 
@@ -246,7 +246,7 @@ export const ContactModal: React.FC<ContactModalProps> = ({ isOpen, type, onClos
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     placeholder="trader@example.com"
-                    className="w-full bg-white border border-slate-300 focus:border-[#0053CF] rounded-lg px-3.5 py-2 text-[13.5px] text-slate-900 outline-hidden font-inter"
+                    className="w-full bg-white border border-slate-300 focus:border-[#0053CF] rounded-lg px-3.5 py-2 text-[16px] sm:text-[13.5px] text-slate-900 outline-hidden font-inter min-h-[42px] sm:min-h-0"
                   />
                 </div>
 
@@ -257,7 +257,7 @@ export const ContactModal: React.FC<ContactModalProps> = ({ isOpen, type, onClos
                   <select
                     value={formData.topic}
                     onChange={(e) => setFormData({ ...formData, topic: e.target.value })}
-                    className="w-full bg-white border border-slate-300 focus:border-[#0053CF] rounded-lg px-3 py-2 text-[13px] text-slate-900 outline-hidden font-inter"
+                    className="w-full bg-white border border-slate-300 focus:border-[#0053CF] rounded-lg px-3 py-2 text-[16px] sm:text-[13px] text-slate-900 outline-hidden font-inter min-h-[42px] sm:min-h-0"
                   >
                     <option value="General Inquiry">General Inquiry</option>
                     <option value="Broker Partnership & Exness Setup">Broker Partnership & Exness Setup</option>
@@ -277,7 +277,7 @@ export const ContactModal: React.FC<ContactModalProps> = ({ isOpen, type, onClos
                     value={formData.message}
                     onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                     placeholder="How can USH Customer Care assist your trading journey?"
-                    className="w-full bg-white border border-slate-300 focus:border-[#0053CF] rounded-lg px-3.5 py-2 text-[13.5px] text-slate-900 outline-hidden font-inter resize-none"
+                    className="w-full bg-white border border-slate-300 focus:border-[#0053CF] rounded-lg px-3.5 py-2 text-[16px] sm:text-[13.5px] text-slate-900 outline-hidden font-inter resize-none"
                   />
                 </div>
 

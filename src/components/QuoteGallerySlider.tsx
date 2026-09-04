@@ -476,7 +476,7 @@ export const QuoteGallerySlider: React.FC<QuoteGallerySliderProps> = ({
     >
       {/* Toast Notification Alert */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 bg-slate-900 text-white px-4 py-2.5 rounded-xl shadow-xl border border-slate-700 flex items-center gap-2 text-[13px] font-bold animate-soft-fade">
+        <div className="fixed bottom-6 left-4 right-4 sm:left-auto sm:right-6 z-50 max-w-sm mx-auto sm:mx-0 bg-slate-900 text-white px-4 py-2.5 rounded-xl shadow-xl border border-slate-700 flex items-center justify-center sm:justify-start gap-2 text-[13px] font-bold animate-soft-fade">
           <Check className="w-4 h-4 text-emerald-400 shrink-0" />
           <span>{toastMessage}</span>
         </div>
@@ -505,7 +505,7 @@ export const QuoteGallerySlider: React.FC<QuoteGallerySliderProps> = ({
         onMouseLeave={() => { isHoveredRef.current = false; }}
         onTouchStart={() => { isHoldingRef.current = true; }}
         onTouchEnd={() => { isHoldingRef.current = false; }}
-        className="flex items-stretch gap-5 sm:gap-6 overflow-x-auto pb-6 pt-3 px-2 no-scrollbar focus:outline-hidden cursor-grab active:cursor-grabbing"
+        className="flex items-stretch gap-4 sm:gap-6 overflow-x-auto pb-6 pt-3 px-2 no-scrollbar focus:outline-hidden cursor-grab active:cursor-grabbing"
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
       >
         {duplicatedQuotes.map((item, idx) => {
@@ -516,7 +516,7 @@ export const QuoteGallerySlider: React.FC<QuoteGallerySliderProps> = ({
           return (
             <div
               key={`${item.id || 'quote'}-${idx}`}
-              className="group relative shrink-0 w-[84vw] max-w-[340px] sm:w-[350px] md:w-[380px] transition-all duration-300 hover:scale-[1.02] select-none"
+              className="group relative shrink-0 w-[85vw] max-w-[340px] sm:w-[350px] md:w-[380px] transition-all duration-300 hover:scale-[1.02] select-none"
             >
               {/* Layered Luxury Accent Shape Behind Card */}
               <div 
@@ -525,7 +525,7 @@ export const QuoteGallerySlider: React.FC<QuoteGallerySliderProps> = ({
 
               {/* Main Luxury White Card with Soft Inner Shader */}
               <div
-                className="relative w-full h-full rounded-3xl p-5 sm:p-7 flex flex-col justify-between min-h-[270px] sm:min-h-[290px] bg-white border border-slate-200 shadow-md group-hover:border-slate-300 transition-all duration-300 overflow-hidden"
+                className="relative w-full h-full rounded-3xl p-4 sm:p-7 flex flex-col justify-between min-h-[260px] sm:min-h-[290px] bg-white border border-slate-200 shadow-md group-hover:border-slate-300 transition-all duration-300 overflow-hidden"
                 style={{
                   background: 'radial-gradient(circle at 50% 12%, #ffffff 0%, #fcfdfd 60%, #f0f7f3 100%)'
                 }}
@@ -541,20 +541,20 @@ export const QuoteGallerySlider: React.FC<QuoteGallerySliderProps> = ({
                 </div>
 
                 {/* Top Row: Official Logo in Black & White on Left, Luxury Number on Right */}
-                <div className="relative z-1 flex items-center justify-between gap-3 mb-3">
+                <div className="relative z-1 flex items-center justify-between gap-2.5 mb-3">
                   {/* Real Logo in Black & White + Brand matching top-left corner */}
-                  <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
                     <img 
                       src={effectiveLogo} 
                       alt="Community of Traders Logo" 
-                      className="h-8 sm:h-9 w-auto max-h-9 object-contain shrink-0 grayscale contrast-125 brightness-95" 
+                      className="h-7.5 sm:h-9 w-auto max-h-9 object-contain shrink-0 grayscale contrast-125 brightness-95" 
                     />
                     <div className="flex flex-col justify-center text-left min-w-0">
-                      <span className="font-manrope text-[13px] sm:text-[14px] font-black tracking-tight text-slate-900 leading-tight truncate">
+                      <span className="font-manrope text-[12.5px] sm:text-[14px] font-black tracking-tight text-slate-900 leading-tight truncate">
                         {brandName}
                       </span>
                       {settings.branding?.tagline ? (
-                        <span className="text-[8.5px] font-bold text-slate-500 uppercase tracking-wider mt-0.5">
+                        <span className="text-[8px] sm:text-[8.5px] font-bold text-slate-500 uppercase tracking-wider mt-0.5 truncate">
                           {settings.branding.tagline}
                         </span>
                       ) : null}
@@ -563,26 +563,26 @@ export const QuoteGallerySlider: React.FC<QuoteGallerySliderProps> = ({
 
                   {/* Luxury Editorial Number */}
                   <div className="flex items-center shrink-0">
-                    <span className="font-luxury text-[24px] sm:text-[28px] font-normal text-slate-300 group-hover:text-[#0053CF]/70 transition-colors select-none tracking-tight">
+                    <span className="font-luxury text-[22px] sm:text-[28px] font-normal text-slate-300 group-hover:text-[#0053CF]/70 transition-colors select-none tracking-tight">
                       {displayNum}
                     </span>
                   </div>
                 </div>
 
                 {/* Cyan / Azure Quotation Mark Icon */}
-                <div className="relative z-1 w-7 h-7 rounded-lg bg-blue-50 border border-blue-100 flex items-center justify-center text-[#0053CF] shadow-2xs mb-2">
-                  <Quote className="w-3.5 h-3.5 fill-[#0053CF] rotate-180" />
+                <div className="relative z-1 w-6.5 h-6.5 sm:w-7 sm:h-7 rounded-lg bg-blue-50 border border-blue-100 flex items-center justify-center text-[#0053CF] shadow-2xs mb-2">
+                  <Quote className="w-3 h-3 sm:w-3.5 sm:h-3.5 fill-[#0053CF] rotate-180" />
                 </div>
 
                 {/* Main Quote Text */}
-                <div className="relative z-1 my-auto py-1.5 text-center">
-                  <p className="font-manrope text-[14.5px] sm:text-[16.5px] md:text-[17.5px] font-extrabold text-slate-900 leading-[1.65] tracking-tight">
+                <div className="relative z-1 my-auto py-1 text-center">
+                  <p className="font-manrope text-[14px] sm:text-[16.5px] md:text-[17.5px] font-extrabold text-slate-900 leading-[1.55] sm:leading-[1.65] tracking-tight">
                     “{item.quote}”
                   </p>
                 </div>
 
                 {/* Bottom Row: Author USH Community of Traders, Email & Action Icons (Download & Share) */}
-                <div className="relative z-1 flex items-center justify-between pt-3.5 mt-2 border-t border-slate-100/90 gap-2">
+                <div className="relative z-1 flex items-center justify-between pt-3 mt-2 border-t border-slate-100/90 gap-2">
                   {/* Left: Author & Contact Email */}
                   <div className="text-left min-w-0">
                     <p className="font-manrope text-[12px] sm:text-[13px] font-black text-slate-900 leading-tight truncate">

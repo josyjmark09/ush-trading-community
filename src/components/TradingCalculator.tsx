@@ -320,7 +320,7 @@ Required Margin: $${marginResults.requiredMargin.toLocaleString()}`;
                   <select
                     value={selectedSymbol}
                     onChange={(e) => handleInstrumentChange(e.target.value)}
-                    className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-[13.5px] font-manrope font-bold text-slate-900 focus:border-[#0053CF] outline-hidden cursor-pointer"
+                    className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-[16px] sm:text-[13.5px] font-manrope font-bold text-slate-900 focus:border-[#0053CF] outline-hidden cursor-pointer min-h-[42px] sm:min-h-0"
                   >
                     {INSTRUMENTS.map((inst) => (
                       <option key={inst.symbol} value={inst.symbol}>
@@ -337,7 +337,7 @@ Required Margin: $${marginResults.requiredMargin.toLocaleString()}`;
                   <select
                     value={accountCurrency}
                     onChange={(e) => setAccountCurrency(e.target.value)}
-                    className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-[13.5px] font-inter font-bold text-slate-900 focus:border-[#0053CF] outline-hidden cursor-pointer"
+                    className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-[16px] sm:text-[13.5px] font-inter font-bold text-slate-900 focus:border-[#0053CF] outline-hidden cursor-pointer min-h-[42px] sm:min-h-0"
                   >
                     <option value="USD">USD ($)</option>
                     <option value="EUR">EUR (€)</option>
@@ -356,13 +356,13 @@ Required Margin: $${marginResults.requiredMargin.toLocaleString()}`;
                       <label className="text-[12px] font-bold text-slate-800 font-inter">
                         Account Balance
                       </label>
-                      <div className="flex gap-1.5 overflow-x-auto pb-0.5">
+                      <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1 touch-manipulation">
                         {[1000, 5000, 10000, 50000].map((val) => (
                           <button
                             key={val}
                             type="button"
                             onClick={() => setAccountBalance(val)}
-                            className={`text-[11px] px-2.5 py-0.5 rounded-md font-bold transition-colors cursor-pointer shrink-0 ${
+                            className={`text-[11px] px-2.5 py-1 sm:py-0.5 rounded-md font-bold transition-colors cursor-pointer shrink-0 ${
                               accountBalance === val 
                                 ? 'bg-[#0053CF] text-white shadow-2xs' 
                                 : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
@@ -381,7 +381,7 @@ Required Margin: $${marginResults.requiredMargin.toLocaleString()}`;
                         step="100"
                         value={accountBalance}
                         onChange={(e) => setAccountBalance(Math.max(0, Number(e.target.value)))}
-                        className="w-full pl-7 pr-3 py-2 bg-white border border-slate-300 rounded-xl text-[13.5px] font-inter font-bold text-slate-900 focus:border-[#0053CF] outline-hidden"
+                        className="w-full pl-7 pr-3 py-2 bg-white border border-slate-300 rounded-xl text-[16px] sm:text-[13.5px] font-inter font-bold text-slate-900 focus:border-[#0053CF] outline-hidden min-h-[42px] sm:min-h-0"
                       />
                     </div>
                   </div>
@@ -432,17 +432,17 @@ Required Margin: $${marginResults.requiredMargin.toLocaleString()}`;
                               step="0.1"
                               value={riskPercent}
                               onChange={(e) => setRiskPercent(Math.max(0.1, Number(e.target.value)))}
-                              className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-[13.5px] font-inter font-bold text-slate-900 focus:border-[#0053CF] outline-hidden"
+                              className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-[16px] sm:text-[13.5px] font-inter font-bold text-slate-900 focus:border-[#0053CF] outline-hidden min-h-[42px] sm:min-h-0"
                             />
                             <span className="absolute right-3 top-2.5 text-slate-400 font-bold">%</span>
                           </div>
-                          <div className="flex gap-1.5 mt-1.5 overflow-x-auto pb-0.5">
+                          <div className="flex gap-1.5 mt-1.5 overflow-x-auto no-scrollbar pb-1 touch-manipulation">
                             {[0.5, 1.0, 1.5, 2.0].map((p) => (
                               <button
                                 key={p}
                                 type="button"
                                 onClick={() => setRiskPercent(p)}
-                                className={`text-[11px] px-2 py-0.5 rounded font-bold cursor-pointer shrink-0 transition-colors ${
+                                className={`text-[11px] px-2 py-1 sm:py-0.5 rounded font-bold cursor-pointer shrink-0 transition-colors ${
                                   riskPercent === p ? 'bg-[#0053CF] text-white shadow-2xs' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                                 }`}
                               >
@@ -460,7 +460,7 @@ Required Margin: $${marginResults.requiredMargin.toLocaleString()}`;
                             step="10"
                             value={riskAmount}
                             onChange={(e) => setRiskAmount(Math.max(1, Number(e.target.value)))}
-                            className="w-full pl-7 pr-3 py-2 bg-white border border-slate-300 rounded-xl text-[13.5px] font-inter font-bold text-slate-900 focus:border-[#0053CF] outline-hidden"
+                            className="w-full pl-7 pr-3 py-2 bg-white border border-slate-300 rounded-xl text-[16px] sm:text-[13.5px] font-inter font-bold text-slate-900 focus:border-[#0053CF] outline-hidden min-h-[42px] sm:min-h-0"
                           />
                         </div>
                       )}
@@ -473,13 +473,13 @@ Required Margin: $${marginResults.requiredMargin.toLocaleString()}`;
                       <label className="text-[12px] font-bold text-slate-800 font-inter">
                         Stop Loss (in Pips)
                       </label>
-                      <div className="flex gap-1.5 overflow-x-auto pb-0.5">
+                      <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1 touch-manipulation">
                         {[10, 15, 20, 30, 50].map((p) => (
                           <button
                             key={p}
                             type="button"
                             onClick={() => setStopLossPips(p)}
-                            className={`text-[11px] px-2.5 py-0.5 rounded-md font-bold cursor-pointer shrink-0 transition-colors ${
+                            className={`text-[11px] px-2.5 py-1 sm:py-0.5 rounded-md font-bold cursor-pointer shrink-0 transition-colors ${
                               stopLossPips === p ? 'bg-[#0053CF] text-white shadow-2xs' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                             }`}
                           >
@@ -494,7 +494,7 @@ Required Margin: $${marginResults.requiredMargin.toLocaleString()}`;
                       step="1"
                       value={stopLossPips}
                       onChange={(e) => setStopLossPips(Math.max(1, Number(e.target.value)))}
-                      className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-[13.5px] font-inter font-bold text-slate-900 focus:border-[#0053CF] outline-hidden"
+                      className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-[16px] sm:text-[13.5px] font-inter font-bold text-slate-900 focus:border-[#0053CF] outline-hidden min-h-[42px] sm:min-h-0"
                     />
                   </div>
                 </div>
@@ -507,7 +507,7 @@ Required Margin: $${marginResults.requiredMargin.toLocaleString()}`;
                     <label className="text-[12px] font-bold text-slate-800 font-inter block">
                       Trade Size (Standard Lots)
                     </label>
-                    <div className="flex gap-1.5 overflow-x-auto pb-1 mb-1.5">
+                    <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1 mb-1.5 touch-manipulation">
                       {[0.01, 0.10, 0.50, 1.0, 2.0, 5.0].map((lots) => (
                         <button
                           key={lots}
@@ -527,7 +527,7 @@ Required Margin: $${marginResults.requiredMargin.toLocaleString()}`;
                       step="0.01"
                       value={pipLotSize}
                       onChange={(e) => setPipLotSize(Math.max(0.01, Number(e.target.value)))}
-                      className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-[13.5px] font-inter font-bold text-slate-900 focus:border-[#0053CF] outline-hidden"
+                      className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-[16px] sm:text-[13.5px] font-inter font-bold text-slate-900 focus:border-[#0053CF] outline-hidden min-h-[42px] sm:min-h-0"
                     />
                   </div>
 
@@ -578,7 +578,7 @@ Required Margin: $${marginResults.requiredMargin.toLocaleString()}`;
                         step="0.01"
                         value={pnlLots}
                         onChange={(e) => setPnlLots(Math.max(0.01, Number(e.target.value)))}
-                        className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-[13.5px] font-inter font-bold text-slate-900 focus:border-[#0053CF] outline-hidden"
+                        className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-[16px] sm:text-[13.5px] font-inter font-bold text-slate-900 focus:border-[#0053CF] outline-hidden min-h-[42px] sm:min-h-0"
                       />
                     </div>
                   </div>
@@ -593,7 +593,7 @@ Required Margin: $${marginResults.requiredMargin.toLocaleString()}`;
                         step="any"
                         value={entryPrice}
                         onChange={(e) => setEntryPrice(Number(e.target.value))}
-                        className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-[13.5px] font-inter font-bold text-slate-900 focus:border-[#0053CF] outline-hidden"
+                        className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-[16px] sm:text-[13.5px] font-inter font-bold text-slate-900 focus:border-[#0053CF] outline-hidden min-h-[42px] sm:min-h-0"
                       />
                     </div>
 
@@ -606,7 +606,7 @@ Required Margin: $${marginResults.requiredMargin.toLocaleString()}`;
                         step="any"
                         value={exitPrice}
                         onChange={(e) => setExitPrice(Number(e.target.value))}
-                        className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-[13.5px] font-inter font-bold text-slate-900 focus:border-[#0053CF] outline-hidden"
+                        className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-[16px] sm:text-[13.5px] font-inter font-bold text-slate-900 focus:border-[#0053CF] outline-hidden min-h-[42px] sm:min-h-0"
                       />
                     </div>
                   </div>
@@ -627,7 +627,7 @@ Required Margin: $${marginResults.requiredMargin.toLocaleString()}`;
                         step="0.01"
                         value={marginLots}
                         onChange={(e) => setMarginLots(Math.max(0.01, Number(e.target.value)))}
-                        className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-[13.5px] font-inter font-bold text-slate-900 focus:border-[#0053CF] outline-hidden"
+                        className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-[16px] sm:text-[13.5px] font-inter font-bold text-slate-900 focus:border-[#0053CF] outline-hidden min-h-[42px] sm:min-h-0"
                       />
                     </div>
 
@@ -638,7 +638,7 @@ Required Margin: $${marginResults.requiredMargin.toLocaleString()}`;
                       <select
                         value={leverage}
                         onChange={(e) => setLeverage(Number(e.target.value))}
-                        className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-[13.5px] font-inter font-bold text-slate-900 focus:border-[#0053CF] outline-hidden cursor-pointer"
+                        className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-[16px] sm:text-[13.5px] font-inter font-bold text-slate-900 focus:border-[#0053CF] outline-hidden cursor-pointer min-h-[42px] sm:min-h-0"
                       >
                         <option value="50">1:50 (Standard Retail)</option>
                         <option value="100">1:100 (Standard)</option>
@@ -717,26 +717,26 @@ Required Margin: $${marginResults.requiredMargin.toLocaleString()}`;
                     </div>
 
                     {/* Adjusted Mini Cards */}
-                    <div className="grid grid-cols-2 gap-2.5 sm:gap-3">
-                      <div className="bg-slate-800/70 p-3 rounded-xl border border-slate-700/70 flex flex-col justify-between">
-                        <span className="text-[11px] text-slate-400 font-medium block">Cash at Risk</span>
-                        <div className="mt-1">
-                          <span className="text-[17px] sm:text-[19px] font-black text-rose-400 font-manrope block leading-tight">
+                    <div className="grid grid-cols-2 gap-2 sm:gap-3">
+                      <div className="bg-slate-800/70 p-2.5 sm:p-3 rounded-xl border border-slate-700/70 flex flex-col justify-between min-w-0">
+                        <span className="text-[10.5px] sm:text-[11px] text-slate-400 font-medium block truncate">Cash at Risk</span>
+                        <div className="mt-1 min-w-0">
+                          <span className="text-[16px] sm:text-[19px] font-black text-rose-400 font-manrope block leading-tight truncate">
                             ${calculatedRiskMoney.toFixed(2)}
                           </span>
-                          <span className="text-[10.5px] text-slate-400 font-inter mt-0.5 block">
+                          <span className="text-[10px] sm:text-[10.5px] text-slate-400 font-inter mt-0.5 block truncate">
                             {riskType === 'percent' ? `${riskPercent}% of balance` : 'Fixed cash risk'}
                           </span>
                         </div>
                       </div>
 
-                      <div className="bg-slate-800/70 p-3 rounded-xl border border-slate-700/70 flex flex-col justify-between">
-                        <span className="text-[11px] text-slate-400 font-medium block">Pip Value (Total)</span>
-                        <div className="mt-1">
-                          <span className="text-[17px] sm:text-[19px] font-black text-sky-400 font-manrope block leading-tight">
+                      <div className="bg-slate-800/70 p-2.5 sm:p-3 rounded-xl border border-slate-700/70 flex flex-col justify-between min-w-0">
+                        <span className="text-[10.5px] sm:text-[11px] text-slate-400 font-medium block truncate">Pip Value (Total)</span>
+                        <div className="mt-1 min-w-0">
+                          <span className="text-[16px] sm:text-[19px] font-black text-sky-400 font-manrope block leading-tight truncate">
                             ${(positionResults.lots * positionResults.pipValuePerLot).toFixed(2)}
                           </span>
-                          <span className="text-[10.5px] text-slate-400 font-inter mt-0.5 block">
+                          <span className="text-[10px] sm:text-[10.5px] text-slate-400 font-inter mt-0.5 block truncate">
                             per pip movement
                           </span>
                         </div>

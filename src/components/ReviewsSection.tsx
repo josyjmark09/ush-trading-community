@@ -473,7 +473,7 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       placeholder="e.g. Alex Johnson"
-                      className="w-full px-3 py-2 text-[13.5px] rounded-lg border border-slate-300 focus:border-[#0053CF] outline-hidden font-inter"
+                      className="w-full px-3 py-2 text-[16px] sm:text-[13.5px] rounded-lg border border-slate-300 focus:border-[#0053CF] outline-hidden font-inter min-h-[42px] sm:min-h-0"
                     />
                   </div>
 
@@ -489,7 +489,7 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({
                           const found = COUNTRIES.find((c) => c.name === e.target.value);
                           if (found) setSelectedCountry(found);
                         }}
-                        className="w-full px-3 py-2 text-[13.5px] rounded-lg border border-slate-300 focus:border-[#0053CF] outline-hidden font-inter bg-white"
+                        className="w-full px-3 py-2 text-[16px] sm:text-[13.5px] rounded-lg border border-slate-300 focus:border-[#0053CF] outline-hidden font-inter bg-white min-h-[42px] sm:min-h-0"
                       >
                         {COUNTRIES.map((c) => (
                           <option key={c.name} value={c.name}>
@@ -538,7 +538,7 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({
                     value={content}
                     onChange={(e) => setContent(e.target.value)}
                     placeholder="Write your honest trading feedback or experience with our signals/education..."
-                    className="w-full px-3 py-2 text-[13.5px] rounded-lg border border-slate-300 focus:border-[#0053CF] outline-hidden font-inter resize-none"
+                    className="w-full px-3 py-2 text-[16px] sm:text-[13.5px] rounded-lg border border-slate-300 focus:border-[#0053CF] outline-hidden font-inter resize-none"
                   />
                 </div>
 

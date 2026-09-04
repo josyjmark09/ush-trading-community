@@ -89,7 +89,7 @@ export const Header: React.FC<HeaderProps> = ({
         {/* Brand Logo & Title */}
         <button 
           onClick={handleLogoTap}
-          className="flex items-center gap-2 sm:gap-2.5 cursor-pointer group text-left shrink-0 mr-3 xl:mr-6"
+          className="flex items-center gap-1.5 sm:gap-2.5 cursor-pointer group text-left shrink-0 mr-1.5 sm:mr-3 xl:mr-6 min-w-0"
           aria-label={settings.branding.brandName}
         >
           <img 
@@ -98,11 +98,11 @@ export const Header: React.FC<HeaderProps> = ({
             className="h-8 sm:h-9 md:h-10 w-auto max-h-10 object-contain shrink-0"
           />
           <div className="flex flex-col justify-center shrink-0">
-            <span className="font-manrope text-[15px] sm:text-[16px] xl:text-[17px] font-black tracking-tight text-slate-900 leading-tight whitespace-nowrap">
+            <span className="font-manrope text-[14px] sm:text-[16px] xl:text-[17px] font-black tracking-tight text-slate-900 leading-tight whitespace-nowrap">
               {settings.branding.brandName}
             </span>
             {settings.branding.tagline && (
-              <span className="text-[8.5px] sm:text-[9px] xl:text-[9.5px] font-bold text-[#0053CF] tracking-wider uppercase mt-0.5 whitespace-nowrap">
+              <span className="text-[8px] sm:text-[9px] xl:text-[9.5px] font-bold text-[#0053CF] tracking-wider uppercase mt-0.5 whitespace-nowrap">
                 {settings.branding.tagline}
               </span>
             )}
@@ -157,14 +157,14 @@ export const Header: React.FC<HeaderProps> = ({
         </nav>
 
         {/* Action Button & Mobile Menu Toggle */}
-        <div className="flex items-center gap-2 shrink-0 ml-3 xl:ml-6">
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0 ml-1.5 sm:ml-3 xl:ml-6">
           {/* Join Community CTA */}
           <button
             onClick={handleTelegramClick}
-            className="flex items-center gap-1.5 bg-[#0053CF] hover:bg-[#0040A2] text-white font-inter text-[12px] sm:text-[13px] font-bold py-2 px-3 sm:py-2.5 sm:px-4.5 rounded-lg shadow-2xs transition-colors cursor-pointer whitespace-nowrap min-h-[38px] sm:min-h-[42px]"
+            className="flex items-center gap-1.5 bg-[#0053CF] hover:bg-[#0040A2] text-white font-inter text-[12px] sm:text-[13px] font-bold py-2 px-2.5 sm:py-2.5 sm:px-4.5 rounded-lg shadow-2xs transition-colors cursor-pointer whitespace-nowrap min-h-[38px] sm:min-h-[42px]"
           >
-            <Send className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-            <span className="hidden xs:inline sm:hidden">Join</span>
+            <Send className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
+            <span className="sm:hidden">Join</span>
             <span className="hidden sm:inline">Join Community</span>
           </button>
 
@@ -172,7 +172,7 @@ export const Header: React.FC<HeaderProps> = ({
           {onOpenContact && (
             <button
               onClick={onOpenContact}
-              className="flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-lg text-slate-700 hover:text-[#0053CF] bg-slate-100 hover:bg-blue-50 border border-slate-300 transition-colors cursor-pointer shrink-0"
+              className="flex items-center justify-center w-8.5 h-8.5 sm:w-10 sm:h-10 rounded-lg text-slate-700 hover:text-[#0053CF] bg-slate-100 hover:bg-blue-50 border border-slate-300 transition-colors cursor-pointer shrink-0"
               title="Customer Care & Support"
               aria-label="Customer Care & Support"
             >
@@ -184,7 +184,7 @@ export const Header: React.FC<HeaderProps> = ({
           <button
             onClick={() => setIsMobileMenuOpen((prev) => !prev)}
             aria-label={isMobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
-            className="lg:hidden flex items-center justify-center w-9 h-9 rounded-lg text-slate-700 hover:text-[#0053CF] bg-slate-100 hover:bg-blue-50 border border-slate-300 transition-colors cursor-pointer shrink-0"
+            className="lg:hidden flex items-center justify-center w-8.5 h-8.5 sm:w-9 sm:h-9 rounded-lg text-slate-700 hover:text-[#0053CF] bg-slate-100 hover:bg-blue-50 border border-slate-300 transition-colors cursor-pointer shrink-0"
           >
             {isMobileMenuOpen ? (
               <X className="w-5 h-5 text-[#0053CF]" />

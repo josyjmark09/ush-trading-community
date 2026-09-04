@@ -48,10 +48,10 @@ export const Footer: React.FC<FooterProps> = ({
     <>
       <footer className="bg-slate-100 text-slate-900 w-full pt-12 pb-10 border-t border-slate-300 mt-auto">
       <div className="max-w-[1200px] mx-auto px-4 md:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-8 pb-10 border-b border-slate-300">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-12 gap-8 pb-10 border-b border-slate-300">
           
           {/* Brand & Summary */}
-          <div className="md:col-span-4 space-y-3.5">
+          <div className="sm:col-span-2 md:col-span-4 space-y-3.5">
             <div 
               onClick={() => handleNav('home')} 
               className="flex items-center gap-2.5 cursor-pointer inline-flex group"
@@ -89,7 +89,7 @@ export const Footer: React.FC<FooterProps> = ({
           </div>
 
           {/* Quick Links */}
-          <div className="md:col-span-3">
+          <div className="sm:col-span-1 md:col-span-3">
             <h4 className="font-inter text-[13px] font-black text-slate-900 uppercase tracking-wider mb-3">
               Quick Links
             </h4>
@@ -163,7 +163,7 @@ export const Footer: React.FC<FooterProps> = ({
           </div>
 
           {/* Resources */}
-          <div className="md:col-span-2">
+          <div className="sm:col-span-1 md:col-span-2">
             <h4 className="font-inter text-[13px] font-black text-slate-900 uppercase tracking-wider mb-3">
               Resources
             </h4>
@@ -204,7 +204,7 @@ export const Footer: React.FC<FooterProps> = ({
           </div>
 
           {/* Connect / Socials */}
-          <div className="md:col-span-3">
+          <div className="sm:col-span-2 md:col-span-3">
             <h4 className="font-inter text-[13px] font-black text-slate-900 uppercase tracking-wider mb-3">
               Connect
             </h4>

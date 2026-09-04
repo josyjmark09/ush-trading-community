@@ -628,7 +628,7 @@ export const AdminModal: React.FC = () => {
                   </span>
                 )}
               </div>
-              <p className="text-slate-300 text-[11px] sm:text-[12px] font-inter hidden xs:block truncate">
+              <p className="text-slate-300 text-[11px] sm:text-[12px] font-inter hidden sm:block truncate">
                 Edit branding, CTAs, links & moderate trader reviews in real-time.
               </p>
             </div>
@@ -646,8 +646,8 @@ export const AdminModal: React.FC = () => {
               className="flex items-center gap-1 sm:gap-1.5 bg-emerald-500 hover:bg-emerald-600 text-white px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-[11.5px] sm:text-[13px] font-bold shadow-xs transition-all active:scale-95 cursor-pointer"
             >
               <Save className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-              <span className="hidden xs:inline">Save Changes</span>
-              <span className="xs:hidden">Save</span>
+              <span className="hidden sm:inline">Save Changes</span>
+              <span className="sm:hidden">Save</span>
             </button>
 
             {/* Logout Action */}
@@ -1059,7 +1059,7 @@ export const AdminModal: React.FC = () => {
           {/* TAB 3: REVIEW MODERATION & APPROVAL */}
           {activeTab === 'reviews' && (
             <div className="space-y-4 sm:space-y-6 animate-in fade-in">
-              <div className="border-b border-slate-200 pb-2.5 flex flex-col xs:flex-row xs:items-center justify-between gap-2.5">
+              <div className="border-b border-slate-200 pb-2.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
                 <div>
                   <h3 className="font-manrope text-[16px] sm:text-[18px] font-bold text-slate-900">
                     Trader Review Moderation

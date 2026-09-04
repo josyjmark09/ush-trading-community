@@ -281,7 +281,7 @@ export const VipGuideView: React.FC<VipGuideViewProps> = ({ setActiveTab }) => {
                   <button
                     type="button"
                     onClick={handleCopyCode}
-                    className="inline-flex items-center justify-center gap-1.5 px-2.5 py-1 text-[11.5px] font-bold bg-white hover:bg-slate-100 text-slate-700 hover:text-slate-900 border border-slate-200 rounded-md transition-all shrink-0 cursor-pointer shadow-2xs active:scale-95"
+                    className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-3 py-1.5 sm:py-1 text-[12px] sm:text-[11.5px] font-bold bg-white hover:bg-slate-100 text-slate-700 hover:text-slate-900 border border-slate-200 rounded-md transition-all shrink-0 cursor-pointer shadow-2xs active:scale-95 min-h-[36px] sm:min-h-0"
                     title="Copy Partner Code"
                   >
                     {copiedCode ? (
@@ -349,7 +349,7 @@ export const VipGuideView: React.FC<VipGuideViewProps> = ({ setActiveTab }) => {
                     placeholder="Exness Account ID (Optional - e.g. 19284712)"
                     value={accountId}
                     onChange={(e) => setAccountId(e.target.value)}
-                    className="w-full px-3.5 py-3 bg-slate-50 border border-slate-200 rounded-lg text-[13px] sm:text-[13.5px] font-inter focus:outline-hidden focus:bg-white focus:border-[#0053CF] transition-colors"
+                    className="w-full px-3.5 py-3 bg-slate-50 border border-slate-200 rounded-lg text-[16px] sm:text-[13.5px] font-inter focus:outline-hidden focus:bg-white focus:border-[#0053CF] transition-colors min-h-[44px]"
                   />
                   <button
                     type="submit"

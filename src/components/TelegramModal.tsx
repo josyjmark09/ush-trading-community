@@ -25,47 +25,47 @@ export const TelegramModal: React.FC<TelegramModalProps> = ({ isOpen, onClose })
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-xs">
       <div 
-        className="bg-white rounded-xl max-w-lg w-full p-6 md:p-8 shadow-xl border border-slate-300 relative flex flex-col max-h-[90vh] overflow-y-auto"
+        className="bg-white rounded-xl max-w-lg w-full p-4 sm:p-6 md:p-8 shadow-xl border border-slate-300 relative flex flex-col max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-5 right-5 text-slate-500 hover:text-slate-900 p-1.5 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer"
+          className="absolute top-4 right-4 sm:top-5 sm:right-5 text-slate-500 hover:text-slate-900 p-1.5 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer z-10"
           aria-label="Close modal"
         >
           <X className="w-5 h-5" />
         </button>
 
         {/* Modal Header */}
-        <div className="flex items-center gap-3.5 mb-5">
-          <div className="w-11 h-11 rounded-lg bg-[#0053CF] flex items-center justify-center text-white shadow-xs">
-            <Send className="w-5 h-5" />
+        <div className="flex items-center gap-3 sm:gap-3.5 mb-4 sm:mb-5">
+          <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-lg bg-[#0053CF] flex items-center justify-center text-white shadow-xs shrink-0">
+            <Send className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
           </div>
-          <div>
+          <div className="min-w-0">
             <div className="flex items-center gap-1.5">
-              <h3 className="font-manrope text-[19px] font-black text-slate-900">USH Community of Traders Telegram</h3>
-              <ShieldCheck className="w-4 h-4 text-[#0053CF]" />
+              <h3 className="font-manrope text-[17px] sm:text-[19px] font-black text-slate-900 truncate">USH Community of Traders</h3>
+              <ShieldCheck className="w-4 h-4 text-[#0053CF] shrink-0" />
             </div>
-            <p className="font-inter text-[13px] text-slate-600">Official Free Community & Market Insights</p>
+            <p className="font-inter text-[12px] sm:text-[13px] text-slate-600 truncate">Official Free Community & Market Insights</p>
           </div>
         </div>
 
         {/* Channel Highlights */}
-        <div className="grid grid-cols-3 gap-3 mb-5 text-center">
-          <div className="bg-slate-50 p-3 rounded-lg border border-slate-300">
-            <div className="font-manrope text-[17px] font-black text-slate-900">5,420+</div>
-            <div className="font-inter text-[11px] text-slate-500 font-medium">Active Traders</div>
+        <div className="grid grid-cols-3 gap-2 sm:gap-3 mb-4 sm:mb-5 text-center">
+          <div className="bg-slate-50 p-2 sm:p-3 rounded-lg border border-slate-300">
+            <div className="font-manrope text-[15px] sm:text-[17px] font-black text-slate-900">5,420+</div>
+            <div className="font-inter text-[10px] sm:text-[11px] text-slate-500 font-medium">Active Traders</div>
           </div>
-          <div className="bg-slate-50 p-3 rounded-lg border border-slate-300">
-            <div className="font-manrope text-[17px] font-black text-[#0053CF]">08:00 UTC</div>
-            <div className="font-inter text-[11px] text-slate-500 font-medium">London Prep</div>
+          <div className="bg-slate-50 p-2 sm:p-3 rounded-lg border border-slate-300">
+            <div className="font-manrope text-[15px] sm:text-[17px] font-black text-[#0053CF]">08:00 UTC</div>
+            <div className="font-inter text-[10px] sm:text-[11px] text-slate-500 font-medium">London Prep</div>
           </div>
-          <div className="bg-slate-50 p-3 rounded-lg border border-slate-300">
-            <div className="font-manrope text-[17px] font-black text-emerald-700">100% Free</div>
-            <div className="font-inter text-[11px] text-slate-500 font-medium">Public Access</div>
+          <div className="bg-slate-50 p-2 sm:p-3 rounded-lg border border-slate-300">
+            <div className="font-manrope text-[15px] sm:text-[17px] font-black text-emerald-700">100% Free</div>
+            <div className="font-inter text-[10px] sm:text-[11px] text-slate-500 font-medium">Public Access</div>
           </div>
         </div>
 

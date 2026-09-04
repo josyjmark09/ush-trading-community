@@ -237,7 +237,7 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
         number: '03',
         title: 'Free Forex Signals',
         subtitle: 'Access market opportunities while learning how trades are analyzed.',
-        description: 'USH provides free trading signals and market insights to members of our community.',
+        description: '',
         includedTitle: 'Signals may include:',
         inclusions: [
           'Buy/Sell direction',
@@ -458,6 +458,14 @@ export const SiteProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const mergedBroker = { ...DEFAULT_SITE_SETTINGS.broker, ...(parsed.broker || {}) };
         const mergedAbout = { ...DEFAULT_SITE_SETTINGS.about, ...(parsed.about || {}) };
         const mergedServices = { ...DEFAULT_SITE_SETTINGS.services, ...(parsed.services || {}) };
+        if (Array.isArray(mergedServices.services)) {
+          mergedServices.services = mergedServices.services.map((s: any) => {
+            if (s.id === 'service-3') {
+              return { ...s, description: '' };
+            }
+            return s;
+          });
+        }
         const mergedVipGuide = { ...DEFAULT_SITE_SETTINGS.vipGuide, ...(parsed.vipGuide || {}) };
         if (mergedVipGuide.partnerCode === '1046090975706890644' || !mergedVipGuide.partnerCode) {
           mergedVipGuide.partnerCode = 'yxxz5mlw1n';
