@@ -43,6 +43,10 @@
   font-family: 'Inter', sans-serif;
 }
 
+.font-luxury {
+  font-family: 'Playfair Display', Georgia, Cambria, 'Times New Roman', serif;
+}
+
 /* Gentle Entry Animation for Pages & Tabs */
 @keyframes soft-entry {
   from {

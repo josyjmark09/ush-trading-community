@@ -67,9 +67,14 @@ export const ServicesSection: React.FC<ServicesSectionProps> = () => {
             key={service.id || index}
             className="bg-white rounded-2xl border border-slate-200/90 shadow-2xs hover:border-[#0053CF]/40 hover:shadow-xs transition-all duration-300 p-5.5 sm:p-6 flex flex-col justify-start"
           >
-            {/* Top Icon Squircle */}
-            <div className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-100/80 flex items-center justify-center mb-4 shrink-0">
-              {getServiceIcon(service.icon)}
+            {/* Top Row: Icon and Luxury Editorial Number */}
+            <div className="flex items-center justify-between mb-4">
+              <div className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-100/80 flex items-center justify-center shrink-0">
+                {getServiceIcon(service.icon)}
+              </div>
+              <span className="font-luxury text-[26px] sm:text-[30px] font-normal text-slate-300 group-hover:text-[#0053CF]/70 transition-colors select-none tracking-tight">
+                {service.number || `0${index + 1}`}
+              </span>
             </div>
 
             {/* Title */}
