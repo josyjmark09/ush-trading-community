@@ -27,7 +27,7 @@ export const Header: React.FC<HeaderProps> = ({
   // Close mobile menu on escape key or resize
   useEffect(() => {
     const handleResize = () => {
-      if (window.innerWidth >= 768) {
+      if (window.innerWidth >= 1024) {
         setIsMobileMenuOpen(false);
       }
     };
@@ -59,16 +59,17 @@ export const Header: React.FC<HeaderProps> = ({
   const navItems: Array<{
     id?: NavTab;
     label: string;
+    shortLabel?: string;
     href?: string;
     isExternal?: boolean;
   }> = [
     { id: 'home', label: 'Home' },
     { label: 'Forex Factory', href: 'https://www.forexfactory.com', isExternal: true },
-    { id: 'services', label: 'Our Services' },
+    { id: 'services', label: 'Our Services', shortLabel: 'Services' },
     { id: 'about', label: 'About' },
-    { id: 'quotes', label: 'Trading Quotes' },
+    { id: 'quotes', label: 'Trading Quotes', shortLabel: 'Quotes' },
     { id: 'testimonials', label: 'Reviews' },
-    { id: 'broker', label: 'Recommended Broker' },
+    { id: 'broker', label: 'Recommended Broker', shortLabel: 'Broker' },
     { id: 'faq', label: 'FAQ' },
   ];
 
@@ -88,20 +89,20 @@ export const Header: React.FC<HeaderProps> = ({
         {/* Brand Logo & Title */}
         <button 
           onClick={handleLogoTap}
-          className="flex items-center gap-2 sm:gap-2.5 cursor-pointer group text-left min-w-0"
+          className="flex items-center gap-2 sm:gap-2.5 cursor-pointer group text-left shrink-0 mr-3 xl:mr-6"
           aria-label={settings.branding.brandName}
         >
           <img 
             src={settings.branding.logoUrl || logoSvg} 
             alt={settings.branding.logoAltText || "USH Logo"} 
-            className="h-8 sm:h-10 w-auto max-h-10 object-contain shrink-0"
+            className="h-8 sm:h-9 md:h-10 w-auto max-h-10 object-contain shrink-0"
           />
-          <div className="flex flex-col justify-center min-w-0">
-            <span className="font-manrope text-[15px] sm:text-[17px] font-black tracking-tight text-slate-900 leading-tight truncate">
+          <div className="flex flex-col justify-center shrink-0">
+            <span className="font-manrope text-[15px] sm:text-[16px] xl:text-[17px] font-black tracking-tight text-slate-900 leading-tight whitespace-nowrap">
               {settings.branding.brandName}
             </span>
             {settings.branding.tagline && (
-              <span className="text-[8.5px] sm:text-[9.5px] font-bold text-[#0053CF] tracking-wider uppercase mt-0.5 truncate">
+              <span className="text-[8.5px] sm:text-[9px] xl:text-[9.5px] font-bold text-[#0053CF] tracking-wider uppercase mt-0.5 whitespace-nowrap">
                 {settings.branding.tagline}
               </span>
             )}
@@ -109,7 +110,7 @@ export const Header: React.FC<HeaderProps> = ({
         </button>
 
         {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center gap-6">
+        <nav className="hidden lg:flex items-center gap-3 xl:gap-5 justify-center flex-1">
           {navItems.map((item) => {
             if (item.href) {
               return (
@@ -118,7 +119,7 @@ export const Header: React.FC<HeaderProps> = ({
                   href={item.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="font-inter text-[13.5px] leading-[20px] transition-colors py-1 relative font-bold whitespace-nowrap cursor-pointer text-slate-700 hover:text-[#0053CF] inline-flex items-center gap-1"
+                  className="font-inter text-[12.5px] xl:text-[13.5px] leading-[20px] transition-colors py-1 relative font-bold whitespace-nowrap cursor-pointer text-slate-700 hover:text-[#0053CF] inline-flex items-center gap-1"
                 >
                   <span>{item.label}</span>
                   <ExternalLink className="w-3 h-3 text-slate-400" />
@@ -127,17 +128,26 @@ export const Header: React.FC<HeaderProps> = ({
             }
 
             const isActive = item.id ? activeTab === item.id : false;
+            const displayLabel = item.shortLabel ? (
+              <>
+                <span className="hidden xl:inline">{item.label}</span>
+                <span className="xl:hidden">{item.shortLabel}</span>
+              </>
+            ) : (
+              item.label
+            );
+
             return (
               <button
                 key={item.id || item.label}
                 onClick={() => item.id && handleNavClick(item.id)}
-                className={`font-inter text-[13.5px] leading-[20px] transition-colors py-1 relative font-bold whitespace-nowrap cursor-pointer ${
+                className={`font-inter text-[12.5px] xl:text-[13.5px] leading-[20px] transition-colors py-1 relative font-bold whitespace-nowrap cursor-pointer ${
                   isActive
                     ? 'text-[#0053CF]'
                     : 'text-slate-700 hover:text-slate-900'
                 }`}
               >
-                {item.label}
+                {displayLabel}
                 {isActive && (
                   <span className="absolute -bottom-2 left-0 right-0 h-[2px] bg-[#0053CF] rounded-full" />
                 )}
@@ -147,7 +157,7 @@ export const Header: React.FC<HeaderProps> = ({
         </nav>
 
         {/* Action Button & Mobile Menu Toggle */}
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex items-center gap-2 shrink-0 ml-3 xl:ml-6">
           {/* Join Community CTA */}
           <button
             onClick={handleTelegramClick}
@@ -174,7 +184,7 @@ export const Header: React.FC<HeaderProps> = ({
           <button
             onClick={() => setIsMobileMenuOpen((prev) => !prev)}
             aria-label={isMobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
-            className="md:hidden flex items-center justify-center w-9 h-9 rounded-lg text-slate-700 hover:text-[#0053CF] bg-slate-100 hover:bg-blue-50 border border-slate-300 transition-colors cursor-pointer shrink-0"
+            className="lg:hidden flex items-center justify-center w-9 h-9 rounded-lg text-slate-700 hover:text-[#0053CF] bg-slate-100 hover:bg-blue-50 border border-slate-300 transition-colors cursor-pointer shrink-0"
           >
             {isMobileMenuOpen ? (
               <X className="w-5 h-5 text-[#0053CF]" />
@@ -187,7 +197,7 @@ export const Header: React.FC<HeaderProps> = ({
 
       {/* Mobile Navigation Dropdown Menu */}
       {isMobileMenuOpen && (
-        <div className="md:hidden bg-white border-b border-slate-300 shadow-lg animate-soft-entry">
+        <div className="lg:hidden bg-white border-b border-slate-300 shadow-lg animate-soft-entry">
           <div className="px-4 py-3 space-y-1">
             {navItems.map((item) => {
               if (item.href) {

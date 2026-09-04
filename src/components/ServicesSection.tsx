@@ -7,57 +7,42 @@ import {
   TrendingUp, 
   Users, 
   CheckCircle2, 
-  ArrowRight, 
   AlertCircle,
   ShieldCheck,
-  Send,
-  MessageSquare
 } from 'lucide-react';
 import { useSite } from '../context/SiteContext';
-import { ServiceItem } from '../types';
 
 interface ServicesSectionProps {
-  onOpenTelegram: () => void;
-  onOpenContact: () => void;
+  onOpenTelegram?: () => void;
+  onOpenContact?: () => void;
   onOpenVipGuide?: () => void;
 }
 
 const getServiceIcon = (iconName?: string) => {
   switch (iconName) {
     case 'GraduationCap':
-      return <GraduationCap className="w-5 h-5" />;
+      return <GraduationCap className="w-5 h-5 text-[#0053CF]" />;
     case 'Crown':
-      return <Crown className="w-5 h-5" />;
+      return <Crown className="w-5 h-5 text-[#0053CF]" />;
     case 'Zap':
-      return <Zap className="w-5 h-5" />;
+      return <Zap className="w-5 h-5 text-[#0053CF]" />;
     case 'Briefcase':
-      return <Briefcase className="w-5 h-5" />;
+      return <Briefcase className="w-5 h-5 text-[#0053CF]" />;
     case 'TrendingUp':
-      return <TrendingUp className="w-5 h-5" />;
+      return <TrendingUp className="w-5 h-5 text-[#0053CF]" />;
     case 'Users':
     default:
-      return <Users className="w-5 h-5" />;
+      return <Users className="w-5 h-5 text-[#0053CF]" />;
   }
 };
 
-export const ServicesSection: React.FC<ServicesSectionProps> = ({
-  onOpenTelegram,
-  onOpenContact,
-}) => {
+export const ServicesSection: React.FC<ServicesSectionProps> = () => {
   const { settings } = useSite();
   const servicesConfig = settings.services;
 
   if (!servicesConfig || !servicesConfig.services || servicesConfig.services.length === 0) {
     return null;
   }
-
-  const handleCardCta = (service: ServiceItem) => {
-    if (service.id === 'service-4') {
-      onOpenContact();
-    } else {
-      onOpenTelegram();
-    }
-  };
 
   return (
     <section id="services" className="px-3 sm:px-6 md:px-8 max-w-[1200px] mx-auto w-full scroll-mt-24">
@@ -75,100 +60,57 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({
         </p>
       </div>
 
-      {/* 6 Services 3x2 Grid */}
+      {/* 6 Services Clean Cards Grid (No bottom CTA button, matching design) */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
-        {servicesConfig.services.map((service, index) => {
-          const isSpecialConsult = service.id === 'service-4';
-          const isSignals = service.id === 'service-3';
-
-          return (
-            <div
-              key={service.id || index}
-              className="bg-white rounded-xl sm:rounded-2xl border border-slate-200/90 shadow-2xs hover:shadow-md hover:border-[#0053CF]/40 transition-all duration-300 p-5 sm:p-6 flex flex-col justify-between group relative overflow-hidden"
-            >
-              {/* Top Accent Gradient Line on Hover */}
-              <div className="absolute top-0 left-0 right-0 h-1 bg-transparent group-hover:bg-[#0053CF] transition-colors duration-300" />
-
-              <div>
-                {/* Header Row: Badge, Number, Icon */}
-                <div className="flex items-center justify-between gap-2 mb-4">
-                  <div className="flex items-center gap-2">
-                    <span className="font-mono text-[11px] font-bold text-slate-400 bg-slate-100 border border-slate-200/80 px-2 py-0.5 rounded-md">
-                      {service.number || `0${index + 1}`}
-                    </span>
-                    {service.badge && (
-                      <span className="text-[11px] font-bold text-[#0053CF] bg-blue-50 border border-blue-100 px-2.5 py-0.5 rounded-md">
-                        {service.badge}
-                      </span>
-                    )}
-                  </div>
-                  <div className="w-9 h-9 rounded-xl bg-blue-50 border border-blue-100 text-[#0053CF] flex items-center justify-center group-hover:scale-105 group-hover:bg-[#0053CF] group-hover:text-white transition-all duration-300 shrink-0">
-                    {getServiceIcon(service.icon)}
-                  </div>
-                </div>
-
-                {/* Title & Tagline */}
-                <h3 className="font-manrope text-[18px] sm:text-[19px] font-black text-slate-900 leading-snug group-hover:text-[#0053CF] transition-colors">
-                  {service.title}
-                </h3>
-                <p className="font-inter text-[12.5px] sm:text-[13px] font-bold text-[#0053CF] mt-1 leading-snug">
-                  {service.subtitle}
-                </p>
-
-                {/* Description */}
-                <p className="font-inter text-[12.5px] sm:text-[13px] text-slate-600 leading-relaxed mt-2.5">
-                  {service.description}
-                </p>
-
-                {/* Inclusions List */}
-                <div className="mt-4 pt-3.5 border-t border-slate-100">
-                  <div className="font-inter text-[11.5px] font-extrabold uppercase tracking-wider text-slate-400 mb-2.5">
-                    {service.includedTitle || "What’s included:"}
-                  </div>
-                  <ul className="space-y-2">
-                    {service.inclusions.map((item, i) => (
-                      <li key={i} className="flex items-start gap-2 text-[12px] sm:text-[12.5px] text-slate-700 font-inter leading-snug">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-[#0053CF] shrink-0 mt-0.5" />
-                        <span>{item}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                {/* Disclaimer Callout (Signals & Investment Consultation) */}
-                {service.disclaimer && (
-                  <div className="mt-4 p-2.5 rounded-lg bg-amber-50/70 border border-amber-200/70 text-amber-900 text-[11px] sm:text-[11.5px] font-inter flex items-start gap-2 leading-relaxed">
-                    <AlertCircle className="w-3.5 h-3.5 text-amber-600 shrink-0 mt-0.5" />
-                    <span>{service.disclaimer}</span>
-                  </div>
-                )}
-              </div>
-
-              {/* Bottom Action Button */}
-              <div className="pt-5 mt-4 border-t border-slate-100">
-                <button
-                  type="button"
-                  onClick={() => handleCardCta(service)}
-                  className={`w-full py-2.5 px-3 rounded-lg font-inter text-[12.5px] sm:text-[13px] font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs active:scale-[0.99] ${
-                    isSpecialConsult
-                      ? 'bg-slate-900 hover:bg-slate-800 text-white border border-slate-900'
-                      : isSignals
-                      ? 'bg-[#0053CF] hover:bg-[#0040A2] text-white'
-                      : 'bg-slate-50 hover:bg-[#0053CF] text-slate-700 hover:text-white border border-slate-200 hover:border-[#0053CF]'
-                  }`}
-                >
-                  {isSpecialConsult ? (
-                    <MessageSquare className="w-3.5 h-3.5 shrink-0" />
-                  ) : (
-                    <Send className="w-3.5 h-3.5 shrink-0" />
-                  )}
-                  <span>{service.ctaText || "Join Community"}</span>
-                  <ArrowRight className="w-3.5 h-3.5 shrink-0 opacity-70 group-hover:translate-x-0.5 transition-transform" />
-                </button>
-              </div>
+        {servicesConfig.services.map((service, index) => (
+          <div
+            key={service.id || index}
+            className="bg-white rounded-2xl border border-slate-200/90 shadow-2xs hover:border-[#0053CF]/40 hover:shadow-xs transition-all duration-300 p-5.5 sm:p-6 flex flex-col justify-start"
+          >
+            {/* Top Icon Squircle */}
+            <div className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-100/80 flex items-center justify-center mb-4 shrink-0">
+              {getServiceIcon(service.icon)}
             </div>
-          );
-        })}
+
+            {/* Title */}
+            <h3 className="font-manrope text-[17.5px] sm:text-[18.5px] font-bold text-slate-900 leading-snug">
+              {service.title}
+            </h3>
+
+            {/* Subtitle */}
+            <p className="font-inter text-[12.5px] sm:text-[13px] font-semibold text-[#0053CF] mt-1 mb-2.5 leading-snug">
+              {service.subtitle}
+            </p>
+
+            {/* Description */}
+            <p className="font-inter text-[13px] text-slate-600 leading-relaxed mb-4">
+              {service.description}
+            </p>
+
+            {/* Inclusions List */}
+            <div className="pt-3.5 border-t border-slate-100 flex-1">
+              <div className="font-inter text-[11.5px] font-extrabold uppercase tracking-wider text-slate-400 mb-2.5">
+                {service.includedTitle || "What’s included:"}
+              </div>
+              <ul className="space-y-2">
+                {service.inclusions.map((item, i) => (
+                  <li key={i} className="flex items-start gap-2 text-[12.5px] text-slate-700 font-inter leading-snug">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-[#0053CF] shrink-0 mt-0.5" />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Disclaimer Callout (For Signals & Consultation) */}
+            {service.disclaimer && (
+              <div className="mt-4 p-2.5 rounded-lg bg-amber-50/70 border border-amber-200/70 text-amber-900 text-[11px] sm:text-[11.5px] font-inter flex items-start gap-2 leading-relaxed">
+                <AlertCircle className="w-3.5 h-3.5 text-amber-600 shrink-0 mt-0.5" />
+                <span>{service.disclaimer}</span>
+              </div>
+            )}
+          </div>
+        ))}
       </div>
     </section>
   );
