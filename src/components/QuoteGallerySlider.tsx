@@ -232,22 +232,11 @@ export const QuoteGallerySlider: React.FC<QuoteGallerySliderProps> = ({
       ctx.fillText(brandName, cardX + 50, headerY + 36);
     }
 
-    // Top-Right Luxury Number Badge
-    const badgeW = 76;
-    const badgeH = 36;
-    const badgeX = cardX + cardW - 50 - badgeW;
-    const badgeY = headerY + 10;
-    drawRoundRect(ctx, badgeX, badgeY, badgeW, badgeH, 8);
-    ctx.fillStyle = '#FFFFFF';
-    ctx.fill();
-    ctx.strokeStyle = '#E2E8F0';
-    ctx.lineWidth = 1.5;
-    ctx.stroke();
-
-    ctx.textAlign = 'center';
-    ctx.fillStyle = '#334155';
-    ctx.font = '700 17px "Courier New", monospace';
-    ctx.fillText(displayNum, badgeX + badgeW / 2, badgeY + 24);
+    // Top-Right Luxury Editorial Number (Playfair Display)
+    ctx.textAlign = 'right';
+    ctx.fillStyle = '#94A3B8';
+    ctx.font = '400 38px "Playfair Display", Georgia, serif';
+    ctx.fillText(displayNum, cardX + cardW - 50, headerY + 44);
 
     // 6. Azure Quotation Mark Icon Container (1:1 with site)
     const quoteIconX = cardX + 50;
@@ -572,9 +561,9 @@ export const QuoteGallerySlider: React.FC<QuoteGallerySliderProps> = ({
                     </div>
                   </div>
 
-                  {/* Luxury Counting Number */}
-                  <div className="flex items-center gap-1.5 shrink-0">
-                    <span className="font-mono text-[11px] sm:text-[12px] font-bold text-slate-700 px-2.5 py-0.5 bg-white rounded-md border border-slate-200 shadow-2xs">
+                  {/* Luxury Editorial Number */}
+                  <div className="flex items-center shrink-0">
+                    <span className="font-luxury text-[24px] sm:text-[28px] font-normal text-slate-300 group-hover:text-[#0053CF]/70 transition-colors select-none tracking-tight">
                       {displayNum}
                     </span>
                   </div>
