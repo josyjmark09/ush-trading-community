@@ -27,6 +27,7 @@ import { TradingCalculator } from './TradingCalculator';
 import { APP_IMAGES } from '../data/mockData';
 import { ExnessLogo } from './ExnessLogo';
 import { TradingViewChart } from './TradingViewChart';
+import { ServicesSection } from './ServicesSection';
 import { openTelegram } from '../utils/telegramLink';
 import chartImage2 from './image 2.png';
 import chartImage3 from './image 3.png';
@@ -382,6 +383,16 @@ export const HomeView: React.FC<HomeViewProps> = ({
           </div>
         </div>
       </section>
+
+      {/* Distinct Spacer */}
+      <div className="my-8 sm:my-12 md:my-14" />
+
+      {/* 5b. OUR SERVICES Section */}
+      <ServicesSection
+        onOpenTelegram={onOpenTelegram}
+        onOpenContact={onOpenContact}
+        onOpenVipGuide={onOpenVipGuide}
+      />
 
       {/* Distinct Spacer */}
       <div className="my-8 sm:my-12 md:my-14" />

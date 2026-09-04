@@ -112,6 +112,14 @@ export const Footer: React.FC<FooterProps> = ({
               </li>
               <li>
                 <button
+                  onClick={() => handleNav('services', 'services')}
+                  className="text-slate-600 hover:text-slate-900 transition-colors cursor-pointer font-medium"
+                >
+                  Our Services
+                </button>
+              </li>
+              <li>
+                <button
                   onClick={() => handleNav('about')}
                   className="text-slate-600 hover:text-slate-900 transition-colors cursor-pointer font-medium"
                 >

@@ -1678,7 +1678,7 @@ export const AdminModal: React.FC = () => {
                     <label className="text-[12px] font-bold text-slate-700 block">Exness Partner Code (IB Number)</label>
                     <input
                       type="text"
-                      value={draft.vipGuide?.partnerCode || '1046090975706890644'}
+                      value={draft.vipGuide?.partnerCode || 'yxxz5mlw1n'}
                       onChange={(e) => {
                         const val = e.target.value;
                         setDraft((prev) => ({
@@ -1724,7 +1724,7 @@ export const AdminModal: React.FC = () => {
                               title: 'Join our trading community',
                               subtitle: 'Follow the instructions below to join our trading community, for both new and already existing Exness users',
                               partnerLink: 'https://one.exnessonelink.com/a/yxxz5mlw1n',
-                              partnerCode: '1046090975706890644',
+                              partnerCode: 'yxxz5mlw1n',
                             }),
                             vipTelegramUrl: val,
                           },
@@ -1736,7 +1736,7 @@ export const AdminModal: React.FC = () => {
                               title: 'Join our trading community',
                               subtitle: 'Follow the instructions below to join our trading community, for both new and already existing Exness users',
                               partnerLink: 'https://one.exnessonelink.com/a/yxxz5mlw1n',
-                              partnerCode: '1046090975706890644',
+                              partnerCode: 'yxxz5mlw1n',
                             }),
                             vipTelegramUrl: val,
                           },

@@ -44,7 +44,7 @@ export const VipGuideModal: React.FC<VipGuideModalProps> = ({
   if (!isOpen) return null;
 
   const partnerLink = settings.vipGuide?.partnerLink || "https://one.exnessonelink.com/a/yxxz5mlw1n";
-  const partnerCode = settings.vipGuide?.partnerCode || "1046090975706890644";
+  const partnerCode = settings.vipGuide?.partnerCode || "yxxz5mlw1n";
   const rawTg = settings.vipGuide?.vipTelegramUrl || settings.social?.telegramUrl;
   const telegramUrl = (!rawTg || rawTg === 'https://t.me/ushforex_official')
     ? 'https://t.me/+wHFuFFkA2i0xZTA8'
@@ -217,6 +217,34 @@ export const VipGuideModal: React.FC<VipGuideModalProps> = ({
                     <ExternalLink className="w-3.5 h-3.5" />
                   </a>
                 </div>
+              </div>
+
+              {/* Partner Code Callout */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-3 py-2 rounded-lg bg-slate-50 border border-slate-200 text-slate-800 text-[12px] font-inter">
+                <span className="text-slate-600 font-medium">
+                  Partner code to use during sign up &ndash;{' '}
+                  <strong className="font-mono text-[12.5px] text-[#0053CF] font-bold tracking-wide select-all">
+                    {partnerCode}
+                  </strong>
+                </span>
+                <button
+                  type="button"
+                  onClick={handleCopyCode}
+                  className="inline-flex items-center justify-center gap-1 px-2.5 py-1 text-[11px] font-bold bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 rounded transition-all shrink-0 cursor-pointer shadow-2xs active:scale-95"
+                  title="Copy Partner Code"
+                >
+                  {copiedCode ? (
+                    <>
+                      <Check className="w-3 h-3 text-emerald-600" />
+                      <span className="text-emerald-700">Copied!</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-3 h-3 text-slate-500" />
+                      <span>Copy Code</span>
+                    </>
+                  )}
+                </button>
               </div>
 
               {/* Warning box */}

@@ -1,4 +1,5 @@
-export type NavTab = 'home' | 'about' | 'quotes' | 'forex-news' | 'testimonials' | 'broker' | 'faq' | 'vip-guide';
+export type NavTab = 'home' | 'services' | 'about' | 'quotes' | 'forex-news' | 'testimonials' | 'broker' | 'faq' | 'vip-guide';
+
 
 export interface Milestone {
   year: string;
@@ -243,12 +244,36 @@ export interface QuoteGallerySettings {
   quotes: QuoteItem[];
 }
 
+export interface ServiceItem {
+  id: string;
+  number: string;
+  title: string;
+  subtitle: string;
+  description: string;
+  includedTitle?: string;
+  inclusions: string[];
+  disclaimer?: string;
+  badge?: string;
+  icon?: string;
+  ctaText?: string;
+}
+
+export interface ServicesSettings {
+  sectionBadge: string;
+  badgeText?: string;
+  title: string;
+  headline?: string;
+  subtitle: string;
+  services: ServiceItem[];
+}
+
 export interface SiteSettings {
   branding: SiteBranding;
   hero: HeroSettings;
   featuresSection?: WhatYouGetSettings;
   whatYouGet: WhatYouGetSettings;
   features?: FeatureItem[];
+  services?: ServicesSettings;
   community: CommunitySettings;
   broker: BrokerSettings;
   about: AboutSettings;

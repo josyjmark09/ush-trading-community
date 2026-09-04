@@ -64,6 +64,7 @@ export const Header: React.FC<HeaderProps> = ({
   }> = [
     { id: 'home', label: 'Home' },
     { label: 'Forex Factory', href: 'https://www.forexfactory.com', isExternal: true },
+    { id: 'services', label: 'Our Services' },
     { id: 'about', label: 'About' },
     { id: 'quotes', label: 'Trading Quotes' },
     { id: 'testimonials', label: 'Reviews' },

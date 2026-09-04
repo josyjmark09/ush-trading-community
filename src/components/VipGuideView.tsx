@@ -35,7 +35,7 @@ export const VipGuideView: React.FC<VipGuideViewProps> = ({ setActiveTab }) => {
   const [isAdminContactModalOpen, setIsAdminContactModalOpen] = useState(false);
 
   const partnerLink = settings.vipGuide?.partnerLink || "https://one.exnessonelink.com/a/yxxz5mlw1n";
-  const partnerCode = settings.vipGuide?.partnerCode || "1046090975706890644";
+  const partnerCode = settings.vipGuide?.partnerCode || "yxxz5mlw1n";
   const rawTg = settings.vipGuide?.vipTelegramUrl || settings.social?.telegramUrl;
   const telegramUrl = (!rawTg || rawTg === 'https://t.me/ushforex_official')
     ? 'https://t.me/+wHFuFFkA2i0xZTA8'
@@ -267,12 +267,35 @@ export const VipGuideView: React.FC<VipGuideViewProps> = ({ setActiveTab }) => {
                   </div>
                 </div>
 
-                {/* Friendly Advisory */}
-                <div className="flex items-start gap-2.5 p-3 rounded-lg bg-amber-50 border border-amber-200 text-amber-900 text-[12px] sm:text-[12.5px] font-inter">
-                  <AlertCircle className="w-4 h-4 text-amber-600 mt-0.5 shrink-0" />
-                  <p className="leading-relaxed">
-                    <strong>Exness is optional:</strong> You do not need an Exness account to join. You can proceed directly to Telegram anytime!
-                  </p>
+                {/* Partner Code Callout during sign up */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 px-3.5 py-2.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-800 text-[12px] sm:text-[12.5px] font-inter">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#0053CF] shrink-0" />
+                    <span className="text-slate-700 font-medium">
+                      Partner code to use during sign up &ndash;{' '}
+                      <strong className="font-mono text-[13px] text-[#0053CF] font-bold tracking-wide select-all">
+                        {partnerCode}
+                      </strong>
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleCopyCode}
+                    className="inline-flex items-center justify-center gap-1.5 px-2.5 py-1 text-[11.5px] font-bold bg-white hover:bg-slate-100 text-slate-700 hover:text-slate-900 border border-slate-200 rounded-md transition-all shrink-0 cursor-pointer shadow-2xs active:scale-95"
+                    title="Copy Partner Code"
+                  >
+                    {copiedCode ? (
+                      <>
+                        <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                        <span className="text-emerald-700">Copied!</span>
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="w-3.5 h-3.5 text-slate-500 shrink-0" />
+                        <span>Copy Code</span>
+                      </>
+                    )}
+                  </button>
                 </div>
               </div>
 

@@ -57,6 +57,7 @@ function MainApp() {
     // Map tabs to section IDs on the single landing page
     const sectionMap: Partial<Record<NavTab, string>> = {
       home: 'hero',
+      services: 'services',
       about: 'about',
       quotes: 'quotes-gallery-1',
       'forex-news': 'quotes-gallery-1',
