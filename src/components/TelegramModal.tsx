@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X, Send, Copy, Check, ShieldCheck, Users, TrendingUp } from 'lucide-react';
 import { useSite } from '../context/SiteContext';
+import { openTelegram, isMobileDevice } from '../utils/telegramLink';
 
 interface TelegramModalProps {
   isOpen: boolean;
@@ -95,7 +96,8 @@ export const TelegramModal: React.FC<TelegramModalProps> = ({ isOpen, onClose })
         <div className="space-y-2.5">
           <a
             href={telegramUrl}
-            target="_blank"
+            onClick={(e) => openTelegram(telegramUrl, e)}
+            target={isMobileDevice() ? '_self' : '_blank'}
             rel="noreferrer"
             className="w-full flex items-center justify-center gap-2 bg-[#0053CF] hover:bg-[#0040A2] text-white py-3 px-6 rounded-lg font-inter text-[14.5px] font-bold shadow-xs transition-colors cursor-pointer text-center"
           >

@@ -27,6 +27,7 @@ import { TradingCalculator } from './TradingCalculator';
 import { APP_IMAGES } from '../data/mockData';
 import { ExnessLogo } from './ExnessLogo';
 import { TradingViewChart } from './TradingViewChart';
+import { openTelegram } from '../utils/telegramLink';
 import chartImage2 from './image 2.png';
 import chartImage3 from './image 3.png';
 
@@ -113,6 +114,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
   const [activeFaqCategory, setActiveFaqCategory] = useState<string>('All');
   const [expandedFaqId, setExpandedFaqId] = useState<string | null>(null);
   const [faqSearchQuery, setFaqSearchQuery] = useState<string>('');
+  const [isChartDropdownOpen, setIsChartDropdownOpen] = useState<boolean>(false);
 
   const faqCategories = ['All', 'Community', 'Broker', 'Trading', 'General'];
 
@@ -156,7 +158,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
   const handleBrokerHelpCta = () => {
     const link = settings.vipGuide?.vipTelegramUrl || settings.social?.telegramUrl;
     if (link) {
-      window.open(link, '_blank', 'noopener,noreferrer');
+      openTelegram(link);
     } else {
       onOpenTelegram();
     }
@@ -169,12 +171,12 @@ export const HomeView: React.FC<HomeViewProps> = ({
       <LiveQuotesTicker />
 
       {/* 2. Hero Section */}
-      <section id="hero" className="relative px-4 sm:px-6 md:px-8 max-w-[1200px] mx-auto w-full flex flex-col items-center text-center overflow-hidden pt-3 sm:pt-6 pb-8 md:pb-12 mb-10 sm:mb-14 md:mb-16 scroll-mt-24">
-        <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6 md:space-y-7 relative z-10">
+      <section id="hero" className="relative px-4 sm:px-6 md:px-8 max-w-[1200px] mx-auto w-full flex flex-col items-center justify-center text-center overflow-hidden pt-4 sm:pt-7 pb-4 md:pb-6 mb-8 sm:mb-12 scroll-mt-24">
+        <div className="w-full max-w-3xl mx-auto flex flex-col items-center justify-center text-center space-y-4 sm:space-y-6 md:space-y-7 relative z-10">
           {/* Badge */}
-          <div>
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-slate-100 border border-slate-300 rounded-md text-slate-800 font-inter text-[12px] sm:text-[13px] font-bold">
-              <Users className="w-3.5 h-3.5 text-[#0053CF]" />
+          <div className="flex justify-center items-center w-full">
+            <div className="inline-flex items-center justify-center gap-2 px-3.5 py-1.5 bg-slate-100 border border-slate-300 rounded-md text-slate-800 font-inter text-[12px] sm:text-[13px] font-bold shadow-2xs">
+              <Users className="w-3.5 h-3.5 text-[#0053CF] shrink-0" />
               <span>
                 {settings.hero?.badgeText || "Join 5,000+ Traders"}
               </span>
@@ -182,37 +184,86 @@ export const HomeView: React.FC<HomeViewProps> = ({
           </div>
 
           {/* Display Heading */}
-          <h1 className="font-manrope text-[32px] sm:text-[44px] md:text-[54px] font-black text-slate-900 leading-[1.2] sm:leading-[1.15] tracking-tight">
-            {settings.hero?.headline || settings.hero?.headingLine1 || "Trade With More Clarity."} <br className="hidden sm:inline" />
-            <span className="text-[#0053CF] sm:mt-1 inline-block">
+          <h1 className="font-manrope text-[28px] sm:text-[42px] md:text-[54px] font-black text-slate-900 leading-[1.2] sm:leading-[1.15] tracking-tight text-center max-w-2xl mx-auto">
+            <span>{settings.hero?.headline || settings.hero?.headingLine1 || "Trade With More Clarity."}</span>{" "}
+            <span className="text-[#0053CF] block sm:inline-block">
               {settings.hero?.highlightText || settings.hero?.headingLine2 || "Learn With a Community."}
             </span>
           </h1>
 
           {/* Subtitle */}
-          <p className="font-inter text-[15px] sm:text-[17px] md:text-[18px] text-slate-600 max-w-2xl mx-auto leading-[1.65] sm:leading-relaxed px-2 sm:px-0">
+          <p className="font-inter text-[14px] sm:text-[16px] md:text-[18px] text-slate-600 max-w-xl mx-auto leading-relaxed text-center px-1">
             {settings.hero?.subtitle}
           </p>
 
           {/* Action Button */}
-          <div className="flex justify-center items-center pt-2 sm:pt-4">
+          <div className="flex justify-center items-center pt-2 sm:pt-4 w-full">
             <button
               onClick={handleHeroCta1}
-              className="w-full sm:w-auto flex items-center justify-center gap-2.5 bg-[#0053CF] hover:bg-[#0040A2] text-white px-8 py-3.5 sm:py-4 rounded-lg font-inter text-[15px] sm:text-[16px] font-bold shadow-sm hover:shadow transition-all cursor-pointer"
+              className="w-full sm:w-auto max-w-xs min-h-[48px] flex items-center justify-center gap-2.5 bg-[#0053CF] hover:bg-[#0040A2] text-white px-7 py-3.5 sm:py-4 rounded-xl sm:rounded-lg font-inter text-[14.5px] sm:text-[16px] font-bold shadow-sm hover:shadow transition-all cursor-pointer active:scale-99"
             >
-              <Send className="w-4 h-4" />
+              <Send className="w-4 h-4 shrink-0" />
               <span>{settings.hero?.cta1Text || settings.hero?.primaryCtaText || "Join our trading community"}</span>
             </button>
           </div>
-        </div>
 
-        {/* Live Interactive TradingView Terminal with Technical Drawing & Fullscreen Landscape */}
-        <div className="mt-8 sm:mt-12 md:mt-14 w-full max-w-5xl relative">
-          <TradingViewChart />
+          {/* Collapsible Dropdown: Live Technical Chart (TradingView) */}
+          <div className="w-full max-w-4xl mx-auto pt-3 sm:pt-5 text-left">
+            <button
+              type="button"
+              onClick={() => setIsChartDropdownOpen((prev) => !prev)}
+              aria-expanded={isChartDropdownOpen}
+              className={`w-full p-3 sm:p-4 rounded-xl sm:rounded-2xl border text-left transition-all shadow-xs cursor-pointer flex items-center justify-between gap-3 active:scale-[0.99] ${
+                isChartDropdownOpen
+                  ? 'bg-white border-[#0053CF] ring-2 ring-[#0053CF]/20 shadow-sm'
+                  : 'bg-white hover:bg-slate-50 border-slate-300 hover:border-[#0053CF]'
+              }`}
+            >
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-blue-50 text-[#0053CF] border border-blue-100 flex items-center justify-center shrink-0">
+                  <Activity className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
+                </div>
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h3 className="font-manrope font-bold text-[13.5px] sm:text-[15px] text-slate-900 leading-tight">
+                      Live Technical Chart
+                    </h3>
+                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10.5px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                      EUR/USD
+                    </span>
+                  </div>
+                  <p className="text-[11.5px] sm:text-[12.5px] text-slate-500 mt-0.5 font-inter truncate">
+                    {isChartDropdownOpen ? 'Tap to collapse market chart' : 'Tap to open live candlesticks, indicators & drawing tools'}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 shrink-0">
+                <span className="hidden sm:inline-block text-[11.5px] font-bold text-[#0053CF] bg-blue-50 border border-blue-200 px-2.5 py-1 rounded-md">
+                  {isChartDropdownOpen ? 'Collapse Chart' : 'Open Chart'}
+                </span>
+                <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-transform duration-300 ${
+                  isChartDropdownOpen ? 'rotate-180 text-[#0053CF] bg-blue-50' : 'text-slate-400 bg-slate-100'
+                }`}>
+                  <ChevronDown className="w-4 h-4" />
+                </div>
+              </div>
+            </button>
+
+            {/* Dropdown Content: Revealed only when tapped */}
+            {isChartDropdownOpen && (
+              <div className="w-full mt-3 animate-soft-entry">
+                <TradingViewChart 
+                  onClose={() => setIsChartDropdownOpen(false)}
+                />
+              </div>
+            )}
+          </div>
         </div>
       </section>
 
-      {/* 3. Reviews & Experiences Section (Moved immediately after the TradingView chart) */}
+      {/* 3. Reviews & Experiences Section */}
       <div id="testimonials" className="scroll-mt-24">
         <ReviewsSection />
       </div>
@@ -240,14 +291,14 @@ export const HomeView: React.FC<HomeViewProps> = ({
 
       {/* 4. Features Grid ("WHAT YOU GET") */}
       <section id="features" className="px-3 sm:px-6 md:px-8 max-w-[1200px] mx-auto w-full scroll-mt-24">
-        <div className="text-center mb-6 sm:mb-8 space-y-1">
+        <div className="text-center flex flex-col items-center justify-center mb-6 sm:mb-8 space-y-1.5 max-w-2xl mx-auto">
           <span className="text-[#0053CF] font-inter text-[11px] sm:text-[12.5px] font-extrabold uppercase tracking-wider block">
             {settings.featuresSection?.badgeText || settings.whatYouGet?.badgeText || settings.whatYouGet?.sectionBadge || "WHAT YOU GET"}
           </span>
-          <h2 className="font-manrope text-[24px] sm:text-[30px] md:text-[34px] font-black text-slate-900 leading-tight">
+          <h2 className="font-manrope text-[24px] sm:text-[30px] md:text-[34px] font-black text-slate-900 leading-tight text-center">
             {settings.featuresSection?.title || settings.whatYouGet?.title || "Everything You Need to Become a Better Trader"}
           </h2>
-          <p className="font-inter text-[13.5px] sm:text-[15px] text-slate-600 max-w-xl mx-auto px-1">
+          <p className="font-inter text-[13.5px] sm:text-[15px] text-slate-600 max-w-xl mx-auto px-1 text-center">
             {settings.featuresSection?.subtitle || settings.whatYouGet?.subtitle || "No guesswork. Just data-backed execution, disciplined risk rules, and daily mentorship."}
           </p>
         </div>
@@ -281,18 +332,18 @@ export const HomeView: React.FC<HomeViewProps> = ({
       <section className="px-3 sm:px-6 md:px-8 max-w-[1200px] mx-auto w-full">
         <div className="bg-white rounded-xl sm:rounded-2xl border border-slate-300 shadow-xs p-4 sm:p-8 md:p-10 grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-center">
           {/* Left Column Info */}
-          <div className="lg:col-span-6 space-y-3 sm:space-y-4 text-left">
+          <div className="lg:col-span-6 space-y-3 sm:space-y-4 text-center lg:text-left flex flex-col items-center lg:items-start">
             <span className="inline-block bg-slate-100 border border-slate-300 text-slate-900 font-inter text-[11px] sm:text-[12px] font-black px-2.5 py-1 rounded-md uppercase tracking-wider">
               {settings.community?.badgeText || settings.community?.sectionBadge || "COMMUNITY HIGHLIGHT"}
             </span>
-            <h2 className="font-manrope text-[24px] sm:text-[30px] md:text-[34px] font-black text-slate-900 leading-tight">
+            <h2 className="font-manrope text-[24px] sm:text-[30px] md:text-[34px] font-black text-slate-900 leading-tight text-center lg:text-left">
               {settings.community?.title || "Daily Institutional Analysis Direct to Your Phone"}
             </h2>
-            <p className="font-inter text-[13.5px] sm:text-[15px] text-slate-600 leading-relaxed">
+            <p className="font-inter text-[13.5px] sm:text-[15px] text-slate-600 leading-relaxed text-center lg:text-left">
               {settings.community?.description || "Stop trading in isolation. Get daily key level breakdowns, London & New York session plans, live trade recaps, and weekly macro analysis inside the official VIP group."}
             </p>
 
-            <ul className="space-y-1.5 sm:space-y-2 font-inter text-[13px] sm:text-[14px] text-slate-800 pt-0.5">
+            <ul className="space-y-1.5 sm:space-y-2 font-inter text-[13px] sm:text-[14px] text-slate-800 pt-0.5 text-left w-full max-w-md">
               <li className="flex items-center gap-2">
                 <CheckCircle className="w-4 h-4 text-[#0053CF] shrink-0" />
                 <span>Morning session bias & key liquidity pools</span>
@@ -307,10 +358,10 @@ export const HomeView: React.FC<HomeViewProps> = ({
               </li>
             </ul>
 
-            <div className="pt-1.5 sm:pt-2">
+            <div className="pt-1.5 sm:pt-2 w-full flex justify-center lg:justify-start">
               <button
                 onClick={handleCommunityCta}
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-[#0053CF] hover:bg-[#0040A2] text-white px-6 sm:px-7 py-2.5 sm:py-3 rounded-lg font-inter text-[14px] font-bold shadow-xs transition-colors cursor-pointer"
+                className="w-full sm:w-auto max-w-xs inline-flex items-center justify-center gap-2 bg-[#0053CF] hover:bg-[#0040A2] text-white px-6 sm:px-7 py-2.5 sm:py-3 rounded-lg font-inter text-[14px] font-bold shadow-xs transition-colors cursor-pointer"
               >
                 <Send className="w-4 h-4" />
                 <span>{settings.community?.ctaText || "Join our trading community"}</span>
@@ -338,26 +389,26 @@ export const HomeView: React.FC<HomeViewProps> = ({
       {/* 6. ABOUT Section */}
       <section id="about" className="px-3 sm:px-6 md:px-8 max-w-[1200px] mx-auto w-full scroll-mt-24">
         <div className="bg-white rounded-xl sm:rounded-2xl border border-slate-300 shadow-xs p-4 sm:p-8 md:p-10">
-          <div className="max-w-3xl mb-6 sm:mb-8 text-left space-y-3 sm:space-y-4">
+          <div className="max-w-3xl mb-6 sm:mb-8 text-center md:text-left flex flex-col items-center md:items-start mx-auto md:mx-0 space-y-3 sm:space-y-4">
             <span className="inline-block bg-slate-100 border border-slate-300 text-slate-900 font-inter text-[11px] sm:text-[12px] font-black px-2.5 py-1 rounded-md uppercase tracking-wider">
               {settings.about?.badgeText || settings.about?.sectionBadge || "ABOUT US"}
             </span>
-            <h2 className="font-manrope text-[24px] sm:text-[30px] md:text-[36px] font-black text-slate-900 leading-tight">
+            <h2 className="font-manrope text-[24px] sm:text-[30px] md:text-[36px] font-black text-slate-900 leading-tight text-center md:text-left">
               {settings.about?.headline || settings.about?.title || "Built by Traders. Driven by Discipline."}
             </h2>
-            <p className="font-inter text-[13.5px] sm:text-[15px] text-slate-600 leading-relaxed">
+            <p className="font-inter text-[13.5px] sm:text-[15px] text-slate-600 leading-relaxed text-center md:text-left">
               {settings.about?.storyParagraph1 || settings.about?.description || "USH Community of Traders was established with a singular objective: to cut through the hype of modern retail trading and provide structured, objective analysis grounded in institutional market structure."}
             </p>
             {settings.about?.storyParagraph2 && (
-              <p className="font-inter text-[13.5px] sm:text-[15px] text-slate-600 leading-relaxed">
+              <p className="font-inter text-[13.5px] sm:text-[15px] text-slate-600 leading-relaxed text-center md:text-left">
                 {settings.about?.storyParagraph2}
               </p>
             )}
 
-            <div className="pt-2 flex flex-col sm:flex-row items-stretch sm:items-center">
+            <div className="pt-2 flex flex-col sm:flex-row items-center justify-center md:justify-start w-full">
               <button
                 onClick={onOpenTelegram}
-                className="inline-flex items-center justify-center gap-2 bg-[#0053CF] hover:bg-[#0040A2] text-white px-6 py-3 rounded-xl font-inter text-[14px] font-bold shadow-xs transition-colors cursor-pointer w-full sm:w-auto"
+                className="inline-flex items-center justify-center gap-2 bg-[#0053CF] hover:bg-[#0040A2] text-white px-6 py-3 rounded-xl font-inter text-[14px] font-bold shadow-xs transition-colors cursor-pointer w-full sm:w-auto max-w-xs"
               >
                 <Send className="w-4 h-4" />
                 <span>Join Our Community</span>
@@ -392,14 +443,14 @@ export const HomeView: React.FC<HomeViewProps> = ({
 
       {/* 7. Recommended Broker Section */}
       <section id="broker" className="px-3 sm:px-6 md:px-8 max-w-[1200px] mx-auto w-full scroll-mt-24">
-        <div className="text-center mb-6 sm:mb-8 space-y-1">
+        <div className="text-center flex flex-col items-center justify-center mb-6 sm:mb-8 space-y-1.5 max-w-2xl mx-auto">
           <span className="text-[#0053CF] font-inter text-[11px] sm:text-[12.5px] font-extrabold uppercase tracking-wider block">
             {settings.broker?.badgeText || settings.broker?.sectionBadge || "RECOMMENDED BROKER"}
           </span>
-          <h2 className="font-manrope text-[24px] sm:text-[30px] md:text-[34px] font-black text-slate-900 leading-tight">
+          <h2 className="font-manrope text-[24px] sm:text-[30px] md:text-[34px] font-black text-slate-900 leading-tight text-center">
             {settings.broker?.title || "Why We Trade With Exness"}
           </h2>
-          <p className="font-inter text-[13.5px] sm:text-[15px] text-slate-600 max-w-xl mx-auto px-1">
+          <p className="font-inter text-[13.5px] sm:text-[15px] text-slate-600 max-w-xl mx-auto px-1 text-center">
             {settings.broker?.subtitle || "Fast execution, zero commissions on major pairs, and instant withdrawals ensure our community trades with maximum edge."}
           </p>
         </div>
@@ -515,14 +566,14 @@ export const HomeView: React.FC<HomeViewProps> = ({
 
       {/* 8. FAQ Section */}
       <section id="faq" className="px-3 sm:px-6 md:px-8 max-w-[1000px] mx-auto w-full scroll-mt-24">
-        <div className="text-center mb-6 sm:mb-7 space-y-1">
+        <div className="text-center flex flex-col items-center justify-center mb-6 sm:mb-7 space-y-1.5 max-w-2xl mx-auto">
           <span className="text-[#0053CF] font-inter text-[11px] sm:text-[12.5px] font-extrabold uppercase tracking-wider block">
             {settings.faqSection?.badgeText || settings.faqSection?.sectionBadge || "FAQ"}
           </span>
-          <h2 className="font-manrope text-[24px] sm:text-[30px] md:text-[34px] font-black text-slate-900 leading-tight">
+          <h2 className="font-manrope text-[24px] sm:text-[30px] md:text-[34px] font-black text-slate-900 leading-tight text-center">
             {settings.faqSection?.title || "Frequently Asked Questions"}
           </h2>
-          <p className="font-inter text-[13.5px] sm:text-[15px] text-slate-600 max-w-xl mx-auto px-1">
+          <p className="font-inter text-[13.5px] sm:text-[15px] text-slate-600 max-w-xl mx-auto px-1 text-center">
             {settings.faqSection?.subtitle || "Everything you need to know about our community, VIP channel, broker partnership, and setup process."}
           </p>
         </div>

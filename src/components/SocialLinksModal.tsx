@@ -7,6 +7,7 @@ import {
   SnapchatLogo, 
   TelegramLogo 
 } from './SocialIcons';
+import { openTelegram, isMobileDevice } from '../utils/telegramLink';
 
 export type SocialPlatformType = 'youtube' | 'tiktok' | 'instagram' | 'snapchat' | 'telegram';
 
@@ -159,9 +160,14 @@ export const SocialLinksModal: React.FC<SocialLinksModalProps> = ({
             <a
               key={idx}
               href={channel.url}
-              target="_blank"
-              rel="noreferrer"
-              onClick={onClose}
+              target={platform === 'telegram' && isMobileDevice() ? '_self' : '_blank'}
+              rel="noopener noreferrer"
+              onClick={(e) => {
+                if (platform === 'telegram') {
+                  openTelegram(channel.url, e);
+                }
+                onClose();
+              }}
               className={`relative flex flex-col items-center justify-center p-3.5 sm:p-4 rounded-xl border transition-all group cursor-pointer active:scale-98 text-center ${
                 channel.isMain 
                   ? 'bg-blue-50/50 border-[#0053CF] shadow-xs hover:bg-blue-50/80 hover:shadow-md ring-1 ring-[#0053CF]/20' 

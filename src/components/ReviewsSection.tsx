@@ -165,19 +165,19 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({
   return (
     <section 
       id="reviews"
-      className="relative w-full max-w-[1200px] mx-auto px-4 mb-8 sm:mb-12 select-none scroll-mt-24"
+      className="relative w-full max-w-[1200px] mx-auto px-3 sm:px-4 mb-8 sm:mb-12 select-none scroll-mt-24 overflow-hidden"
       onTouchStart={onTouchStart}
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
     >
-      <div className="text-center mb-5 sm:mb-6 space-y-1">
+      <div className="text-center flex flex-col items-center justify-center mb-5 sm:mb-6 space-y-1 max-w-2xl mx-auto">
         <span className="text-[#0053CF] font-inter text-[11px] sm:text-[12.5px] font-extrabold uppercase tracking-wider block">
           VERIFIED TRADER EXPERIENCES
         </span>
-        <h2 className="font-manrope text-[24px] sm:text-[32px] md:text-[36px] font-black text-slate-900 leading-tight">
+        <h2 className="font-manrope text-[24px] sm:text-[32px] md:text-[36px] font-black text-slate-900 leading-tight text-center">
           {title}
         </h2>
-        <p className="font-inter text-[13px] sm:text-[15px] text-slate-600 max-w-lg mx-auto px-1">
+        <p className="font-inter text-[13px] sm:text-[15px] text-slate-600 max-w-lg mx-auto px-1 text-center">
           {subtitle}
         </p>
 

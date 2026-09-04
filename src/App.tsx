@@ -87,7 +87,7 @@ function MainApp() {
       />
 
       {/* Main Content (Home Landing or Dedicated Full-Page VIP Guide) */}
-      <main className="flex-grow pt-[84px] md:pt-[88px] pb-8 px-2 sm:px-4 flex flex-col items-center w-full max-w-full overflow-x-hidden box-border">
+      <main className="flex-grow pt-[70px] sm:pt-[84px] md:pt-[88px] pb-8 px-2 sm:px-4 flex flex-col items-center w-full max-w-full overflow-x-hidden box-border">
         {activeTab === 'vip-guide' ? (
           <VipGuideView setActiveTab={handleTabChange} />
         ) : (

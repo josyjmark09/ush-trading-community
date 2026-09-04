@@ -12,6 +12,13 @@ import {
 } from '../types';
 import { TESTIMONIALS, FAQS, COMMUNITY_FEATURES, MILESTONES, VALUES } from '../data/mockData';
 import { DEFAULT_QUOTE_GALLERY_1, DEFAULT_QUOTE_GALLERY_2 } from '../data/quotesData';
+import { 
+  checkSupabaseStatus, 
+  fetchCloudReviews, 
+  submitCloudReview, 
+  submitCloudMessage, 
+  SupabaseStatus 
+} from '../services/supabaseApi';
 
 const SETTINGS_STORAGE_KEY = 'ush_site_settings_v2';
 const REVIEWS_STORAGE_KEY = 'ush_site_reviews_v3';
@@ -304,6 +311,8 @@ interface SiteContextType {
   clearAllMessages: () => void;
   exportSettingsJson: () => string;
   importSettingsJson: (jsonStr: string) => boolean;
+  supabaseStatus: SupabaseStatus | null;
+  refreshSupabaseStatus: () => Promise<void>;
 }
 
 const SiteContext = createContext<SiteContextType | undefined>(undefined);
@@ -480,6 +489,30 @@ export const SiteProvider: React.FC<{ children: React.ReactNode }> = ({ children
   });
 
   const [isAdminOpen, setIsAdminOpen] = useState(false);
+  const [supabaseStatus, setSupabaseStatus] = useState<SupabaseStatus | null>(null);
+
+  const refreshSupabaseStatus = async () => {
+    try {
+      const status = await checkSupabaseStatus();
+      setSupabaseStatus(status);
+    } catch {
+      setSupabaseStatus({ connected: false, url: '' });
+    }
+  };
+
+  useEffect(() => {
+    refreshSupabaseStatus();
+    // Fetch initial cloud reviews from Supabase
+    fetchCloudReviews().then((cloudReviews) => {
+      if (cloudReviews && cloudReviews.length > 0) {
+        setReviews((prev) => {
+          const existingIds = new Set(prev.map((r) => r.id));
+          const newOnes = cloudReviews.filter((cr: any) => !existingIds.has(cr.id));
+          return [...newOnes, ...prev];
+        });
+      }
+    });
+  }, []);
 
   // Sync to local storage
   useEffect(() => {
@@ -656,6 +689,16 @@ export const SiteProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     setReviews((prev) => [newReview, ...prev]);
 
+    // Asynchronous background sync to Supabase database
+    submitCloudReview({
+      name: reviewData.name,
+      country: reviewData.country,
+      countryCode: reviewData.countryCode,
+      rating: reviewData.rating,
+      content: reviewData.content,
+      isApproved: initialStatus === 'approved',
+    }).catch((err) => console.warn('Supabase review sync error:', err));
+
     return {
       success: true,
       requiresApproval: initialStatus === 'pending',
@@ -685,6 +728,14 @@ export const SiteProvider: React.FC<{ children: React.ReactNode }> = ({ children
       status: messageData.status || 'new',
     };
     setMessages((prev) => [newMsg, ...prev]);
+
+    // Asynchronous background sync to Supabase database
+    submitCloudMessage({
+      name: messageData.name,
+      email: messageData.email,
+      subject: messageData.topic || 'General Inquiry',
+      message: messageData.message,
+    }).catch((err) => console.warn('Supabase message sync error:', err));
   };
 
   const markMessageRead = (id: string, read = true) => {
@@ -769,6 +820,8 @@ export const SiteProvider: React.FC<{ children: React.ReactNode }> = ({ children
         clearAllMessages,
         exportSettingsJson,
         importSettingsJson,
+        supabaseStatus,
+        refreshSupabaseStatus,
       }}
     >
       {children}

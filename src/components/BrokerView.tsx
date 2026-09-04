@@ -25,14 +25,14 @@ export const BrokerView: React.FC<BrokerViewProps> = ({
   return (
     <div className="w-full flex flex-col gap-5 md:gap-10 pt-1 sm:pt-2 pb-10 sm:pb-12">
       {/* Header Section */}
-      <section className="text-center px-3 sm:px-6 md:px-8 max-w-[1200px] mx-auto w-full">
+      <section className="text-center flex flex-col items-center justify-center px-4 sm:px-6 md:px-8 max-w-[1200px] mx-auto w-full">
         <span className="inline-block bg-slate-100 border border-slate-300 text-slate-800 font-inter text-[11px] sm:text-[12px] font-black py-1 px-3 rounded-md uppercase tracking-wider mb-2">
           RECOMMENDED BROKER
         </span>
-        <h1 className="font-manrope text-[26px] sm:text-[36px] md:text-[44px] font-black text-slate-900 mb-2 tracking-tight leading-[1.15]">
+        <h1 className="font-manrope text-[26px] sm:text-[36px] md:text-[44px] font-black text-slate-900 mb-2 tracking-tight leading-[1.15] text-center">
           Recommended Broker Setup
         </h1>
-        <p className="font-inter text-[13.5px] sm:text-[16px] text-slate-600 max-w-2xl mx-auto leading-relaxed px-1">
+        <p className="font-inter text-[13.5px] sm:text-[16px] text-slate-600 max-w-2xl mx-auto leading-relaxed px-1 text-center">
           At USH Community of Traders, execution quality, raw zero-spread liquidity, and instant withdrawals are non-negotiable. That is why our community trades on Exness.
         </p>
       </section>

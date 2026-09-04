@@ -29,14 +29,14 @@ export const FAQView: React.FC<FAQViewProps> = ({ onOpenContact }) => {
   return (
     <div className="w-full flex flex-col gap-8 md:gap-12 pt-2 pb-12">
       {/* Header Section */}
-      <section className="text-center px-4 md:px-8 max-w-[1200px] mx-auto w-full">
+      <section className="text-center flex flex-col items-center justify-center px-4 md:px-8 max-w-[1200px] mx-auto w-full">
         <span className="inline-block bg-slate-100 border border-slate-300 text-slate-800 font-inter text-[12px] font-black py-1 px-3.5 rounded-md uppercase tracking-wider mb-2">
           HELP & RESOURCES
         </span>
-        <h1 className="font-manrope text-[30px] sm:text-[38px] md:text-[44px] font-black text-slate-900 mb-2 tracking-tight leading-[1.15]">
+        <h1 className="font-manrope text-[30px] sm:text-[38px] md:text-[44px] font-black text-slate-900 mb-2 tracking-tight leading-[1.15] text-center">
           Frequently Asked Questions
         </h1>
-        <p className="font-inter text-[15px] sm:text-[16px] text-slate-600 max-w-2xl mx-auto leading-relaxed">
+        <p className="font-inter text-[15px] sm:text-[16px] text-slate-600 max-w-2xl mx-auto leading-relaxed text-center">
           Find answers about our community guidelines, Telegram alerts, recommended broker setups, and trading discipline.
         </p>
 

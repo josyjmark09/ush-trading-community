@@ -1,6 +1,6 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { NavTab } from '../types';
-import { Send, Phone } from 'lucide-react';
+import { Send, Phone, Menu, X, ChevronRight } from 'lucide-react';
 import { useSite } from '../context/SiteContext';
 import logoSvg from './image 1.svg';
 
@@ -18,10 +18,22 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenContact 
 }) => {
   const { settings, openAdmin } = useSite();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // Logo 5-tap detector for Admin Panel login (completely silent)
   const tapCountRef = useRef(0);
   const tapTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Close mobile menu on escape key or resize
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 768) {
+        setIsMobileMenuOpen(false);
+      }
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const handleLogoTap = () => {
     tapCountRef.current += 1;
@@ -55,32 +67,34 @@ export const Header: React.FC<HeaderProps> = ({
 
   const handleNavClick = (tab: NavTab) => {
     setActiveTab(tab);
+    setIsMobileMenuOpen(false);
   };
 
   const handleTelegramClick = () => {
     onOpenTelegram();
+    setIsMobileMenuOpen(false);
   };
 
   return (
     <header className="fixed top-0 w-full z-50 bg-white border-b border-slate-300 shadow-2xs">
-      <div className="flex justify-between items-center h-16 sm:h-18 px-4 md:px-8 max-w-[1200px] mx-auto w-full relative">
+      <div className="flex justify-between items-center h-16 sm:h-18 px-3 sm:px-6 md:px-8 max-w-[1200px] mx-auto w-full relative">
         {/* Brand Logo & Title */}
         <button 
           onClick={handleLogoTap}
-          className="flex items-center gap-2.5 cursor-pointer group text-left"
+          className="flex items-center gap-2 sm:gap-2.5 cursor-pointer group text-left min-w-0"
           aria-label={settings.branding.brandName}
         >
           <img 
             src={settings.branding.logoUrl || logoSvg} 
             alt={settings.branding.logoAltText || "USH Logo"} 
-            className="h-9 sm:h-10 w-auto max-h-10 object-contain shrink-0"
+            className="h-8 sm:h-10 w-auto max-h-10 object-contain shrink-0"
           />
-          <div className="flex flex-col justify-center">
-            <span className="font-manrope text-[16px] sm:text-[17px] font-black tracking-tight text-slate-900 leading-tight">
+          <div className="flex flex-col justify-center min-w-0">
+            <span className="font-manrope text-[15px] sm:text-[17px] font-black tracking-tight text-slate-900 leading-tight truncate">
               {settings.branding.brandName}
             </span>
             {settings.branding.tagline && (
-              <span className="text-[9px] sm:text-[9.5px] font-bold text-[#0053CF] tracking-wider uppercase mt-0.5">
+              <span className="text-[8.5px] sm:text-[9.5px] font-bold text-[#0053CF] tracking-wider uppercase mt-0.5 truncate">
                 {settings.branding.tagline}
               </span>
             )}
@@ -110,29 +124,91 @@ export const Header: React.FC<HeaderProps> = ({
           })}
         </nav>
 
-        {/* Action Button & Contact Support Icon */}
-        <div className="flex items-center gap-2 sm:gap-3">
+        {/* Action Button & Mobile Menu Toggle */}
+        <div className="flex items-center gap-2 shrink-0">
+          {/* Join Community CTA */}
           <button
             onClick={handleTelegramClick}
-            className="hidden sm:flex items-center gap-2 bg-[#0053CF] hover:bg-[#0040A2] text-white font-inter text-[13px] font-bold py-2.5 px-4.5 rounded-lg shadow-2xs transition-colors cursor-pointer whitespace-nowrap"
+            className="flex items-center gap-1.5 bg-[#0053CF] hover:bg-[#0040A2] text-white font-inter text-[12px] sm:text-[13px] font-bold py-2 px-3 sm:py-2.5 sm:px-4.5 rounded-lg shadow-2xs transition-colors cursor-pointer whitespace-nowrap min-h-[38px] sm:min-h-[42px]"
           >
-            <Send className="w-4 h-4" />
-            <span>Join Community</span>
+            <Send className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            <span className="hidden xs:inline sm:hidden">Join</span>
+            <span className="hidden sm:inline">Join Community</span>
           </button>
 
           {/* Customer Support Telephone Icon Button */}
           {onOpenContact && (
             <button
               onClick={onOpenContact}
-              className="flex items-center justify-center w-10 h-10 rounded-lg text-slate-700 hover:text-[#0053CF] bg-slate-100 hover:bg-blue-50 border border-slate-300 transition-colors cursor-pointer"
+              className="flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-lg text-slate-700 hover:text-[#0053CF] bg-slate-100 hover:bg-blue-50 border border-slate-300 transition-colors cursor-pointer shrink-0"
               title="Customer Care & Support"
               aria-label="Customer Care & Support"
             >
-              <Phone className="w-4.5 h-4.5" />
+              <Phone className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
             </button>
           )}
+
+          {/* Mobile Hamburger Menu Button */}
+          <button
+            onClick={() => setIsMobileMenuOpen((prev) => !prev)}
+            aria-label={isMobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
+            className="md:hidden flex items-center justify-center w-9 h-9 rounded-lg text-slate-700 hover:text-[#0053CF] bg-slate-100 hover:bg-blue-50 border border-slate-300 transition-colors cursor-pointer shrink-0"
+          >
+            {isMobileMenuOpen ? (
+              <X className="w-5 h-5 text-[#0053CF]" />
+            ) : (
+              <Menu className="w-5 h-5" />
+            )}
+          </button>
         </div>
       </div>
+
+      {/* Mobile Navigation Dropdown Menu */}
+      {isMobileMenuOpen && (
+        <div className="md:hidden bg-white border-b border-slate-300 shadow-lg animate-soft-entry">
+          <div className="px-4 py-3 space-y-1">
+            {navItems.map((item) => {
+              const isActive = activeTab === item.id;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => handleNavClick(item.id)}
+                  className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-[14.5px] font-bold transition-colors cursor-pointer ${
+                    isActive
+                      ? 'bg-blue-50 text-[#0053CF] font-black'
+                      : 'text-slate-700 hover:bg-slate-50 hover:text-slate-900'
+                  }`}
+                >
+                  <span>{item.label}</span>
+                  <ChevronRight className={`w-4 h-4 ${isActive ? 'text-[#0053CF]' : 'text-slate-400'}`} />
+                </button>
+              );
+            })}
+
+            <div className="pt-2 mt-2 border-t border-slate-200 flex flex-col gap-2">
+              <button
+                onClick={handleTelegramClick}
+                className="w-full flex items-center justify-center gap-2 bg-[#0053CF] hover:bg-[#0040A2] text-white py-2.5 px-4 rounded-lg font-inter text-[14px] font-bold shadow-xs cursor-pointer"
+              >
+                <Send className="w-4 h-4" />
+                <span>Join Official VIP Group</span>
+              </button>
+              {onOpenContact && (
+                <button
+                  onClick={() => {
+                    setIsMobileMenuOpen(false);
+                    onOpenContact();
+                  }}
+                  className="w-full flex items-center justify-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-800 py-2.5 px-4 rounded-lg font-inter text-[13.5px] font-bold border border-slate-300 cursor-pointer"
+                >
+                  <Phone className="w-4 h-4 text-[#0053CF]" />
+                  <span>Contact Customer Support</span>
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </header>
   );
 };

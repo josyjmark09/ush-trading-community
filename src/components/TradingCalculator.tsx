@@ -237,7 +237,7 @@ Required Margin: $${marginResults.requiredMargin.toLocaleString()}`;
   return (
     <section 
       id="calculator"
-      className="relative w-full max-w-[1200px] mx-auto px-4 py-8 sm:py-12 scroll-mt-24"
+      className="relative w-full max-w-[1200px] mx-auto px-3 sm:px-4 py-8 sm:py-12 scroll-mt-24 overflow-hidden"
     >
       {/* Header */}
       <div className="text-center mb-6 sm:mb-8 space-y-1">

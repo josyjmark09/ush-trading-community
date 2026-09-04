@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { useSite } from '../context/SiteContext';
 import { AdminContactModal } from './AdminContactModal';
+import { openTelegram, isMobileDevice } from '../utils/telegramLink';
 
 interface VipGuideModalProps {
   isOpen: boolean;
@@ -90,9 +91,7 @@ export const VipGuideModal: React.FC<VipGuideModalProps> = ({
       finalUrl = `${cleanTgUrl}?text=${msg}`;
     }
     
-    setTimeout(() => {
-      window.open(finalUrl, '_blank', 'noopener,noreferrer');
-    }, 400);
+    openTelegram(finalUrl);
   };
 
   return (
@@ -130,12 +129,13 @@ export const VipGuideModal: React.FC<VipGuideModalProps> = ({
         <div className="w-full mb-4">
           <a
             href={telegramUrl}
-            target="_blank"
+            onClick={(e) => openTelegram(telegramUrl, e)}
+            target={isMobileDevice() ? '_self' : '_blank'}
             rel="noopener noreferrer"
-            className="w-full inline-flex items-center justify-center gap-2 sm:gap-2.5 px-3 py-3 sm:px-5 sm:py-3.5 bg-[#0053CF] hover:bg-[#0042A6] text-white font-inter font-black text-[13px] sm:text-[14.5px] rounded-xl shadow-md hover:shadow-lg transition-all cursor-pointer border border-blue-600 group"
+            className="w-full flex items-center justify-center gap-2 sm:gap-2.5 px-3 py-3 sm:px-5 sm:py-3.5 bg-[#0053CF] hover:bg-[#0042A6] text-white font-inter font-bold text-[13.5px] sm:text-[14.5px] rounded-xl shadow-sm hover:shadow transition-all cursor-pointer border border-blue-600 group text-center min-h-[48px]"
           >
             <Send className="w-4 h-4 text-white shrink-0 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
-            <span className="whitespace-nowrap">Proceed to Telegram Channel</span>
+            <span>Proceed to Telegram Channel</span>
             <ArrowRight className="w-4 h-4 text-white shrink-0 transition-transform group-hover:translate-x-1" />
           </a>
         </div>
@@ -269,10 +269,10 @@ export const VipGuideModal: React.FC<VipGuideModalProps> = ({
                   />
                   <button
                     type="submit"
-                    className="flex items-center justify-center gap-2 px-4 py-2 bg-[#0053CF] hover:bg-[#0040A2] text-white font-inter font-bold text-[13px] rounded-lg transition-colors shadow-2xs cursor-pointer shrink-0"
+                    className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2.5 bg-[#0053CF] hover:bg-[#0040A2] text-white font-inter font-bold text-[13px] rounded-lg transition-colors shadow-2xs cursor-pointer min-h-[44px]"
                   >
-                    <Send className="w-3.5 h-3.5" />
-                    <span className="whitespace-nowrap">Proceed to Telegram Channel</span>
+                    <Send className="w-3.5 h-3.5 shrink-0" />
+                    <span>Proceed to Telegram Channel</span>
                   </button>
                 </div>
                 {submittedId && (
@@ -448,10 +448,10 @@ export const VipGuideModal: React.FC<VipGuideModalProps> = ({
                   />
                   <button
                     type="submit"
-                    className="flex items-center justify-center gap-2 px-5 py-2.5 bg-[#0053CF] hover:bg-[#0040A2] text-white font-inter font-bold text-[13px] rounded-lg transition-colors shadow-2xs cursor-pointer shrink-0"
+                    className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-2.5 bg-[#0053CF] hover:bg-[#0040A2] text-white font-inter font-bold text-[13px] rounded-lg transition-colors shadow-2xs cursor-pointer min-h-[44px]"
                   >
-                    <Send className="w-3.5 h-3.5" />
-                    <span className="whitespace-nowrap">Proceed to Telegram Channel</span>
+                    <Send className="w-3.5 h-3.5 shrink-0" />
+                    <span>Proceed to Telegram Channel</span>
                   </button>
                 </div>
                 {submittedId && (

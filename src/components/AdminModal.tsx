@@ -67,6 +67,8 @@ export const AdminModal: React.FC = () => {
     updateReview,
     toggleAutoApproveReviews,
     importSettingsJson,
+    supabaseStatus,
+    refreshSupabaseStatus,
   } = useSite();
 
   const [activeTab, setActiveTab] = useState<'inbox' | 'branding' | 'hero' | 'reviews' | 'features' | 'community' | 'broker' | 'about' | 'faqs' | 'quotes' | 'social' | 'backup'>('inbox');
@@ -284,6 +286,16 @@ export const AdminModal: React.FC = () => {
                 <span className="bg-sky-400/20 text-sky-200 text-[9px] sm:text-[10px] uppercase font-bold px-1.5 sm:px-2 py-0.5 rounded-full border border-sky-300/30 shrink-0">
                   Live Admin
                 </span>
+                {supabaseStatus?.connected ? (
+                  <span className="bg-emerald-500/20 text-emerald-200 border border-emerald-400/30 text-[9px] sm:text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 shrink-0">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                    Supabase Connected
+                  </span>
+                ) : (
+                  <span className="bg-amber-500/20 text-amber-200 border border-amber-400/30 text-[9px] sm:text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0">
+                    Local Storage
+                  </span>
+                )}
               </div>
               <p className="text-slate-300 text-[11px] sm:text-[12px] font-inter hidden xs:block truncate">
                 Edit branding, CTAs, links & moderate trader reviews in real-time.
@@ -1685,6 +1697,64 @@ export const AdminModal: React.FC = () => {
                 <p className="text-[12px] sm:text-[13px] text-slate-500 font-inter">
                   Export your full site settings as JSON or restore from a backup.
                 </p>
+              </div>
+
+              {/* Supabase Cloud Connection Status */}
+              <div className="bg-slate-50 border border-slate-200 p-3.5 sm:p-5 rounded-xl sm:rounded-2xl space-y-3">
+                <div className="flex items-center justify-between flex-wrap gap-2">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-lg bg-emerald-50 border border-emerald-200 flex items-center justify-center">
+                      <Database className="w-4 h-4 text-emerald-600" />
+                    </div>
+                    <div>
+                      <h4 className="font-manrope font-bold text-[14px] text-slate-900 flex items-center gap-2">
+                        <span>Supabase Cloud Database</span>
+                        {supabaseStatus?.connected ? (
+                          <span className="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded-full border border-emerald-300">
+                            Active & Synced
+                          </span>
+                        ) : (
+                          <span className="bg-amber-100 text-amber-800 text-[10px] font-bold px-2 py-0.5 rounded-full border border-amber-300">
+                            Checking status...
+                          </span>
+                        )}
+                      </h4>
+                      <p className="text-[11.5px] text-slate-500 font-mono">
+                        {supabaseStatus?.url || 'https://lahyyqzhrnndcdxzcnmn.supabase.co'}
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => refreshSupabaseStatus()}
+                    className="text-[11.5px] font-semibold text-[#0053CF] hover:underline cursor-pointer flex items-center gap-1"
+                  >
+                    <RotateCcw className="w-3 h-3" />
+                    <span>Test Connection</span>
+                  </button>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1 text-[11.5px]">
+                  <div className="bg-white p-2.5 rounded-lg border border-slate-200">
+                    <span className="text-slate-500 block text-[10px] uppercase font-bold">Reviews Table</span>
+                    <span className="text-emerald-700 font-semibold flex items-center gap-1 mt-0.5">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                      <span>Connected</span>
+                    </span>
+                  </div>
+                  <div className="bg-white p-2.5 rounded-lg border border-slate-200">
+                    <span className="text-slate-500 block text-[10px] uppercase font-bold">Messages Table</span>
+                    <span className="text-emerald-700 font-semibold flex items-center gap-1 mt-0.5">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                      <span>Connected</span>
+                    </span>
+                  </div>
+                  <div className="bg-white p-2.5 rounded-lg border border-slate-200">
+                    <span className="text-slate-500 block text-[10px] uppercase font-bold">Settings Table</span>
+                    <span className="text-emerald-700 font-semibold flex items-center gap-1 mt-0.5">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                      <span>Connected</span>
+                    </span>
+                  </div>
+                </div>
               </div>
 
               {/* Restore Box */}

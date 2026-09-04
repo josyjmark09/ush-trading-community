@@ -44,18 +44,18 @@ export const AboutView: React.FC<AboutViewProps> = ({
       <section className="px-3 sm:px-6 md:px-8 max-w-[1200px] mx-auto w-full">
         <div className="flex flex-col md:flex-row gap-6 md:gap-14 items-center">
           {/* Left Column Text */}
-          <div className="flex-1 space-y-3 sm:space-y-4 text-left">
+          <div className="flex-1 space-y-3 sm:space-y-4 text-center md:text-left flex flex-col items-center md:items-start">
             <span className="inline-block bg-slate-100 border border-slate-300 text-slate-900 font-inter text-[11px] sm:text-[12px] font-black px-2.5 py-1 rounded-md uppercase tracking-wider">
               Our Story
             </span>
-            <h1 className="font-manrope text-[28px] sm:text-[38px] md:text-[48px] font-black text-slate-900 leading-[1.15] tracking-tight">
+            <h1 className="font-manrope text-[28px] sm:text-[38px] md:text-[48px] font-black text-slate-900 leading-[1.15] tracking-tight text-center md:text-left">
               Built on Clarity. <br />
               <span className="text-[#0053CF]">Driven by Education.</span>
             </h1>
-            <p className="font-inter text-[13.5px] sm:text-[16px] text-slate-600 leading-relaxed">
+            <p className="font-inter text-[13.5px] sm:text-[16px] text-slate-600 leading-relaxed text-center md:text-left">
               USH Community of Traders was founded with a singular purpose: to cut through the noise of the trading industry and provide institutional-grade insights paired with actionable education for the modern retail trader.
             </p>
-            <div className="pt-1 sm:pt-2 flex flex-col sm:flex-row gap-2.5 sm:gap-3">
+            <div className="pt-1 sm:pt-2 flex flex-col sm:flex-row items-center justify-center md:justify-start gap-2.5 sm:gap-3 w-full">
               <button
                 onClick={onOpenTelegram}
                 className="inline-flex items-center justify-center gap-2 bg-[#0053CF] hover:bg-[#0040A2] text-white px-5 sm:px-6 py-2.5 sm:py-3 rounded-lg font-inter text-[13.5px] sm:text-[14px] font-bold shadow-xs transition-colors cursor-pointer w-full sm:w-auto"
