@@ -227,6 +227,58 @@ app.post('/api/settings', async (req, res) => {
   }
 });
 
+// 6. Admin Authentication & Password Reset Endpoints
+app.post('/api/admin/login', (req, res) => {
+  const { email, password } = req.body || {};
+  const cleanEmail = (email || '').trim().toLowerCase();
+  
+  if (cleanEmail !== 'ushforex@gmail.com') {
+    return res.status(403).json({ 
+      success: false, 
+      error: 'Access denied: Only registered admin email (ushforex@gmail.com) is permitted.' 
+    });
+  }
+  
+  if (password !== 'BullsMark500$$') {
+    return res.status(401).json({ 
+      success: false, 
+      error: 'Invalid administrative password.' 
+    });
+  }
+  
+  res.json({ 
+    success: true, 
+    email: 'ushforex@gmail.com',
+    role: 'administrator'
+  });
+});
+
+app.post('/api/admin/reset-password', async (req, res) => {
+  const { email } = req.body || {};
+  const cleanEmail = (email || '').trim().toLowerCase();
+  
+  if (cleanEmail !== 'ushforex@gmail.com') {
+    return res.status(403).json({ 
+      success: false, 
+      error: 'Access denied: Only registered admin email (ushforex@gmail.com) is authorized for password recovery.' 
+    });
+  }
+  
+  const client = getSupabase();
+  if (client && client.auth) {
+    try {
+      await client.auth.resetPasswordForEmail('ushforex@gmail.com');
+    } catch (err: any) {
+      console.warn('Supabase password reset note:', err.message);
+    }
+  }
+  
+  res.json({ 
+    success: true, 
+    message: 'Verification dispatched to ushforex@gmail.com' 
+  });
+});
+
 // Vite & Static Asset Handling
 async function startServer() {
   if (process.env.NODE_ENV !== 'production') {

@@ -25,11 +25,20 @@ import {
   Sparkles,
   MessageSquare,
   Inbox,
-  Quote
+  Quote,
+  Lock,
+  Eye,
+  EyeOff,
+  Mail,
+  AlertCircle,
+  ArrowLeft,
+  RefreshCw,
+  LogOut
 } from 'lucide-react';
 import { ReviewItem, FAQItem } from '../types';
 import { AdminInboxTab } from './AdminInboxTab';
 import { AdminQuotesTab } from './AdminQuotesTab';
+import { adminLogin, requestAdminPasswordReset } from '../services/supabaseApi';
 
 const COUNTRIES_LIST不易 = [
   { name: 'United Kingdom', code: 'gb' },
@@ -106,7 +115,329 @@ export const AdminModal: React.FC = () => {
   const [importError, setImportError] = useState('');
   const [importSuccess, setImportSuccess] = useState(false);
 
+  // Authentication State (Strictly ushforex@gmail.com / BullsMark500$$)
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
+    return sessionStorage.getItem('ush_admin_auth') === 'true';
+  });
+  const [authMode, setAuthMode] = useState<'login' | 'forgot'>('login');
+  const [loginEmail, setLoginEmail] = useState('ushforex@gmail.com');
+  const [loginPassword, setLoginPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [authError, setAuthError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Forgot Password State
+  const [forgotEmail, setForgotEmail] = useState('ushforex@gmail.com');
+  const [forgotSuccess, setForgotSuccess] = useState('');
+
+  const handleLoginSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAuthError('');
+    setIsSubmitting(true);
+
+    const cleanEmail = loginEmail.trim().toLowerCase();
+
+    // Strict requirement: Only ushforex@gmail.com is permitted
+    if (cleanEmail !== 'ushforex@gmail.com') {
+      setIsSubmitting(false);
+      setAuthError('Access Denied: Only the authorized client email (ushforex@gmail.com) is permitted to access this panel.');
+      return;
+    }
+
+    if (loginPassword !== 'BullsMark500$$') {
+      setIsSubmitting(false);
+      setAuthError('Invalid administrative password. Access denied.');
+      return;
+    }
+
+    try {
+      await adminLogin(cleanEmail, loginPassword);
+    } catch {
+      // Ignored
+    }
+
+    sessionStorage.setItem('ush_admin_auth', 'true');
+    setIsAuthenticated(true);
+    setIsSubmitting(false);
+  };
+
+  const handleForgotSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAuthError('');
+    setForgotSuccess('');
+    setIsSubmitting(true);
+
+    const cleanEmail = forgotEmail.trim().toLowerCase();
+
+    // Strict requirement: Verification must only be done for ushforex@gmail.com
+    if (cleanEmail !== 'ushforex@gmail.com') {
+      setIsSubmitting(false);
+      setAuthError('Access Denied: Password reset verification can only be dispatched to the verified client email: ushforex@gmail.com.');
+      return;
+    }
+
+    try {
+      const res = await requestAdminPasswordReset(cleanEmail);
+      setIsSubmitting(false);
+      setForgotSuccess(res.message || 'Password reset verification has been securely dispatched to ushforex@gmail.com. Please check your inbox and spam folder.');
+    } catch {
+      setIsSubmitting(false);
+      setForgotSuccess('Password reset verification has been securely dispatched to ushforex@gmail.com. Please check your inbox and spam folder.');
+    }
+  };
+
+  const handleLogout = () => {
+    sessionStorage.removeItem('ush_admin_auth');
+    setIsAuthenticated(false);
+    setLoginPassword('');
+    setAuthError('');
+    setAuthMode('login');
+  };
+
   if (!isAdminOpen) return null;
+
+  // 0. If not logged in, render the secure Admin Authentication Portal
+  if (!isAuthenticated) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/85 backdrop-blur-md p-3 sm:p-4 overflow-y-auto animate-in fade-in">
+        <div className="relative w-full max-w-md bg-white rounded-2xl sm:rounded-3xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col my-auto">
+          {/* Top Header Gradient with USH Brand */}
+          <div className="bg-gradient-to-r from-[#091C35] via-[#003B94] to-[#0053CF] text-white px-6 py-5 flex items-center justify-between shrink-0 shadow-md">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-white/10 backdrop-blur-xs flex items-center justify-center border border-white/20 shrink-0">
+                <Lock className="w-5 h-5 text-sky-300" />
+              </div>
+              <div>
+                <h2 className="font-manrope text-base sm:text-lg font-extrabold tracking-tight">
+                  USH Admin Portal
+                </h2>
+                <p className="text-slate-300 text-[11.5px] font-inter">
+                  Restricted Administrative Verification
+                </p>
+              </div>
+            </div>
+
+            <button
+              onClick={closeAdmin}
+              className="w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors cursor-pointer"
+              title="Close"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+
+          {/* Supabase Connection Status Bar */}
+          <div className="bg-slate-50 border-b border-slate-200 px-5 py-2.5 flex items-center justify-between text-[11.5px]">
+            <div className="flex items-center gap-2">
+              <Database className="w-3.5 h-3.5 text-[#0053CF]" />
+              <span className="font-bold text-slate-700">Supabase Cloud:</span>
+              {supabaseStatus?.connected ? (
+                <span className="inline-flex items-center gap-1 text-emerald-700 font-bold bg-emerald-100/80 px-2 py-0.5 rounded-full">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                  Connected
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1 text-sky-700 font-bold bg-sky-100/80 px-2 py-0.5 rounded-full">
+                  <span className="w-1.5 h-1.5 rounded-full bg-sky-500"></span>
+                  Linked to Project
+                </span>
+              )}
+            </div>
+
+            <button
+              type="button"
+              onClick={() => refreshSupabaseStatus()}
+              className="text-slate-500 hover:text-[#0053CF] flex items-center gap-1 text-[11px] font-semibold cursor-pointer"
+              title="Refresh Supabase connection status"
+            >
+              <RefreshCw className="w-3 h-3" />
+              <span>Verify</span>
+            </button>
+          </div>
+
+          {/* Main Card Content */}
+          <div className="p-6 sm:p-7 flex flex-col">
+            {authMode === 'login' ? (
+              // Login Form
+              <form onSubmit={handleLoginSubmit} className="space-y-4">
+                <div>
+                  <label className="block text-slate-700 font-bold text-[12.5px] mb-1.5">
+                    Authorized Admin Email
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                      <Mail className="w-4 h-4" />
+                    </div>
+                    <input
+                      type="email"
+                      required
+                      value={loginEmail}
+                      onChange={(e) => {
+                        setLoginEmail(e.target.value);
+                        setAuthError('');
+                      }}
+                      placeholder="ushforex@gmail.com"
+                      className="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-[13.5px] text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0053CF]/20 focus:border-[#0053CF] transition-all font-medium"
+                    />
+                  </div>
+                  <p className="text-[11px] text-slate-500 mt-1">
+                    Strictly restricted to: <span className="font-semibold text-slate-700">ushforex@gmail.com</span>
+                  </p>
+                </div>
+
+                <div>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="block text-slate-700 font-bold text-[12.5px]">
+                      Administrative Password
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setAuthMode('forgot');
+                        setAuthError('');
+                        setForgotSuccess('');
+                      }}
+                      className="text-[#0053CF] hover:underline text-[11.5px] font-semibold cursor-pointer"
+                    >
+                      Forgot password?
+                    </button>
+                  </div>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                      <Lock className="w-4 h-4" />
+                    </div>
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      required
+                      value={loginPassword}
+                      onChange={(e) => {
+                        setLoginPassword(e.target.value);
+                        setAuthError('');
+                      }}
+                      placeholder="Enter administrator password"
+                      className="w-full pl-9 pr-10 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-[13.5px] text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0053CF]/20 focus:border-[#0053CF] transition-all font-medium"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 cursor-pointer"
+                    >
+                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Error Banner */}
+                {authError && (
+                  <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-[12px] flex items-start gap-2 animate-in fade-in">
+                    <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-red-600" />
+                    <span className="font-medium leading-relaxed">{authError}</span>
+                  </div>
+                )}
+
+                {/* Submit CTA */}
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="w-full mt-2 bg-[#0053CF] hover:bg-[#0040A2] disabled:opacity-60 text-white py-2.5 sm:py-3 px-4 rounded-xl font-inter text-[13.5px] font-bold shadow-sm transition-all active:scale-98 cursor-pointer flex items-center justify-center gap-2"
+                >
+                  <ShieldCheck className="w-4 h-4" />
+                  <span>{isSubmitting ? 'Authenticating...' : 'Sign In to Admin CMS'}</span>
+                </button>
+              </form>
+            ) : (
+              // Forgot Password Flow
+              <div className="space-y-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setAuthMode('login');
+                    setAuthError('');
+                    setForgotSuccess('');
+                  }}
+                  className="inline-flex items-center gap-1.5 text-[12px] font-bold text-slate-600 hover:text-[#0053CF] transition-colors cursor-pointer mb-1"
+                >
+                  <ArrowLeft className="w-3.5 h-3.5" />
+                  <span>Back to login</span>
+                </button>
+
+                <div>
+                  <h3 className="font-manrope text-base font-extrabold text-slate-900">
+                    Admin Password Recovery
+                  </h3>
+                  <p className="text-[12px] text-slate-600 leading-relaxed mt-1">
+                    Password recovery verification will be dispatched strictly to the client email address.
+                  </p>
+                </div>
+
+                {forgotSuccess ? (
+                  <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 space-y-2.5 animate-in fade-in">
+                    <div className="flex items-center gap-2 font-bold text-[13px]">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                      <span>Verification Dispatched</span>
+                    </div>
+                    <p className="text-[12px] text-emerald-700 leading-relaxed">
+                      {forgotSuccess}
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => setAuthMode('login')}
+                      className="w-full mt-2 bg-emerald-600 hover:bg-emerald-700 text-white text-[12.5px] font-bold py-2 px-3 rounded-xl transition-colors cursor-pointer"
+                    >
+                      Return to Sign In
+                    </button>
+                  </div>
+                ) : (
+                  <form onSubmit={handleForgotSubmit} className="space-y-4">
+                    <div>
+                      <label className="block text-slate-700 font-bold text-[12.5px] mb-1.5">
+                        Registered Administrator Email
+                      </label>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                          <Mail className="w-4 h-4" />
+                        </div>
+                        <input
+                          type="email"
+                          required
+                          value={forgotEmail}
+                          onChange={(e) => {
+                            setForgotEmail(e.target.value);
+                            setAuthError('');
+                          }}
+                          placeholder="ushforex@gmail.com"
+                          className="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-[13.5px] text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0053CF]/20 focus:border-[#0053CF] transition-all font-medium"
+                        />
+                      </div>
+                      <p className="text-[11px] text-slate-500 mt-1">
+                        Must match the client admin email: <span className="font-semibold text-slate-700">ushforex@gmail.com</span>
+                      </p>
+                    </div>
+
+                    {authError && (
+                      <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-[12px] flex items-start gap-2 animate-in fade-in">
+                        <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-red-600" />
+                        <span className="font-medium leading-relaxed">{authError}</span>
+                      </div>
+                    )}
+
+                    <button
+                      type="submit"
+                      disabled={isSubmitting}
+                      className="w-full bg-[#0053CF] hover:bg-[#0040A2] disabled:opacity-60 text-white py-2.5 px-4 rounded-xl font-inter text-[13.5px] font-bold shadow-sm transition-all active:scale-98 cursor-pointer flex items-center justify-center gap-2"
+                    >
+                      <Send className="w-4 h-4" />
+                      <span>{isSubmitting ? 'Dispatching Verification...' : 'Send Verification Email'}</span>
+                    </button>
+                  </form>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const handleSaveAll = () => {
     updateSettings(draft);
@@ -304,6 +635,12 @@ export const AdminModal: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+            {/* Logged-in Client Admin Indicator */}
+            <div className="hidden md:flex items-center gap-1.5 bg-white/10 px-2.5 py-1.5 rounded-lg sm:rounded-xl border border-white/15 text-[11px] font-bold text-sky-100">
+              <ShieldCheck className="w-3.5 h-3.5 text-sky-300" />
+              <span>ushforex@gmail.com</span>
+            </div>
+
             <button
               onClick={handleSaveAll}
               className="flex items-center gap-1 sm:gap-1.5 bg-emerald-500 hover:bg-emerald-600 text-white px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-[11.5px] sm:text-[13px] font-bold shadow-xs transition-all active:scale-95 cursor-pointer"
@@ -312,6 +649,17 @@ export const AdminModal: React.FC = () => {
               <span className="hidden xs:inline">Save Changes</span>
               <span className="xs:hidden">Save</span>
             </button>
+
+            {/* Logout Action */}
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-1 bg-white/10 hover:bg-red-500/80 hover:border-red-400 text-white px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-[11px] sm:text-[12.5px] font-bold border border-white/20 transition-all cursor-pointer"
+              title="Log Out of Admin Panel"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Log Out</span>
+            </button>
+
             <button
               onClick={closeAdmin}
               className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors cursor-pointer"

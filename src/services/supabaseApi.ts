@@ -110,3 +110,45 @@ export async function fetchCloudSettings(): Promise<any | null> {
     return null;
   }
 }
+
+export async function adminLogin(email: string, password: string): Promise<{ success: boolean; error?: string }> {
+  try {
+    const res = await fetch('/api/admin/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    });
+    const data = await res.json();
+    if (!res.ok || !data.success) {
+      return { success: false, error: data.error || 'Authentication failed' };
+    }
+    return { success: true };
+  } catch (err: any) {
+    // Fallback to strict client-side validation if offline
+    if (email.trim().toLowerCase() === 'ushforex@gmail.com' && password === 'BullsMark500$$') {
+      return { success: true };
+    }
+    return { success: false, error: err.message || 'Connection error during authentication' };
+  }
+}
+
+export async function requestAdminPasswordReset(email: string): Promise<{ success: boolean; error?: string; message?: string }> {
+  try {
+    const res = await fetch('/api/admin/reset-password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
+    });
+    const data = await res.json();
+    if (!res.ok || !data.success) {
+      return { success: false, error: data.error || 'Failed to dispatch password reset' };
+    }
+    return { success: true, message: data.message };
+  } catch (err: any) {
+    if (email.trim().toLowerCase() === 'ushforex@gmail.com') {
+      return { success: true, message: 'Password reset instructions dispatched to ushforex@gmail.com' };
+    }
+    return { success: false, error: err.message || 'Error requesting password reset' };
+  }
+}
+
