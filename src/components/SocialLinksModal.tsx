@@ -4,12 +4,11 @@ import {
   YouTubeLogo, 
   InstagramLogo, 
   TikTokLogo, 
-  SnapchatLogo, 
-  TelegramLogo 
+  SnapchatLogo 
 } from './SocialIcons';
 import { openTelegram, isMobileDevice } from '../utils/telegramLink';
 
-export type SocialPlatformType = 'youtube' | 'tiktok' | 'instagram' | 'snapchat' | 'telegram';
+export type SocialPlatformType = 'youtube' | 'tiktok' | 'instagram' | 'snapchat';
 
 export interface SocialChannelOption {
   title: string;
@@ -95,22 +94,6 @@ export const SOCIAL_CHANNELS_DATA: Record<SocialPlatformType, {
       {
         title: 'USH',
         url: 'https://snapchat.com/t/ZKRE8Ycf',
-      }
-    ]
-  },
-  telegram: {
-    name: 'Telegram',
-    renderLogo: (sizeClass = 'w-11 h-11') => <TelegramLogo className={sizeClass} />,
-    channels: [
-      {
-        title: 'Customer Support Direct (@USHFX)',
-        url: 'https://t.me/USHFX',
-        isMain: true,
-      },
-      {
-        title: 'Official Trading Community',
-        url: 'https://t.me/+wHFuFFkA2i0xZTA8',
-        isMain: false,
       }
     ]
   }

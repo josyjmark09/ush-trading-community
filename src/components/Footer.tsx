@@ -14,6 +14,7 @@ import {
   SnapchatLogo,
 } from './SocialIcons';
 import { SocialLinksModal, SocialPlatformType } from './SocialLinksModal';
+import { openTelegram } from '../utils/telegramLink';
 import logoSvg from './image 1.svg';
 
 interface FooterProps {
@@ -209,12 +210,13 @@ export const Footer: React.FC<FooterProps> = ({
               Connect
             </h4>
             <ul className="space-y-2.5 font-inter text-[13.5px]">
-              {/* Telegram - Pops up support & channel options */}
+              {/* Telegram - Directly directs the user to USH Customer Support (@USHFX) with no modal */}
               <li>
                 <button
-                  onClick={() => setSocialModalPlatform('telegram')}
+                  type="button"
+                  onClick={(e) => openTelegram('https://t.me/USHFX', e)}
                   className="text-slate-700 hover:text-[#0088cc] transition-colors inline-flex items-center gap-2.5 font-medium cursor-pointer group"
-                  title="Telegram"
+                  title="Telegram Support (@USHFX)"
                 >
                   <div className="w-6 h-6 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
                     <TelegramLogo className="w-5 h-5" />
