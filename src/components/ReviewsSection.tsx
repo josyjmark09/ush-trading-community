@@ -1,4 +1,5 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { ReviewItem } from '../types';
 import { useSite } from '../context/SiteContext';
 import { 
@@ -114,15 +115,61 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({
     ? (reviewsList.reduce((acc, r) => acc + r.rating, 0) / totalReviews).toFixed(1)
     : null;
 
+  // Prevent background page scrolling when either modal is open
+  useEffect(() => {
+    if (isFramingOpen || isAllReviewsOpen) {
+      const originalStyle = window.getComputedStyle(document.body).overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = originalStyle;
+      };
+    }
+  }, [isFramingOpen, isAllReviewsOpen]);
+
+  const compressInitialAvatar = (imageSrc: string) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = 140;
+      canvas.height = 140;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+
+      const minDim = Math.min(img.width, img.height);
+      const sx = (img.width - minDim) / 2;
+      const sy = (img.height - minDim) / 2;
+
+      ctx.drawImage(img, sx, sy, minDim, minDim, 0, 0, 140, 140);
+      try {
+        const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.85);
+        setAvatar(compressedDataUrl);
+      } catch (err) {
+        console.error('Failed to compress avatar:', err);
+      }
+    };
+    img.src = imageSrc;
+  };
+
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      alert('Please select an image file (e.g. JPG, PNG, WebP).');
+      return;
+    }
+
     const reader = new FileReader();
     reader.onload = () => {
-      setRawImage(reader.result as string);
+      const dataUrl = reader.result as string;
+      setRawImage(dataUrl);
       setZoom(1);
       setPanX(0);
       setPanY(0);
+      // Pre-set compressed avatar immediately
+      compressInitialAvatar(dataUrl);
+      // Open the interactive framing modal centered in viewport
       setIsFramingOpen(true);
     };
     reader.readAsDataURL(file);
@@ -150,7 +197,7 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({
       const sy = Math.max(0, Math.min(img.height - scaledDim, (img.height - scaledDim) / 2 + (panY / 100) * maxOffsetY));
 
       ctx.drawImage(img, sx, sy, scaledDim, scaledDim, 0, 0, 140, 140);
-      const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.82);
+      const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.85);
       setAvatar(compressedDataUrl);
       setIsFramingOpen(false);
     };
@@ -720,14 +767,14 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({
         )}
       </div>
 
-      {/* Interactive Face Framing Modal */}
-      {isFramingOpen && rawImage && (
+      {/* Interactive Face Framing Modal (Portaled to document.body so it is always 100% centered in viewport) */}
+      {isFramingOpen && rawImage && typeof document !== 'undefined' && createPortal(
         <div 
-          className="fixed inset-0 z-50 flex items-center justify-center p-3.5 sm:p-4 bg-slate-900/70 backdrop-blur-xs animate-soft-fade"
+          className="fixed inset-0 z-[99999] flex items-center justify-center p-3.5 sm:p-4 bg-slate-950/80 backdrop-blur-md overflow-y-auto animate-soft-fade"
           onClick={() => setIsFramingOpen(false)}
         >
           <div 
-            className="bg-white rounded-2xl max-w-sm sm:max-w-md w-full p-4 sm:p-6 shadow-2xl border border-slate-300 relative flex flex-col space-y-4"
+            className="bg-white rounded-2xl max-w-sm sm:max-w-md w-full p-4 sm:p-6 shadow-2xl border border-slate-300 relative flex flex-col space-y-4 my-auto max-h-[94vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between pb-2 border-b border-slate-200">
@@ -877,17 +924,18 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
-      {/* All Reviews Modal */}
-      {isAllReviewsOpen && (
+      {/* All Reviews Modal (Portaled to document.body) */}
+      {isAllReviewsOpen && typeof document !== 'undefined' && createPortal(
         <div 
-          className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 md:p-6 bg-slate-900/60 backdrop-blur-xs animate-soft-fade"
+          className="fixed inset-0 z-[99999] flex items-center justify-center p-3 sm:p-4 md:p-6 bg-slate-950/80 backdrop-blur-md overflow-y-auto animate-soft-fade"
           onClick={() => setIsAllReviewsOpen(false)}
         >
           <div 
-            className="bg-white rounded-2xl max-w-4xl w-full p-4 sm:p-6 shadow-2xl border border-slate-300 relative flex flex-col max-h-[90vh] overflow-hidden"
+            className="bg-white rounded-2xl max-w-4xl w-full p-4 sm:p-6 shadow-2xl border border-slate-300 relative flex flex-col max-h-[90vh] overflow-hidden my-auto"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
@@ -1036,7 +1084,8 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </section>
   );
