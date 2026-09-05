@@ -45,6 +45,7 @@ export async function submitCloudReview(review: {
   countryCode?: string;
   rating: number;
   content: string;
+  avatar?: string;
   isApproved?: boolean;
 }): Promise<boolean> {
   try {

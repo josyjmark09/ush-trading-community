@@ -54,8 +54,27 @@ export const ContactModal: React.FC<ContactModalProps> = ({ isOpen, type, onClos
     });
 
     // 2. Prepare direct dispatch URLs for ushforex@gmail.com
-    const subject = `USH Customer Care: Inquiry from ${formData.name.trim()} [${formData.topic}]`;
-    const body = `Hello USH Customer Care,\n\nYou have received a new inquiry via the USH Community of Traders website:\n\nName: ${formData.name.trim()}\nSender Email: ${formData.email.trim()}\nTopic: ${formData.topic}\n\nMessage:\n${formData.message.trim()}\n\n---\nDispatched to: ${targetEmail}\nUSH Community of Traders Customer Care Desk`;
+    const subject = `Inquiry: ${formData.topic} - from ${formData.name.trim()}`;
+    const body = 
+`==============================================
+USH CUSTOMER CARE INQUIRY
+==============================================
+
+CUSTOMER DETAILS
+• Name: ${formData.name.trim()}
+• Email: ${formData.email.trim()}
+• Date & Time: ${new Date().toLocaleString()}
+
+TOPIC
+• ${formData.topic}
+
+MESSAGE
+${formData.message.trim()}
+
+==============================================
+Delivered via USH Community of Traders Support Desk
+Target: ${targetEmail}
+==============================================`;
 
     const encodedSubject = encodeURIComponent(subject);
     const encodedBody = encodeURIComponent(body);
@@ -136,6 +155,26 @@ export const ContactModal: React.FC<ContactModalProps> = ({ isOpen, type, onClos
               </div>
             </div>
 
+            {/* Telegram Direct Support CTA */}
+            <div className="mb-3">
+              <a
+                href="https://t.me/USHFX"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full min-h-[46px] flex items-center justify-center gap-2.5 px-4 py-2.5 bg-[#0088cc] hover:bg-[#0077b5] text-white rounded-xl font-inter font-bold text-[13.5px] transition-all shadow-2xs hover:shadow-xs active:scale-[0.99] cursor-pointer"
+              >
+                <Send className="w-4 h-4 shrink-0" />
+                <span>Chat Direct with Support: @USHFX</span>
+              </a>
+            </div>
+
+            {/* Divider OR */}
+            <div className="flex items-center gap-3 my-3">
+              <div className="flex-1 border-t border-slate-200"></div>
+              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">OR EMAIL US</span>
+              <div className="flex-1 border-t border-slate-200"></div>
+            </div>
+
             {/* Official Support Email Banner with 1-Click Copy */}
             <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 mb-4 flex items-center justify-between gap-2">
               <div className="min-w-0">
@@ -169,52 +208,25 @@ export const ContactModal: React.FC<ContactModalProps> = ({ isOpen, type, onClos
               </div>
             </div>
 
-            {submitted && lastPayload ? (
-              <div className="py-4 space-y-4">
-                <div className="text-center space-y-2">
-                  <div className="w-12 h-12 bg-emerald-50 border border-emerald-200 text-emerald-600 rounded-full flex items-center justify-center mx-auto shadow-xs">
-                    <CheckCircle className="w-6 h-6" />
-                  </div>
-                  <h4 className="font-manrope text-[19px] font-black text-slate-900">
-                    Inquiry Logged in Admin Desk
+            {submitted ? (
+              <div className="py-8 space-y-4 text-center animate-soft-fade">
+                <div className="w-14 h-14 bg-emerald-50 border border-emerald-200 text-emerald-600 rounded-full flex items-center justify-center mx-auto shadow-xs">
+                  <CheckCircle className="w-8 h-8" />
+                </div>
+                <div className="space-y-1">
+                  <h4 className="font-manrope text-[20px] font-black text-slate-900">
+                    Message Sent Successfully
                   </h4>
-                  <p className="font-inter text-[13.5px] text-slate-600 max-w-sm mx-auto leading-relaxed">
-                    Your message has been stored in the USH Community of Traders admin center and prepared for direct dispatch to <strong>{targetEmail}</strong>.
+                  <p className="font-inter text-[13.5px] text-slate-600">
+                    We will get back to you shortly.
                   </p>
                 </div>
 
-                {/* Direct Action Dispatch Buttons */}
-                <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-2.5">
-                  <span className="text-[11.5px] font-bold text-slate-600 uppercase tracking-wider block text-center">
-                    Dispatch Directly to ushforex@gmail.com
-                  </span>
-                  
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                    <a
-                      href={lastPayload.gmailUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center justify-center gap-2 bg-[#0053CF] hover:bg-[#0040A2] text-white py-2.5 px-3 rounded-lg font-inter text-[13px] font-bold transition-colors shadow-2xs text-center"
-                    >
-                      <ExternalLink className="w-3.5 h-3.5" />
-                      <span>Open in Gmail Web</span>
-                    </a>
-
-                    <a
-                      href={lastPayload.mailtoUrl}
-                      className="inline-flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-800 text-white py-2.5 px-3 rounded-lg font-inter text-[13px] font-bold transition-colors shadow-2xs text-center"
-                    >
-                      <Mail className="w-3.5 h-3.5" />
-                      <span>Open in Email App</span>
-                    </a>
-                  </div>
-                </div>
-
-                <div className="pt-2 text-center">
+                <div className="pt-3">
                   <button
                     type="button"
                     onClick={handleReset}
-                    className="text-slate-600 hover:text-slate-900 font-inter text-[13px] font-semibold py-1.5 px-4 cursor-pointer"
+                    className="w-full max-w-xs mx-auto py-2.5 px-6 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-inter text-[13.5px] font-bold transition-colors cursor-pointer shadow-2xs"
                   >
                     Close Window
                   </button>

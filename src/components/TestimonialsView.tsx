@@ -79,7 +79,7 @@ export const TestimonialsView: React.FC<TestimonialsViewProps> = ({ onOpenTelegr
               Ready to trade with clarity?
             </h3>
             <p className="font-inter text-[14.5px] text-slate-300">
-              Join over 5,000 active traders receiving daily institutional analysis and trade breakdowns directly on Telegram.
+              Join over 20,000 active traders receiving daily institutional analysis and trade breakdowns directly on Telegram.
             </p>
             <div className="pt-2">
               <button

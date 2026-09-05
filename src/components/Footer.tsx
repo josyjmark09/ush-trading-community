@@ -209,10 +209,10 @@ export const Footer: React.FC<FooterProps> = ({
               Connect
             </h4>
             <ul className="space-y-2.5 font-inter text-[13.5px]">
-              {/* Telegram - Redirects to Exness VIP Verification flow */}
+              {/* Telegram - Pops up support & channel options */}
               <li>
                 <button
-                  onClick={onOpenTelegram}
+                  onClick={() => setSocialModalPlatform('telegram')}
                   className="text-slate-700 hover:text-[#0088cc] transition-colors inline-flex items-center gap-2.5 font-medium cursor-pointer group"
                   title="Telegram"
                 >

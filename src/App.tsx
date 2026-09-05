@@ -61,7 +61,7 @@ function MainApp() {
       about: 'about',
       quotes: 'quotes-gallery-1',
       'forex-news': 'quotes-gallery-1',
-      testimonials: 'testimonials',
+      testimonials: 'reviews',
       broker: 'broker',
       faq: 'faq',
     };

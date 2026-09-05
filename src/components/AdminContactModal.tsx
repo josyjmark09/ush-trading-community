@@ -37,7 +37,7 @@ export const AdminContactModal: React.FC<AdminContactModalProps> = ({
   if (!isOpen) return null;
 
   const adminEmail = settings.social?.supportEmail || 'ushforex@gmail.com';
-  const partnerCode = settings.vipGuide?.partnerCode || 'yxxz5mlw1n';
+  const partnerCode = '1046090975706890644';
 
   const handleCopyEmail = () => {
     navigator.clipboard.writeText(adminEmail);
@@ -53,10 +53,26 @@ export const AdminContactModal: React.FC<AdminContactModalProps> = ({
 
   const handleOpenEmailClient = () => {
     const subject = encodeURIComponent(
-      `[Exness Support] ${formData.accountId ? `Account #${formData.accountId}` : 'Trader Inquiry'}`
+      `[Exness Support] ${formData.accountId ? `Account #${formData.accountId}` : 'Trader Inquiry'} - from ${formData.name || 'Trader'}`
     );
     const body = encodeURIComponent(
-      `Hello Admin,\n\nName: ${formData.name || 'Trader'}\nExness Account ID: ${formData.accountId || 'N/A'}\n\nMessage:\n${formData.message || 'I need help with Exness setup / verification.'}\n\nThank you!`
+`==============================================
+EXNESS IB & TRADER ASSISTANCE
+==============================================
+
+TRADER DETAILS
+• Name: ${formData.name || 'Trader'}
+• Email: ${formData.email || 'N/A'}
+• Exness Account ID: ${formData.accountId || 'Not provided'}
+• Date & Time: ${new Date().toLocaleString()}
+
+MESSAGE
+${formData.message || 'I need help with Exness setup / verification.'}
+
+==============================================
+USH Community of Traders Support Desk
+Target: ${adminEmail}
+==============================================`
     );
     window.location.href = `mailto:${adminEmail}?subject=${subject}&body=${body}`;
   };
@@ -113,6 +129,26 @@ export const AdminContactModal: React.FC<AdminContactModalProps> = ({
           >
             <X className="w-4.5 h-4.5" />
           </button>
+        </div>
+
+        {/* Telegram Direct Support CTA */}
+        <div className="mb-2.5">
+          <a
+            href="https://t.me/USHFX"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-full min-h-[42px] flex items-center justify-center gap-2 px-3.5 py-2 bg-[#0088cc] hover:bg-[#0077b5] text-white rounded-lg font-inter font-bold text-[12.5px] transition-all shadow-2xs cursor-pointer"
+          >
+            <Send className="w-3.5 h-3.5 shrink-0" />
+            <span>Chat Support on Telegram (@USHFX)</span>
+          </a>
+        </div>
+
+        {/* Divider OR */}
+        <div className="flex items-center gap-2.5 my-2">
+          <div className="flex-1 border-t border-slate-200"></div>
+          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">OR EMAIL US</span>
+          <div className="flex-1 border-t border-slate-200"></div>
         </div>
 
         {/* Admin Email Row - Compact Inline Row */}

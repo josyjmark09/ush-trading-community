@@ -876,18 +876,28 @@ export const AdminModal: React.FC = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   <div className="space-y-1">
                     <label className="text-[12px] sm:text-[13px] font-bold text-slate-700 block">
-                      Hero Badge Pill Text
+                      Hero Badge Trader Count
                     </label>
-                    <input
-                      type="text"
-                      value={draft.hero.badgeText}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        setDraft((prev紧) => ({ ...prev紧, hero: { ...prev紧.hero, badgeText: val } }));
-                        updateSettings((prev紧) => ({ ...prev紧, hero: { ...prev紧.hero, badgeText: val } }));
-                      }}
-                      className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-[13px] font-inter"
-                    />
+                    <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-300 rounded-xl text-[13px] font-inter focus-within:border-[#0053CF] focus-within:ring-1 focus-within:ring-[#0053CF]">
+                      <span className="text-slate-500 font-bold select-none shrink-0">Join</span>
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        placeholder="20,000"
+                        value={draft.hero.badgeText?.replace(/[^0-9,]/g, '') || '20,000'}
+                        onChange={(e) => {
+                          const numOnly = e.target.value.replace(/[^0-9,]/g, '');
+                          const formattedBadge = `Join ${numOnly || '0'}+ Traders`;
+                          setDraft((prev) => ({ ...prev, hero: { ...prev.hero, badgeText: formattedBadge } }));
+                          updateSettings((prev) => ({ ...prev, hero: { ...prev.hero, badgeText: formattedBadge } }));
+                        }}
+                        className="w-24 sm:w-28 font-bold text-[#0053CF] text-center bg-slate-50 border border-slate-200 rounded px-2 py-1 focus:outline-none focus:bg-white"
+                      />
+                      <span className="text-slate-500 font-bold select-none shrink-0">+ Traders</span>
+                    </div>
+                    <p className="text-[11px] text-slate-500 mt-1">
+                      Preview: <strong className="text-slate-800">{draft.hero.badgeText}</strong>
+                    </p>
                   </div>
 
                   <div className="space-y-1">

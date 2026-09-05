@@ -181,7 +181,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
             <div className="inline-flex items-center justify-center gap-2 px-3.5 py-1.5 bg-slate-100 border border-slate-300 rounded-md text-slate-800 font-inter text-[12px] sm:text-[13px] font-bold shadow-2xs">
               <Users className="w-3.5 h-3.5 text-[#0053CF] shrink-0" />
               <span>
-                {settings.hero?.badgeText || "Join 5,000+ Traders"}
+                {settings.hero?.badgeText || "Join 20,000+ Traders"}
               </span>
             </div>
           </div>

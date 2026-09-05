@@ -44,14 +44,21 @@ export const VipGuideModal: React.FC<VipGuideModalProps> = ({
   if (!isOpen) return null;
 
   const partnerLink = settings.vipGuide?.partnerLink || "https://one.exnessonelink.com/a/yxxz5mlw1n";
-  const partnerCode = settings.vipGuide?.partnerCode || "yxxz5mlw1n";
+  const newAccountPartnerCode = "yxxz5mlw1n";
+  const existingAccountIbCode = "1046090975706890644";
   const rawTg = settings.vipGuide?.vipTelegramUrl || settings.social?.telegramUrl;
   const telegramUrl = (!rawTg || rawTg === 'https://t.me/ushforex_official')
     ? 'https://t.me/+wHFuFFkA2i0xZTA8'
     : rawTg;
 
-  const handleCopyCode = () => {
-    navigator.clipboard.writeText(partnerCode);
+  const handleCopyNewAccountCode = () => {
+    navigator.clipboard.writeText(newAccountPartnerCode);
+    setCopiedCode(true);
+    setTimeout(() => setCopiedCode(false), 2500);
+  };
+
+  const handleCopyExistingIbCode = () => {
+    navigator.clipboard.writeText(existingAccountIbCode);
     setCopiedCode(true);
     setTimeout(() => setCopiedCode(false), 2500);
   };
@@ -63,7 +70,7 @@ export const VipGuideModal: React.FC<VipGuideModalProps> = ({
   };
 
   const handleCopySupportMessage = () => {
-    const message = `Hello Exness Support, I would like to change my Partner / IB code to: ${partnerCode}`;
+    const message = `Hello Exness Support, I would like to change my Partner / IB code to: ${existingAccountIbCode}`;
     navigator.clipboard.writeText(message);
     setCopiedSupportMessage(true);
     setTimeout(() => setCopiedSupportMessage(false), 2500);
@@ -224,12 +231,12 @@ export const VipGuideModal: React.FC<VipGuideModalProps> = ({
                 <span className="text-slate-600 font-medium">
                   Partner code to use during sign up &ndash;{' '}
                   <strong className="font-mono text-[12.5px] text-[#0053CF] font-bold tracking-wide select-all">
-                    {partnerCode}
+                    {newAccountPartnerCode}
                   </strong>
                 </span>
                 <button
                   type="button"
-                  onClick={handleCopyCode}
+                  onClick={handleCopyNewAccountCode}
                   className="w-full sm:w-auto inline-flex items-center justify-center gap-1 px-3 py-1.5 sm:py-1 text-[12px] sm:text-[11px] font-bold bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 rounded transition-all shrink-0 cursor-pointer shadow-2xs active:scale-95 min-h-[36px] sm:min-h-0"
                   title="Copy Partner Code"
                 >
@@ -378,13 +385,13 @@ export const VipGuideModal: React.FC<VipGuideModalProps> = ({
                           Official VIP Partner Code / IB
                         </span>
                         <span className="font-mono text-[18px] sm:text-[20px] font-black tracking-wider text-amber-400">
-                          {partnerCode}
+                          {existingAccountIbCode}
                         </span>
                       </div>
 
                       <button
                         type="button"
-                        onClick={handleCopyCode}
+                        onClick={handleCopyExistingIbCode}
                         className="flex items-center justify-center gap-2 px-3.5 py-2 bg-[#0053CF] hover:bg-[#0040A2] text-white rounded-md text-[12.5px] font-bold transition-colors shadow-2xs cursor-pointer shrink-0"
                       >
                         {copiedCode ? (
@@ -430,11 +437,11 @@ export const VipGuideModal: React.FC<VipGuideModalProps> = ({
             <div className="p-4 rounded-xl bg-amber-50 border border-amber-300 space-y-2.5">
               <div className="flex items-center gap-2 text-amber-950 font-manrope font-black text-[13.5px]">
                 <Info className="w-4 h-4 text-amber-700 shrink-0" />
-                <span>If Exness doesn't allow the change:</span>
+                <span>Alternative: Create a fresh account with another email</span>
               </div>
 
               <p className="text-[12.5px] text-amber-950 font-inter leading-relaxed">
-                Simply create a new Exness account using a <strong>different email address</strong> (you can keep the same personal name, phone number, and ID details) through this link:
+                If Exness support is unable to change your IB partner, you can simply open a new account using a different email address. Note that Exness allows you to verify the new account using the <strong>exact same identity documents and personal credentials</strong> as your existing account:
               </p>
 
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 p-1.5 bg-white border border-amber-300 rounded-md">

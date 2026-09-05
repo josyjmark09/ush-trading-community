@@ -86,6 +86,7 @@ app.get('/api/reviews', async (_req, res) => {
       countryCode: r.country_code || 'US',
       rating: r.rating,
       content: r.content,
+      avatar: r.avatar || undefined,
       status: r.is_approved ? 'approved' : 'pending',
       submittedAt: r.created_at ? r.created_at.split('T')[0] : new Date().toISOString().split('T')[0],
     }));
@@ -98,7 +99,7 @@ app.get('/api/reviews', async (_req, res) => {
 
 app.post('/api/reviews', async (req, res) => {
   const client = getSupabase();
-  const { name, country, countryCode, rating, content, isApproved } = req.body;
+  const { name, country, countryCode, rating, content, isApproved, avatar } = req.body;
 
   if (!name || !content || !rating) {
     return res.status(400).json({ success: false, error: 'Name, rating, and content are required' });
@@ -109,19 +110,33 @@ app.post('/api/reviews', async (req, res) => {
   }
 
   try {
-    const { data, error } = await client
+    const payload: any = {
+      name: String(name).trim(),
+      country: String(country || 'United States').trim(),
+      country_code: String(countryCode || 'US').toUpperCase(),
+      rating: Math.min(5, Math.max(1, Number(rating))),
+      content: String(content).trim(),
+      is_approved: Boolean(isApproved),
+    };
+    if (avatar) {
+      payload.avatar = String(avatar);
+    }
+
+    let { data, error } = await client
       .from('reviews')
-      .insert([
-        {
-          name: String(name).trim(),
-          country: String(country || 'United States').trim(),
-          country_code: String(countryCode || 'US').toUpperCase(),
-          rating: Math.min(5, Math.max(1, Number(rating))),
-          content: String(content).trim(),
-          is_approved: Boolean(isApproved),
-        },
-      ])
+      .insert([payload])
       .select();
+
+    // If remote table doesn't have avatar column yet, graceful fallback without avatar
+    if (error && (error.message?.includes('avatar') || error.details?.includes('avatar'))) {
+      delete payload.avatar;
+      const retry = await client
+        .from('reviews')
+        .insert([payload])
+        .select();
+      data = retry.data;
+      error = retry.error;
+    }
 
     if (error) {
       return res.status(500).json({ success: false, error: error.message });

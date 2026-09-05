@@ -36,7 +36,7 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
     copyrightText: '© 2026 USH Community of Traders. All rights reserved. Forex and CFD trading involves significant risk of loss.',
   },
   hero: {
-    badgeText: 'Join 5,000+ Traders',
+    badgeText: 'Join 20,000+ Traders',
     badgeSubtext: 'Free VIP Community • Exness Partner Broker',
     headline: 'Trade With More Clarity.',
     highlightText: 'Learn With a Community.',
@@ -104,7 +104,7 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
     ctaLink: '',
     communityImageUrl: '',
     chartImageUrl: '',
-    stat1Number: '5,000+',
+    stat1Number: '20,000+',
     stat1Label: 'Community Members',
     stat2Number: 'Daily',
     stat2Label: 'Market Breakdowns',
@@ -117,7 +117,7 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
       'Macroeconomic news debriefs before major central bank events',
     ],
     stats: [
-      { number: '5,000+', label: 'Community Members' },
+      { number: '20,000+', label: 'Community Members' },
       { number: 'Daily', label: 'Market Breakdowns' },
       { number: '100%', label: 'Free Community Access' },
     ],
@@ -179,7 +179,7 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
     title: 'Join our trading community',
     subtitle: 'Follow the instructions below to join our trading community, for both new and already existing Exness users',
     partnerLink: 'https://one.exnessonelink.com/a/yxxz5mlw1n',
-    partnerCode: 'yxxz5mlw1n',
+    partnerCode: '1046090975706890644',
     vipTelegramUrl: 'https://t.me/+wHFuFFkA2i0xZTA8',
     adminTelegramUser: 'https://t.me/+wHFuFFkA2i0xZTA8',
     supportHelpText: 'Stay on the website until you complete the full registration process.',
@@ -467,9 +467,7 @@ export const SiteProvider: React.FC<{ children: React.ReactNode }> = ({ children
           });
         }
         const mergedVipGuide = { ...DEFAULT_SITE_SETTINGS.vipGuide, ...(parsed.vipGuide || {}) };
-        if (mergedVipGuide.partnerCode === '1046090975706890644' || !mergedVipGuide.partnerCode) {
-          mergedVipGuide.partnerCode = 'yxxz5mlw1n';
-        }
+        mergedVipGuide.partnerCode = '1046090975706890644';
 
         // Upgrade legacy CTA texts
         const isLegacyCta = (text?: string) => 
@@ -486,6 +484,14 @@ export const SiteProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const upgradedCommunityCta = isLegacyCta(mergedCommunity.ctaText)
           ? 'Join our trading community'
           : mergedCommunity.ctaText;
+
+        const upgradedBadgeText = (!mergedHero.badgeText || mergedHero.badgeText.includes('5,000') || mergedHero.badgeText.includes('5000'))
+          ? 'Join 20,000+ Traders'
+          : mergedHero.badgeText;
+
+        const upgradedStat1Number = (!mergedCommunity.stat1Number || mergedCommunity.stat1Number.includes('5,000') || mergedCommunity.stat1Number.includes('5000'))
+          ? '20,000+'
+          : mergedCommunity.stat1Number;
 
         // Ensure functional working Telegram links
         const fixTelegramLink = (url?: string) => {
@@ -522,6 +528,7 @@ export const SiteProvider: React.FC<{ children: React.ReactNode }> = ({ children
           },
           hero: {
             ...mergedHero,
+            badgeText: upgradedBadgeText,
             headline: mergedHero.headline || mergedHero.headingLine1 || DEFAULT_SITE_SETTINGS.hero.headline,
             highlightText: mergedHero.highlightText || mergedHero.headingLine2 || DEFAULT_SITE_SETTINGS.hero.highlightText,
             headingLine1: mergedHero.headingLine1 || mergedHero.headline || DEFAULT_SITE_SETTINGS.hero.headingLine1,
@@ -540,6 +547,7 @@ export const SiteProvider: React.FC<{ children: React.ReactNode }> = ({ children
           features: Array.isArray(parsed.features) && parsed.features.length > 0 ? parsed.features : mergedWhatYouGet.features,
           community: {
             ...mergedCommunity,
+            stat1Number: upgradedStat1Number,
             headline: mergedCommunity.headline || mergedCommunity.titleLine1 || DEFAULT_SITE_SETTINGS.community.headline,
             highlightText: mergedCommunity.highlightText || mergedCommunity.titleHighlight || DEFAULT_SITE_SETTINGS.community.highlightText,
             titleLine1: mergedCommunity.titleLine1 || mergedCommunity.headline || DEFAULT_SITE_SETTINGS.community.titleLine1,
@@ -838,6 +846,7 @@ export const SiteProvider: React.FC<{ children: React.ReactNode }> = ({ children
       countryCode: reviewData.countryCode,
       rating: reviewData.rating,
       content: reviewData.content,
+      avatar: reviewData.avatar,
       isApproved: initialStatus === 'approved',
     }).catch((err) => console.warn('Supabase review sync error:', err));
 

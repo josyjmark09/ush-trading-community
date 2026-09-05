@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { ReviewItem } from '../types';
 import { useSite } from '../context/SiteContext';
 import { 
@@ -11,7 +11,18 @@ import {
   CheckCircle2,
   Clock,
   ShieldCheck,
-  Award
+  Award,
+  Camera,
+  Upload,
+  X,
+  ZoomIn,
+  ZoomOut,
+  Move,
+  Users,
+  Search,
+  Trash2,
+  Check,
+  Sliders
 } from 'lucide-react';
 
 interface ReviewsSectionProps {
@@ -81,13 +92,70 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({
   const [selectedCountry, setSelectedCountry] = useState(COUNTRIES[0]);
   const [rating, setRating] = useState(5);
   const [content, setContent] = useState('');
+  const [avatar, setAvatar] = useState<string | undefined>(undefined);
   const [submissionResult, setSubmissionResult] = useState<{ submitted: boolean; requiresApproval: boolean } | null>(null);
+
+  // Profile photo interactive framing state
+  const [rawImage, setRawImage] = useState<string | null>(null);
+  const [isFramingOpen, setIsFramingOpen] = useState(false);
+  const [zoom, setZoom] = useState(1);
+  const [panX, setPanX] = useState(0); // -50 to 50
+  const [panY, setPanY] = useState(0); // -50 to 50
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // All Reviews modal state
+  const [isAllReviewsOpen, setIsAllReviewsOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterRating, setFilterRating] = useState<number | null>(null);
 
   const totalReviews = reviewsList.length;
 
   const averageRating = totalReviews > 0
     ? (reviewsList.reduce((acc, r) => acc + r.rating, 0) / totalReviews).toFixed(1)
     : null;
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      setRawImage(reader.result as string);
+      setZoom(1);
+      setPanX(0);
+      setPanY(0);
+      setIsFramingOpen(true);
+    };
+    reader.readAsDataURL(file);
+    e.target.value = '';
+  };
+
+  const handleApplyFraming = () => {
+    if (!rawImage) return;
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = 140;
+      canvas.height = 140;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+
+      const minDim = Math.min(img.width, img.height);
+      const scaledDim = minDim / zoom;
+
+      const maxOffsetX = (img.width - scaledDim) / 2;
+      const maxOffsetY = (img.height - scaledDim) / 2;
+
+      const sx = Math.max(0, Math.min(img.width - scaledDim, (img.width - scaledDim) / 2 + (panX / 100) * maxOffsetX));
+      const sy = Math.max(0, Math.min(img.height - scaledDim, (img.height - scaledDim) / 2 + (panY / 100) * maxOffsetY));
+
+      ctx.drawImage(img, sx, sy, scaledDim, scaledDim, 0, 0, 140, 140);
+      const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.82);
+      setAvatar(compressedDataUrl);
+      setIsFramingOpen(false);
+    };
+    img.src = rawImage;
+  };
 
   const nextReview = () => {
     if (totalReviews <= 1) return;
@@ -146,6 +214,7 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({
       countryCode: selectedCountry.code,
       rating,
       content: content.trim(),
+      avatar: avatar || undefined,
     });
 
     setSubmissionResult({
@@ -155,6 +224,7 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({
 
     setName('');
     setContent('');
+    setAvatar(undefined);
 
     setTimeout(() => {
       setSubmissionResult(null);
@@ -264,9 +334,17 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({
                   </p>
                 </div>
                 <div className="flex items-center gap-2.5 pt-2 border-t border-slate-200">
-                  <div className="w-7 h-7 rounded-md bg-slate-100 flex items-center justify-center text-slate-800 font-manrope font-black text-[11px] shrink-0 border border-slate-300">
-                    {getInitials(prevItem.name)}
-                  </div>
+                  {prevItem.avatar ? (
+                    <img 
+                      src={prevItem.avatar} 
+                      alt={prevItem.name} 
+                      className="w-7 h-7 rounded-full object-cover border border-slate-300 shrink-0" 
+                    />
+                  ) : (
+                    <div className="w-7 h-7 rounded-md bg-slate-100 flex items-center justify-center text-slate-800 font-manrope font-black text-[11px] shrink-0 border border-slate-300">
+                      {getInitials(prevItem.name)}
+                    </div>
+                  )}
                   <div className="flex items-center gap-1.5 truncate">
                     <span className="font-manrope text-[12px] sm:text-[13px] font-bold text-slate-900 truncate">
                       {prevItem.name}
@@ -304,9 +382,17 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({
               {/* Author Footer */}
               <div className="flex items-center justify-between pt-3 sm:pt-4 border-t border-slate-200">
                 <div className="flex items-center gap-2.5 sm:gap-3">
-                  <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-lg bg-slate-100 flex items-center justify-center text-slate-900 font-manrope font-black text-[12px] sm:text-[14px] border border-slate-300 shrink-0">
-                    {getInitials(currentItem.name)}
-                  </div>
+                  {currentItem.avatar ? (
+                    <img 
+                      src={currentItem.avatar} 
+                      alt={currentItem.name} 
+                      className="w-10 h-10 sm:w-11 sm:h-11 rounded-full object-cover border-2 border-[#0053CF]/30 shadow-2xs shrink-0" 
+                    />
+                  ) : (
+                    <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-lg bg-slate-100 flex items-center justify-center text-slate-900 font-manrope font-black text-[12px] sm:text-[14px] border border-slate-300 shrink-0">
+                      {getInitials(currentItem.name)}
+                    </div>
+                  )}
 
                   <div>
                     <div className="flex items-center gap-2">
@@ -350,9 +436,17 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({
                   </p>
                 </div>
                 <div className="flex items-center gap-2.5 pt-2 border-t border-slate-200">
-                  <div className="w-7 h-7 rounded-md bg-slate-100 flex items-center justify-center text-slate-800 font-manrope font-black text-[11px] shrink-0 border border-slate-300">
-                    {getInitials(nextItem.name)}
-                  </div>
+                  {nextItem.avatar ? (
+                    <img 
+                      src={nextItem.avatar} 
+                      alt={nextItem.name} 
+                      className="w-7 h-7 rounded-full object-cover border border-slate-300 shrink-0" 
+                    />
+                  ) : (
+                    <div className="w-7 h-7 rounded-md bg-slate-100 flex items-center justify-center text-slate-800 font-manrope font-black text-[11px] shrink-0 border border-slate-300">
+                      {getInitials(nextItem.name)}
+                    </div>
+                  )}
                   <div className="flex items-center gap-1.5 truncate">
                     <span className="font-manrope text-[12px] sm:text-[13px] font-bold text-slate-900 truncate">
                       {nextItem.name}
@@ -401,20 +495,30 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({
         </>
       )}
 
-      {/* Review Submission Form Drawer / Card */}
+      {/* Review Actions: View All & Submit Buttons */}
       <div className="mt-8 text-center">
         {!isFormOpen ? (
-          totalReviews > 0 && (
+          <div className="flex flex-wrap items-center justify-center gap-2.5">
+            {totalReviews > 0 && (
+              <button
+                onClick={() => setIsAllReviewsOpen(true)}
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-[13px] font-bold transition-all border border-slate-300 shadow-2xs cursor-pointer active:scale-98"
+              >
+                <Users className="w-4 h-4 text-[#0053CF]" />
+                <span>View All ({totalReviews}) Reviews</span>
+              </button>
+            )}
+
             <button
               onClick={() => setIsFormOpen(true)}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-white hover:bg-slate-100 text-slate-900 text-[13px] font-bold transition-colors border border-slate-300 shadow-2xs cursor-pointer"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#0053CF] hover:bg-[#0040A2] text-white text-[13px] font-bold transition-all shadow-xs cursor-pointer active:scale-98"
             >
-              <MessageSquarePlus className="w-4 h-4 text-[#0053CF]" />
-              <span>Share Your Trading Feedback</span>
+              <MessageSquarePlus className="w-4 h-4" />
+              <span>{totalReviews === 0 ? "Write the First Review" : "Leave a Review"}</span>
             </button>
-          )
+          </div>
         ) : (
-          <div className="mt-4 max-w-lg mx-auto bg-white rounded-2xl border border-slate-300 p-5 sm:p-7 shadow-sm text-left">
+          <div className="mt-4 max-w-lg mx-auto bg-white rounded-2xl border border-slate-300 p-5 sm:p-7 shadow-sm text-left animate-soft-fade">
             <div className="flex items-center justify-between mb-4 pb-2 border-b border-slate-200">
               <div>
                 <h3 className="font-manrope font-black text-[17px] text-slate-900">
@@ -542,6 +646,67 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({
                   />
                 </div>
 
+                {/* Profile Photo Uploader & Interactive Framing Preview */}
+                <div>
+                  <label className="block text-[12px] font-bold text-slate-900 mb-1.5 font-inter">
+                    Profile Photo <span className="text-slate-500 font-normal">(Optional)</span>
+                  </label>
+
+                  {avatar ? (
+                    <div className="flex items-center gap-3 p-3 bg-slate-50 border border-slate-200 rounded-xl">
+                      <img
+                        src={avatar}
+                        alt="Your profile avatar"
+                        className="w-12 h-12 rounded-full object-cover border-2 border-[#0053CF] shadow-xs shrink-0"
+                      />
+                      <div className="min-w-0 flex-1">
+                        <span className="text-[12px] font-bold text-slate-800 block">Photo ready</span>
+                        <span className="text-[11px] text-emerald-600 font-semibold block">Compressed to &lt;15KB • Fast loading</span>
+                      </div>
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <button
+                          type="button"
+                          onClick={() => setIsFramingOpen(true)}
+                          className="px-2.5 py-1.5 bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 rounded-lg text-[11.5px] font-bold transition-colors cursor-pointer flex items-center gap-1"
+                          title="Adjust Framing"
+                        >
+                          <Sliders className="w-3.5 h-3.5 text-[#0053CF]" />
+                          <span>Adjust</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setAvatar(undefined)}
+                          className="p-1.5 bg-white hover:bg-rose-50 text-slate-400 hover:text-rose-600 border border-slate-300 hover:border-rose-200 rounded-lg transition-colors cursor-pointer"
+                          title="Remove Photo"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div>
+                      <input
+                        type="file"
+                        ref={fileInputRef}
+                        accept="image/*"
+                        onChange={handleFileSelect}
+                        className="hidden"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="w-full flex items-center justify-center gap-2 py-2.5 px-3 bg-slate-50 hover:bg-slate-100 text-slate-700 border border-dashed border-slate-300 hover:border-[#0053CF] rounded-xl text-[12.5px] font-bold font-inter transition-all cursor-pointer"
+                      >
+                        <Camera className="w-4 h-4 text-[#0053CF]" />
+                        <span>Upload & Frame Profile Photo</span>
+                      </button>
+                      <p className="text-[11px] text-slate-500 mt-1 font-inter">
+                        Upload your photo, position your face clearly in the circular frame, and it will be micro-compressed for instant loading.
+                      </p>
+                    </div>
+                  )}
+                </div>
+
                 <button
                   type="submit"
                   className="w-full inline-flex items-center justify-center gap-2 bg-[#0053CF] hover:bg-[#0040A2] text-white py-2.5 px-4 rounded-xl font-inter text-[14px] font-bold shadow-xs transition-colors cursor-pointer"
@@ -554,6 +719,325 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({
           </div>
         )}
       </div>
+
+      {/* Interactive Face Framing Modal */}
+      {isFramingOpen && rawImage && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center p-3.5 sm:p-4 bg-slate-900/70 backdrop-blur-xs animate-soft-fade"
+          onClick={() => setIsFramingOpen(false)}
+        >
+          <div 
+            className="bg-white rounded-2xl max-w-sm sm:max-w-md w-full p-4 sm:p-6 shadow-2xl border border-slate-300 relative flex flex-col space-y-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between pb-2 border-b border-slate-200">
+              <div>
+                <h3 className="font-manrope text-[16px] sm:text-[17px] font-black text-slate-900">
+                  Position & Frame Your Face
+                </h3>
+                <p className="text-[11.5px] text-slate-500 font-inter">
+                  Adjust zoom & position so your face fits nicely in the circular avatar.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsFramingOpen(false)}
+                className="text-slate-400 hover:text-slate-700 p-1 rounded-md cursor-pointer"
+              >
+                <X className="w-4.5 h-4.5" />
+              </button>
+            </div>
+
+            {/* Live Framing Mask Window */}
+            <div className="flex flex-col items-center justify-center py-2">
+              <div className="relative w-40 h-40 rounded-full overflow-hidden border-4 border-[#0053CF] shadow-md bg-slate-900 flex items-center justify-center select-none">
+                <img
+                  src={rawImage}
+                  alt="Framing preview"
+                  className="max-w-none transition-transform duration-75 select-none pointer-events-none"
+                  style={{
+                    width: `${100 * zoom}%`,
+                    height: `${100 * zoom}%`,
+                    objectFit: 'cover',
+                    transform: `translate(${panX}%, ${panY}%)`,
+                  }}
+                />
+                {/* Crosshair guide */}
+                <div className="absolute inset-0 rounded-full pointer-events-none border border-white/20"></div>
+              </div>
+              <span className="text-[11px] text-slate-500 font-medium mt-2">
+                Live circular avatar preview
+              </span>
+            </div>
+
+            {/* Interactive Sliders */}
+            <div className="space-y-3 bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+              {/* Zoom Slider */}
+              <div className="space-y-1">
+                <div className="flex justify-between text-[11.5px] font-bold text-slate-700">
+                  <span className="flex items-center gap-1">
+                    <ZoomIn className="w-3.5 h-3.5 text-[#0053CF]" />
+                    <span>Zoom Level:</span>
+                  </span>
+                  <span>{zoom.toFixed(2)}x</span>
+                </div>
+                <input
+                  type="range"
+                  min="1"
+                  max="2.5"
+                  step="0.05"
+                  value={zoom}
+                  onChange={(e) => setZoom(parseFloat(e.target.value))}
+                  className="w-full h-1.5 bg-slate-300 rounded-lg appearance-none cursor-pointer accent-[#0053CF]"
+                />
+              </div>
+
+              {/* Vertical Position Slider (Face Up / Down) */}
+              <div className="space-y-1">
+                <div className="flex justify-between text-[11.5px] font-bold text-slate-700">
+                  <span className="flex items-center gap-1">
+                    <Move className="w-3.5 h-3.5 text-[#0053CF]" />
+                    <span>Position Face (Up / Down):</span>
+                  </span>
+                  <span>{panY > 0 ? `+${panY}%` : `${panY}%`}</span>
+                </div>
+                <input
+                  type="range"
+                  min="-40"
+                  max="40"
+                  step="1"
+                  value={panY}
+                  onChange={(e) => setPanY(parseInt(e.target.value, 10))}
+                  className="w-full h-1.5 bg-slate-300 rounded-lg appearance-none cursor-pointer accent-[#0053CF]"
+                />
+              </div>
+
+              {/* Horizontal Position Slider (Left / Right) */}
+              <div className="space-y-1">
+                <div className="flex justify-between text-[11.5px] font-bold text-slate-700">
+                  <span className="flex items-center gap-1">
+                    <Move className="w-3.5 h-3.5 text-[#0053CF]" />
+                    <span>Position Face (Left / Right):</span>
+                  </span>
+                  <span>{panX > 0 ? `+${panX}%` : `${panX}%`}</span>
+                </div>
+                <input
+                  type="range"
+                  min="-40"
+                  max="40"
+                  step="1"
+                  value={panX}
+                  onChange={(e) => setPanX(parseInt(e.target.value, 10))}
+                  className="w-full h-1.5 bg-slate-300 rounded-lg appearance-none cursor-pointer accent-[#0053CF]"
+                />
+              </div>
+
+              {/* Quick Preset Buttons */}
+              <div className="flex items-center justify-center gap-2 pt-1">
+                <button
+                  type="button"
+                  onClick={() => { setZoom(1); setPanX(0); setPanY(0); }}
+                  className="px-2.5 py-1 bg-white hover:bg-slate-200 border border-slate-300 rounded text-[11px] font-bold text-slate-700 cursor-pointer"
+                >
+                  Center
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setZoom(1.3); setPanX(0); setPanY(-15); }}
+                  className="px-2.5 py-1 bg-white hover:bg-slate-200 border border-slate-300 rounded text-[11px] font-bold text-slate-700 cursor-pointer"
+                >
+                  Face Focus
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setZoom(1.6); setPanX(0); setPanY(-20); }}
+                  className="px-2.5 py-1 bg-white hover:bg-slate-200 border border-slate-300 rounded text-[11px] font-bold text-slate-700 cursor-pointer"
+                >
+                  Close Up
+                </button>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex items-center justify-end gap-2 pt-1">
+              <button
+                type="button"
+                onClick={() => setIsFramingOpen(false)}
+                className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-[12.5px] font-bold transition-colors cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleApplyFraming}
+                className="px-5 py-2 bg-[#0053CF] hover:bg-[#0040A2] text-white rounded-xl text-[12.5px] font-bold transition-colors shadow-2xs cursor-pointer flex items-center gap-1.5"
+              >
+                <Check className="w-4 h-4" />
+                <span>Confirm & Apply</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* All Reviews Modal */}
+      {isAllReviewsOpen && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 md:p-6 bg-slate-900/60 backdrop-blur-xs animate-soft-fade"
+          onClick={() => setIsAllReviewsOpen(false)}
+        >
+          <div 
+            className="bg-white rounded-2xl max-w-4xl w-full p-4 sm:p-6 shadow-2xl border border-slate-300 relative flex flex-col max-h-[90vh] overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between pb-3 border-b border-slate-200 shrink-0">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-blue-50 text-[#0053CF] flex items-center justify-center font-black text-[13px]">
+                  <Users className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="font-manrope text-[17px] sm:text-[20px] font-black text-slate-900 leading-tight">
+                    All Verified Reviews ({totalReviews})
+                  </h3>
+                  <p className="font-inter text-[12px] text-slate-500">
+                    Real feedback from our global trading collective
+                  </p>
+                </div>
+              </div>
+
+              <button
+                onClick={() => setIsAllReviewsOpen(false)}
+                className="text-slate-400 hover:text-slate-800 p-1.5 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer"
+                aria-label="Close"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Filter & Search Bar */}
+            <div className="py-3 border-b border-slate-100 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 shrink-0">
+              <div className="relative flex-1">
+                <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  placeholder="Search by name or country..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-9 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-[13px] font-inter focus:outline-none focus:bg-white focus:border-[#0053CF]"
+                />
+              </div>
+
+              <div className="flex items-center gap-1 overflow-x-auto pb-1 sm:pb-0">
+                <button
+                  onClick={() => setFilterRating(null)}
+                  className={`px-2.5 py-1 rounded-md text-[11.5px] font-bold transition-colors cursor-pointer shrink-0 ${
+                    filterRating === null ? 'bg-[#0053CF] text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  }`}
+                >
+                  All ({totalReviews})
+                </button>
+                {[5, 4, 3].map((r) => {
+                  const count = reviewsList.filter(item => item.rating === r).length;
+                  return (
+                    <button
+                      key={r}
+                      onClick={() => setFilterRating(filterRating === r ? null : r)}
+                      className={`px-2 py-1 rounded-md text-[11.5px] font-bold transition-colors cursor-pointer flex items-center gap-1 shrink-0 ${
+                        filterRating === r ? 'bg-[#0053CF] text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                      }`}
+                    >
+                      <span>{r}★</span>
+                      <span className="opacity-75">({count})</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Reviews Grid */}
+            <div className="flex-1 overflow-y-auto py-4 space-y-3 sm:space-y-0 sm:grid sm:grid-cols-2 lg:grid-cols-3 sm:gap-3.5 pr-1">
+              {reviewsList
+                .filter((r) => {
+                  const matchesSearch = !searchTerm.trim() || 
+                    r.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                    (r.country && r.country.toLowerCase().includes(searchTerm.toLowerCase())) ||
+                    r.content.toLowerCase().includes(searchTerm.toLowerCase());
+                  const matchesRating = filterRating === null || r.rating === filterRating;
+                  return matchesSearch && matchesRating;
+                })
+                .map((review) => (
+                  <div
+                    key={review.id}
+                    className="p-4 rounded-xl bg-slate-50 border border-slate-200 flex flex-col justify-between space-y-3"
+                  >
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-0.5">
+                          {[...Array(review.rating)].map((_, i) => (
+                            <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                          ))}
+                        </div>
+                        {review.submittedAt && (
+                          <span className="text-[10.5px] text-slate-400 font-inter">
+                            {review.submittedAt}
+                          </span>
+                        )}
+                      </div>
+
+                      <p className="font-inter text-[12.5px] text-slate-700 leading-relaxed">
+                        "{review.content}"
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-2.5 pt-2 border-t border-slate-200/80">
+                      {review.avatar ? (
+                        <img
+                          src={review.avatar}
+                          alt={review.name}
+                          className="w-8 h-8 rounded-full object-cover border border-slate-300 shrink-0"
+                        />
+                      ) : (
+                        <div className="w-8 h-8 rounded-md bg-white text-slate-800 font-manrope font-black text-[11px] flex items-center justify-center border border-slate-200 shrink-0">
+                          {getInitials(review.name)}
+                        </div>
+                      )}
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-1.5 truncate">
+                          <span className="font-manrope text-[12.5px] font-bold text-slate-900 truncate">
+                            {review.name}
+                          </span>
+                          <CountryFlag code={review.countryCode} name={review.country} className="w-4 h-2.5 rounded-xs" />
+                        </div>
+                        <span className="text-[10.5px] text-slate-500 font-inter truncate block">
+                          {review.country || 'Verified Trader'}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+            </div>
+
+            {/* Footer inside modal */}
+            <div className="pt-3 border-t border-slate-200 flex items-center justify-between shrink-0">
+              <span className="text-[12px] text-slate-500 font-inter">
+                Showing {reviewsList.length} verified reviews
+              </span>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsAllReviewsOpen(false);
+                  setIsFormOpen(true);
+                }}
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-[#0053CF] hover:bg-[#0040A2] text-white text-[12px] font-bold rounded-lg transition-colors cursor-pointer shadow-2xs"
+              >
+                <MessageSquarePlus className="w-3.5 h-3.5" />
+                <span>Write a Review</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 };

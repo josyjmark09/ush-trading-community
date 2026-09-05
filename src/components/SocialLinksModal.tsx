@@ -103,9 +103,14 @@ export const SOCIAL_CHANNELS_DATA: Record<SocialPlatformType, {
     renderLogo: (sizeClass = 'w-11 h-11') => <TelegramLogo className={sizeClass} />,
     channels: [
       {
-        title: 'USH Community of Traders',
-        url: 'https://t.me/+wHFuFFkA2i0xZTA8',
+        title: 'Customer Support Direct (@USHFX)',
+        url: 'https://t.me/USHFX',
         isMain: true,
+      },
+      {
+        title: 'Official Trading Community',
+        url: 'https://t.me/+wHFuFFkA2i0xZTA8',
+        isMain: false,
       }
     ]
   }

@@ -35,14 +35,21 @@ export const VipGuideView: React.FC<VipGuideViewProps> = ({ setActiveTab }) => {
   const [isAdminContactModalOpen, setIsAdminContactModalOpen] = useState(false);
 
   const partnerLink = settings.vipGuide?.partnerLink || "https://one.exnessonelink.com/a/yxxz5mlw1n";
-  const partnerCode = settings.vipGuide?.partnerCode || "yxxz5mlw1n";
+  const newAccountPartnerCode = "yxxz5mlw1n";
+  const existingAccountIbCode = "1046090975706890644";
   const rawTg = settings.vipGuide?.vipTelegramUrl || settings.social?.telegramUrl;
   const telegramUrl = (!rawTg || rawTg === 'https://t.me/ushforex_official')
     ? 'https://t.me/+wHFuFFkA2i0xZTA8'
     : rawTg;
 
-  const handleCopyCode = () => {
-    navigator.clipboard.writeText(partnerCode);
+  const handleCopyNewAccountCode = () => {
+    navigator.clipboard.writeText(newAccountPartnerCode);
+    setCopiedCode(true);
+    setTimeout(() => setCopiedCode(false), 2500);
+  };
+
+  const handleCopyExistingIbCode = () => {
+    navigator.clipboard.writeText(existingAccountIbCode);
     setCopiedCode(true);
     setTimeout(() => setCopiedCode(false), 2500);
   };
@@ -54,7 +61,7 @@ export const VipGuideView: React.FC<VipGuideViewProps> = ({ setActiveTab }) => {
   };
 
   const handleCopySupportMessage = () => {
-    const message = `Hello Exness Support, I would like to change my Partner / IB code to: ${partnerCode}`;
+    const message = `Hello Exness Support, I would like to change my Partner / IB code to: ${existingAccountIbCode}`;
     navigator.clipboard.writeText(message);
     setCopiedSupportMessage(true);
     setTimeout(() => setCopiedSupportMessage(false), 2500);
@@ -274,13 +281,13 @@ export const VipGuideView: React.FC<VipGuideViewProps> = ({ setActiveTab }) => {
                     <span className="text-slate-700 font-medium">
                       Partner code to use during sign up &ndash;{' '}
                       <strong className="font-mono text-[13px] text-[#0053CF] font-bold tracking-wide select-all">
-                        {partnerCode}
+                        {newAccountPartnerCode}
                       </strong>
                     </span>
                   </div>
                   <button
                     type="button"
-                    onClick={handleCopyCode}
+                    onClick={handleCopyNewAccountCode}
                     className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-3 py-1.5 sm:py-1 text-[12px] sm:text-[11.5px] font-bold bg-white hover:bg-slate-100 text-slate-700 hover:text-slate-900 border border-slate-200 rounded-md transition-all shrink-0 cursor-pointer shadow-2xs active:scale-95 min-h-[36px] sm:min-h-0"
                     title="Copy Partner Code"
                   >
@@ -455,13 +462,13 @@ export const VipGuideView: React.FC<VipGuideViewProps> = ({ setActiveTab }) => {
                       OFFICIAL EXNESS PARTNER CODE
                     </span>
                     <div className="font-mono text-[22px] sm:text-[26px] font-black tracking-wider text-amber-400 select-all break-all mt-0.5">
-                      {partnerCode}
+                      {existingAccountIbCode}
                     </div>
                   </div>
 
                   <button
                     type="button"
-                    onClick={handleCopyCode}
+                    onClick={handleCopyExistingIbCode}
                     className="w-full min-h-[44px] flex items-center justify-center gap-2 px-4 py-2.5 bg-[#0053CF] hover:bg-[#0040A2] text-white rounded-lg text-[13px] font-bold transition-colors cursor-pointer active:scale-99"
                   >
                     {copiedCode ? (
@@ -497,13 +504,13 @@ export const VipGuideView: React.FC<VipGuideViewProps> = ({ setActiveTab }) => {
                 </div>
 
                 {/* Fallback alternative */}
-                <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 space-y-2 text-[12px] sm:text-[12.5px] font-inter text-slate-700">
+                <div className="p-3.5 rounded-lg bg-amber-50/70 border border-amber-200/80 space-y-2 text-[12px] sm:text-[12.5px] font-inter text-slate-800">
                   <div className="flex items-center gap-1.5 font-bold text-slate-900">
-                    <Info className="w-3.5 h-3.5 text-[#0053CF] shrink-0" />
-                    <span>Alternative: Create a new account with another email</span>
+                    <Info className="w-4 h-4 text-amber-600 shrink-0" />
+                    <span>Alternative: Create a fresh account with another email</span>
                   </div>
-                  <p className="leading-relaxed">
-                    If Exness doesn't allow the partner change, you can simply open a new account using a different email:
+                  <p className="leading-relaxed text-slate-700">
+                    If Exness support is unable to change your IB partner, you can simply open a new account using a different email address. Note that Exness allows you to verify the new account using the <strong>exact same identity documents and personal credentials</strong> as your existing account.
                   </p>
                   <a
                     href={partnerLink}
