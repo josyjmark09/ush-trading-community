@@ -81,7 +81,7 @@ const CountryFlag: React.FC<{ code?: string; name?: string; className?: string }
 
 export const ReviewsSection: React.FC<ReviewsSectionProps> = ({
   title = "Community Reviews & Feedback",
-  subtitle = "Real reviews submitted by verified community traders. Reviews appear here once approved by our moderation desk."
+  subtitle = "Real feedback and experiences shared by members of our trading community."
 }) => {
   const { approvedReviews, addReview } = useSite();
   const reviewsList = approvedReviews.length > 0 ? approvedReviews : [];
@@ -707,8 +707,8 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({
                         className="w-12 h-12 rounded-full object-cover border-2 border-[#0053CF] shadow-xs shrink-0"
                       />
                       <div className="min-w-0 flex-1">
-                        <span className="text-[12px] font-bold text-slate-800 block">Photo ready</span>
-                        <span className="text-[11px] text-emerald-600 font-semibold block">Compressed to &lt;15KB • Fast loading</span>
+                        <span className="text-[13px] font-bold text-slate-800 block">Photo attached</span>
+                        <span className="text-[11px] text-slate-500 font-medium block">Ready</span>
                       </div>
                       <div className="flex items-center gap-1.5 shrink-0">
                         <button
@@ -745,10 +745,10 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({
                         className="w-full flex items-center justify-center gap-2 py-2.5 px-3 bg-slate-50 hover:bg-slate-100 text-slate-700 border border-dashed border-slate-300 hover:border-[#0053CF] rounded-xl text-[12.5px] font-bold font-inter transition-all cursor-pointer"
                       >
                         <Camera className="w-4 h-4 text-[#0053CF]" />
-                        <span>Upload & Frame Profile Photo</span>
+                        <span>Add Profile Photo</span>
                       </button>
                       <p className="text-[11px] text-slate-500 mt-1 font-inter">
-                        Upload your photo, position your face clearly in the circular frame, and it will be micro-compressed for instant loading.
+                        Choose a photo to personalize your review.
                       </p>
                     </div>
                   )}
@@ -759,7 +759,7 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({
                   className="w-full inline-flex items-center justify-center gap-2 bg-[#0053CF] hover:bg-[#0040A2] text-white py-2.5 px-4 rounded-xl font-inter text-[14px] font-bold shadow-xs transition-colors cursor-pointer"
                 >
                   <Send className="w-4 h-4" />
-                  <span>Submit Review For Verification</span>
+                  <span>Submit Review</span>
                 </button>
               </form>
             )}
