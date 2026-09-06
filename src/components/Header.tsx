@@ -64,7 +64,7 @@ export const Header: React.FC<HeaderProps> = ({
     isExternal?: boolean;
   }> = [
     { id: 'home', label: 'Home' },
-    { label: 'Forex Factory', href: 'https://www.forexfactory.com', isExternal: true },
+    { label: 'Forex News', href: 'https://www.forexfactory.com', isExternal: true },
     { id: 'services', label: 'Our Services', shortLabel: 'Services' },
     { id: 'about', label: 'About' },
     { id: 'quotes', label: 'Trading Quotes', shortLabel: 'Quotes' },

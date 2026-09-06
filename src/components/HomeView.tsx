@@ -28,7 +28,7 @@ import { APP_IMAGES } from '../data/mockData';
 import { ExnessLogo } from './ExnessLogo';
 import { TradingViewChart } from './TradingViewChart';
 import { ServicesSection } from './ServicesSection';
-import { openTelegram } from '../utils/telegramLink';
+import { openTelegram, DEFAULT_TELEGRAM_URL } from '../utils/telegramLink';
 import { NavTab } from '../types';
 import chartImage2 from './image 2.png';
 import chartImage3 from './image 3.png';
@@ -167,6 +167,8 @@ export const HomeView: React.FC<HomeViewProps> = ({
     }
   };
 
+  const telegramUrl = settings.social?.telegramUrl || DEFAULT_TELEGRAM_URL;
+
   return (
     <div className="w-full flex flex-col pt-0 sm:pt-1 pb-16">
       
@@ -176,14 +178,22 @@ export const HomeView: React.FC<HomeViewProps> = ({
       {/* 2. Hero Section */}
       <section id="hero" className="relative px-4 sm:px-6 md:px-8 max-w-[1200px] mx-auto w-full flex flex-col items-center justify-center text-center overflow-hidden pt-4 sm:pt-7 pb-4 md:pb-6 mb-8 sm:mb-12 scroll-mt-24">
         <div className="w-full max-w-3xl mx-auto flex flex-col items-center justify-center text-center space-y-4 sm:space-y-6 md:space-y-7 relative z-10">
-          {/* Badge */}
+          {/* Badge / Tiny CTA Button */}
           <div className="flex justify-center items-center w-full">
-            <div className="inline-flex items-center justify-center gap-2 px-3.5 py-1.5 bg-slate-100 border border-slate-300 rounded-md text-slate-800 font-inter text-[12px] sm:text-[13px] font-bold shadow-2xs">
-              <Users className="w-3.5 h-3.5 text-[#0053CF] shrink-0" />
+            <a
+              href={telegramUrl}
+              onClick={(e) => {
+                openTelegram(telegramUrl, e);
+              }}
+              className="inline-flex items-center justify-center gap-2 px-3.5 py-1.5 bg-[#0053CF] hover:bg-[#0040A2] text-white rounded-md font-inter text-[12px] sm:text-[13px] font-bold shadow-xs hover:shadow transition-all cursor-pointer active:scale-98"
+              title="Join 20,000+ Traders on Telegram"
+              aria-label={settings.hero?.badgeText || "Join 20,000+ Traders"}
+            >
+              <Users className="w-3.5 h-3.5 text-white shrink-0" />
               <span>
                 {settings.hero?.badgeText || "Join 20,000+ Traders"}
               </span>
-            </div>
+            </a>
           </div>
 
           {/* Display Heading */}
