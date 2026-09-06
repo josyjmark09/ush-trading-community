@@ -66,7 +66,13 @@ export const ContactModal: React.FC<ContactModalProps> = ({ isOpen, type, onClos
   if (!isOpen) return null;
 
   const targetEmail = settings.social?.supportEmail || 'ushforex@gmail.com';
-  const telegramSupportUrl = settings.social?.supportTelegram || 'https://t.me/USHFX';
+  const rawSupportTg = settings.social?.supportTelegram;
+  const telegramSupportUrl = 
+    rawSupportTg && 
+    rawSupportTg !== 'https://t.me/+wHFuFFkA2i0xZTA8' && 
+    !rawSupportTg.includes('+wHFuFFkA2i0xZTA8')
+      ? rawSupportTg 
+      : 'https://t.me/USHFX';
 
   const handleCopyEmail = () => {
     navigator.clipboard.writeText(targetEmail);
@@ -74,8 +80,8 @@ export const ContactModal: React.FC<ContactModalProps> = ({ isOpen, type, onClos
     setTimeout(() => setCopiedEmail(false), 2000);
   };
 
-  const handleTelegramOption = () => {
-    openTelegram(telegramSupportUrl);
+  const handleTelegramOption = (e?: React.MouseEvent) => {
+    openTelegram(telegramSupportUrl, e);
   };
 
   // Submit for Email Option
@@ -225,8 +231,8 @@ Target: ${targetEmail}
                 {/* 3 Contact Options */}
                 <div className="space-y-3 mb-6">
                   {/* Option 1: Telegram */}
-                  <button
-                    type="button"
+                  <a
+                    href={telegramSupportUrl}
                     onClick={handleTelegramOption}
                     className="w-full flex items-center justify-between p-3.5 sm:p-4 rounded-xl border border-slate-200 hover:border-[#0088cc] hover:bg-slate-50/70 transition-all text-left group cursor-pointer shadow-2xs hover:shadow-xs active:scale-[0.99]"
                   >
@@ -246,7 +252,7 @@ Target: ${targetEmail}
                       </div>
                     </div>
                     <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-slate-600 group-hover:translate-x-0.5 transition-all shrink-0 ml-2" />
-                  </button>
+                  </a>
 
                   {/* Option 2: Email */}
                   <button

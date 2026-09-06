@@ -390,7 +390,7 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
     telegramHandle: '@USHFOREX',
     brokerPartnerUrl: 'https://one.exnesstrack.net/a/c_iun6m90d5o',
     supportEmail: 'ushforex@gmail.com',
-    supportTelegram: 'https://t.me/+wHFuFFkA2i0xZTA8',
+    supportTelegram: 'https://t.me/USHFX',
     tiktokUrl: 'https://www.tiktok.com/@ush.forex?_r=1&_t=ZS-99MCYEw58JZ',
     instagramUrl: 'https://www.instagram.com/kingsforex01?igsi=OG8ydWJ1ZHFsMHk5&utm_source=qr',
     youtubeUrl: 'https://youtube.com/@ushforex01?si=W3LngDqtaJiICbqe',
@@ -501,6 +501,13 @@ export const SiteProvider: React.FC<{ children: React.ReactNode }> = ({ children
           return url;
         };
 
+        const fixSupportTelegramLink = (url?: string) => {
+          if (!url || url === 'https://t.me/+wHFuFFkA2i0xZTA8' || url.includes('+wHFuFFkA2i0xZTA8') || url.includes('ushforex_official')) {
+            return 'https://t.me/USHFX';
+          }
+          return url;
+        };
+
         return {
           ...DEFAULT_SITE_SETTINGS,
           ...parsed,
@@ -593,7 +600,7 @@ export const SiteProvider: React.FC<{ children: React.ReactNode }> = ({ children
             ...(parsed.social || {}),
             supportEmail: 'ushforex@gmail.com',
             telegramUrl: fixTelegramLink(parsed.social?.telegramUrl),
-            supportTelegram: fixTelegramLink(parsed.social?.supportTelegram),
+            supportTelegram: fixSupportTelegramLink(parsed.social?.supportTelegram),
           },
           moderation: { ...DEFAULT_SITE_SETTINGS.moderation, ...(parsed.moderation || {}) },
           faqs: Array.isArray(parsed.faqs) && parsed.faqs.length > 0 ? parsed.faqs : DEFAULT_SITE_SETTINGS.faqs,

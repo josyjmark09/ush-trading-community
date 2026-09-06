@@ -212,8 +212,8 @@ export const Footer: React.FC<FooterProps> = ({
             <ul className="space-y-2.5 font-inter text-[13.5px]">
               {/* Telegram - Directly directs the user to USH Customer Support (@USHFX) with no modal */}
               <li>
-                <button
-                  type="button"
+                <a
+                  href="https://t.me/USHFX"
                   onClick={(e) => openTelegram('https://t.me/USHFX', e)}
                   className="text-slate-700 hover:text-[#0088cc] transition-colors inline-flex items-center gap-2.5 font-medium cursor-pointer group"
                   title="Telegram Support (@USHFX)"
@@ -222,7 +222,7 @@ export const Footer: React.FC<FooterProps> = ({
                     <TelegramLogo className="w-5 h-5" />
                   </div>
                   <span>Telegram</span>
-                </button>
+                </a>
               </li>
 
               {/* Instagram - Pops up accounts */}
