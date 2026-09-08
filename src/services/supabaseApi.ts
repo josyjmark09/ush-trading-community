@@ -97,6 +97,31 @@ export async function checkSupabaseStatus(): Promise<SupabaseStatus> {
   return { connected: false, url: SUPABASE_URL, error: 'Database unreachable' };
 }
 
+const DELETED_REVIEWS_KEY = 'ush_deleted_reviews';
+
+function getDeletedReviewIds(): Set<string> {
+  try {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      const raw = localStorage.getItem(DELETED_REVIEWS_KEY);
+      if (raw) {
+        const list = JSON.parse(raw);
+        if (Array.isArray(list)) return new Set(list);
+      }
+    }
+  } catch {}
+  return new Set();
+}
+
+export function markReviewAsDeleted(id: string) {
+  try {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      const set = getDeletedReviewIds();
+      set.add(id);
+      localStorage.setItem(DELETED_REVIEWS_KEY, JSON.stringify(Array.from(set)));
+    }
+  } catch {}
+}
+
 /**
  * Fetches all reviews directly from Supabase cloud (ordered for landing page carousel).
  */
@@ -107,23 +132,25 @@ export async function fetchCloudReviews(): Promise<any[] | null> {
       const { data, error } = await sb
         .from('reviews')
         .select('*')
-        .order('order_index', { ascending: true })
         .order('created_at', { ascending: false });
 
       if (!error && Array.isArray(data)) {
-        return data.map((r: any, idx: number) => ({
-          id: String(r.id),
-          name: r.name,
-          country: r.country,
-          countryCode: r.country_code || 'US',
-          rating: Number(r.rating) || 5,
-          content: r.content,
-          avatar: r.avatar || undefined,
-          status: r.is_approved ? 'approved' : 'pending',
-          submittedAt: r.created_at ? r.created_at.split('T')[0] : new Date().toISOString().split('T')[0],
-          orderIndex: typeof r.order_index === 'number' ? r.order_index : idx,
-          isPinned: false
-        }));
+        const deletedIds = getDeletedReviewIds();
+        return data
+          .filter((r: any) => !deletedIds.has(String(r.id)))
+          .map((r: any, idx: number) => ({
+            id: String(r.id),
+            name: r.name,
+            country: r.country,
+            countryCode: r.country_code || 'US',
+            rating: Number(r.rating) || 5,
+            content: r.content,
+            avatar: r.avatar || undefined,
+            status: 'approved',
+            submittedAt: r.created_at ? r.created_at.split('T')[0] : new Date().toISOString().split('T')[0],
+            orderIndex: typeof r.order_index === 'number' ? r.order_index : idx,
+            isPinned: false
+          }));
       } else if (error) {
         console.warn('Supabase direct review fetch notice:', error.message);
       }
@@ -161,11 +188,8 @@ export async function submitCloudReview(review: {
   isApproved?: boolean;
 }): Promise<{ success: boolean; review?: any; requiresApproval?: boolean }> {
   const tempId = `review-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`;
-  const status = review.isApproved !== undefined 
-    ? (review.isApproved ? 'approved' : 'pending')
-    : 'pending';
-
-  const newReviewItem = {
+  
+  let newReviewItem: any = {
     id: tempId,
     name: review.name,
     country: review.country,
@@ -173,7 +197,7 @@ export async function submitCloudReview(review: {
     rating: review.rating,
     content: review.content,
     avatar: review.avatar,
-    status: status,
+    status: 'approved',
     submittedAt: new Date().toISOString().split('T')[0],
     orderIndex: 0,
     isPinned: false
@@ -183,25 +207,32 @@ export async function submitCloudReview(review: {
   if (sb) {
     try {
       const payload: any = {
-        id: tempId,
-        name: review.name,
-        country: review.country,
-        country_code: review.countryCode || 'US',
-        rating: review.rating,
-        content: review.content,
-        is_approved: status === 'approved',
-        order_index: 0,
+        name: review.name.trim(),
+        country: (review.country || 'United States').trim(),
+        country_code: (review.countryCode || 'US').trim().toUpperCase(),
+        rating: Math.min(5, Math.max(1, Number(review.rating) || 5)),
+        content: review.content.trim(),
+        is_approved: true,
       };
-      if (review.avatar) payload.avatar = review.avatar;
 
-      const { error } = await sb.from('reviews').insert([payload]);
-      if (error) {
-        console.warn('Supabase review insert error:', error.message);
-        // If avatar payload was too large for text column, retry without avatar
-        if (payload.avatar) {
-          delete payload.avatar;
-          await sb.from('reviews').insert([payload]);
-        }
+      const { data, error } = await sb.from('reviews').insert([payload]).select();
+      if (!error && Array.isArray(data) && data.length > 0) {
+        const saved = data[0];
+        newReviewItem = {
+          id: String(saved.id),
+          name: saved.name,
+          country: saved.country,
+          countryCode: saved.country_code || 'US',
+          rating: Number(saved.rating) || 5,
+          content: saved.content,
+          avatar: review.avatar,
+          status: 'approved',
+          submittedAt: saved.created_at ? saved.created_at.split('T')[0] : new Date().toISOString().split('T')[0],
+          orderIndex: 0,
+          isPinned: false,
+        };
+      } else if (error) {
+        console.warn('Supabase review insert notice:', error.message);
       }
     } catch (e) {
       console.warn('Direct Supabase submit error:', e);
@@ -213,14 +244,14 @@ export async function submitCloudReview(review: {
     fetch('/api/reviews', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ...review, id: tempId }),
+      body: JSON.stringify({ ...review, isApproved: true }),
     }).catch(() => {});
   } catch {}
 
   return {
     success: true,
     review: newReviewItem,
-    requiresApproval: status === 'pending',
+    requiresApproval: false,
   };
 }
 
@@ -268,6 +299,7 @@ export async function updateCloudReview(id: string, updates: any): Promise<boole
  * Deletes a review directly from Supabase cloud.
  */
 export async function deleteCloudReview(id: string): Promise<boolean> {
+  markReviewAsDeleted(id);
   const sb = getBrowserSupabase();
   let directSuccess = false;
   if (sb) {

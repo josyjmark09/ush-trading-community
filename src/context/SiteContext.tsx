@@ -407,7 +407,7 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
   quoteGallery1: DEFAULT_QUOTE_GALLERY_1,
   quoteGallery2: DEFAULT_QUOTE_GALLERY_2,
   moderation: {
-    requireReviewApproval: true,
+    requireReviewApproval: false,
   },
 };
 
@@ -853,7 +853,7 @@ export const SiteProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const approvedReviews = reviews.filter((r) => r.status === 'approved');
+  const approvedReviews = reviews.filter((r) => r.status !== 'rejected');
   const pendingReviews = reviews.filter((r) => r.status === 'pending');
 
   const approveReview = (id: string) => {
@@ -924,14 +924,12 @@ export const SiteProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const addReview = (
     reviewData: Omit<ReviewItem, 'id' | 'status' | 'submittedAt'> & { status?: 'approved' | 'pending' | 'rejected' }
   ) => {
-    const requiresApproval = settings.moderation.requireReviewApproval;
-    const initialStatus = reviewData.status || (requiresApproval ? 'pending' : 'approved');
     const tempId = `review-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`;
 
     const newReview: ReviewItem = {
       ...reviewData,
       id: tempId,
-      status: initialStatus,
+      status: 'approved',
       submittedAt: new Date().toISOString().split('T')[0],
       orderIndex: 0,
       isPinned: false,
@@ -939,7 +937,7 @@ export const SiteProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     setReviews((prev) => [newReview, ...prev]);
 
-    // Asynchronous background sync to server database
+    // Asynchronous background sync to database
     submitCloudReview({
       name: reviewData.name,
       country: reviewData.country,
@@ -947,18 +945,18 @@ export const SiteProvider: React.FC<{ children: React.ReactNode }> = ({ children
       rating: reviewData.rating,
       content: reviewData.content,
       avatar: reviewData.avatar,
-      isApproved: reviewData.status ? reviewData.status === 'approved' : undefined,
+      isApproved: true,
     }).then((res) => {
       if (res.success && res.review) {
         setReviews((prev) =>
-          prev.map((r) => (r.id === tempId ? res.review : r))
+          prev.map((r) => (r.id === tempId ? { ...res.review, status: 'approved' } : r))
         );
       }
     }).catch((err) => console.warn('Review submit error:', err));
 
     return {
       success: true,
-      requiresApproval: initialStatus === 'pending',
+      requiresApproval: false,
     };
   };
 

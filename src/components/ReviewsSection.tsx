@@ -336,13 +336,13 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({
               No Reviews Published Yet
             </h3>
             <p className="font-inter text-[13.5px] sm:text-[14.5px] text-slate-600 leading-relaxed max-w-md mx-auto">
-              Every review on USH Community of Traders is submitted by a genuine community member and verified before appearing live. We do not use simulated reviews or fake testimonials.
+              Share your genuine trading journey and feedback with the community. Be the first to share your experience!
             </p>
           </div>
 
-          <div className="inline-flex items-center gap-2 bg-slate-50 border border-slate-200 px-3.5 py-1.5 rounded-lg text-[12px] text-slate-600 font-inter">
-            <ShieldCheck className="w-4 h-4 text-[#0053CF]" />
-            <span>Strict moderation enabled: your feedback will appear once verified</span>
+          <div className="inline-flex items-center gap-2 bg-blue-50 border border-blue-100 px-3.5 py-1.5 rounded-lg text-[12px] text-slate-700 font-inter">
+            <CheckCircle2 className="w-4 h-4 text-[#0053CF]" />
+            <span>Real trader experiences and community feedback</span>
           </div>
 
           <div className="pt-2">
