@@ -15,7 +15,7 @@ import {
 } from './SocialIcons';
 import { SocialLinksModal, SocialPlatformType } from './SocialLinksModal';
 import { openTelegram } from '../utils/telegramLink';
-import logoSvg from './image 1.svg';
+import logoSvg from './ush-logo-opt.png';
 
 interface FooterProps {
   setActiveTab: (tab: NavTab) => void;

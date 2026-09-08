@@ -15,8 +15,8 @@ import {
 } from 'lucide-react';
 import { useSite } from '../context/SiteContext';
 import { openTelegram } from '../utils/telegramLink';
-import ushLogoPng from './ush logo.png';
-import logoSvg from './image 1.svg';
+import ushLogoPng from './ush-logo-opt.png';
+import logoSvg from './ush-logo-opt.png';
 
 interface ContactModalProps {
   isOpen: boolean;

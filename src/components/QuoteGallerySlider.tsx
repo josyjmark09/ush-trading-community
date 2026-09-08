@@ -11,8 +11,8 @@ import {
   Smartphone
 } from 'lucide-react';
 import { useSite } from '../context/SiteContext';
-import ushLogoPng from './ush logo.png';
-import logoSvg from './image 1.svg';
+import ushLogoPng from './ush-logo-opt.png';
+import logoSvg from './ush-logo-opt.png';
 
 interface QuoteGallerySliderProps {
   gallery: QuoteGallerySettings;

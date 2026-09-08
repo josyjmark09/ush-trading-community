@@ -2,7 +2,7 @@ import React, { useRef, useState, useEffect } from 'react';
 import { NavTab } from '../types';
 import { Send, Phone, Menu, X, ChevronRight, ExternalLink } from 'lucide-react';
 import { useSite } from '../context/SiteContext';
-import logoSvg from './image 1.svg';
+import logoSvg from './ush-logo-opt.png';
 
 interface HeaderProps {
   activeTab: NavTab;
