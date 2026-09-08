@@ -111,9 +111,6 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({
 
   const totalReviews = reviewsList.length;
 
-  const averageRating = totalReviews > 0
-    ? (reviewsList.reduce((acc, r) => acc + r.rating, 0) / totalReviews).toFixed(1)
-    : null;
 
   // Prevent background page scrolling when either modal is open
   useEffect(() => {
@@ -298,30 +295,6 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({
           {subtitle}
         </p>
 
-        {/* Real Rating Badge (Only shown when real reviews exist!) */}
-        {totalReviews > 0 && averageRating && (
-          <div className="pt-2 flex items-center justify-center gap-2">
-            <div className="flex items-center gap-1">
-              {[...Array(5)].map((_, i) => (
-                <Star
-                  key={i}
-                  className={`w-4 h-4 ${
-                    i < Math.round(Number(averageRating))
-                      ? 'fill-amber-400 text-amber-400'
-                      : 'text-slate-300'
-                  }`}
-                />
-              ))}
-            </div>
-            <span className="font-manrope text-[13px] sm:text-[14px] font-black text-slate-900">
-              {averageRating} / 5.0
-            </span>
-            <span className="text-slate-400 text-[12px] font-inter">•</span>
-            <span className="text-slate-600 text-[12px] sm:text-[13px] font-inter font-bold">
-              {totalReviews} {totalReviews === 1 ? 'Verified Review' : 'Verified Reviews'}
-            </span>
-          </div>
-        )}
       </div>
 
       {/* Case 1: EMPTY STATE - No approved reviews yet */}
