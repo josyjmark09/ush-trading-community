@@ -44,7 +44,8 @@ export const VipGuideModal: React.FC<VipGuideModalProps> = ({
   if (!isOpen) return null;
 
   const partnerLink = settings.vipGuide?.partnerLink || "https://one.exnessonelink.com/a/yxxz5mlw1n";
-  const newAccountPartnerCode = "yxxz5mlw1n";
+  const partnerCode = settings.vipGuide?.partnerCode || "yxxz5mlw1n";
+  const newAccountPartnerCode = partnerCode;
   const existingAccountIbCode = "1046090975706890644";
   const rawTg = settings.vipGuide?.vipTelegramUrl || settings.social?.telegramUrl;
   const telegramUrl = (!rawTg || rawTg === 'https://t.me/ushforex_official')

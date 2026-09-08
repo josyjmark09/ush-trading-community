@@ -33,7 +33,12 @@ import {
   AlertCircle,
   ArrowLeft,
   RefreshCw,
-  LogOut
+  LogOut,
+  ArrowUp,
+  ArrowDown,
+  ArrowUpToLine,
+  Calendar,
+  Search
 } from 'lucide-react';
 import { ReviewItem, FAQItem } from '../types';
 import { AdminInboxTab } from './AdminInboxTab';
@@ -74,6 +79,9 @@ export const AdminModal: React.FC = () => {
     deleteReview,
     addReview,
     updateReview,
+    pushReviewToTop,
+    moveReviewPosition,
+    refreshReviews,
     toggleAutoApproveReviews,
     importSettingsJson,
     supabaseStatus,
@@ -91,8 +99,12 @@ export const AdminModal: React.FC = () => {
     setDraft(settings);
   }, [settings, isAdminOpen]);
 
-  // Review management states
+  // Review management & filtering states
   const [reviewFilter, setReviewFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>('all');
+  const [reviewSearchTerm, setReviewSearchTerm] = useState('');
+  const [reviewDateFilterPreset, setReviewDateFilterPreset] = useState<'all' | 'today' | '7days' | '30days' | 'custom'>('all');
+  const [reviewStartDate, setReviewStartDate] = useState('');
+  const [reviewEndDate, setReviewEndDate] = useState('');
   const [isAddingReview, setIsAddingReview] = useState(false);
   const [editingReviewId, setEditingReviewId] = useState<string | null>(null);
   
@@ -493,7 +505,7 @@ export const AdminModal: React.FC = () => {
     reader.readAsDataURL(file);
   };
 
-  const handleSaveNewReview紧 = (e: React.FormEvent) => {
+  const handleSaveReview = (e: React.FormEvent) => {
     e.preventDefault();
     if (!revName.trim() || !revContent.trim()) return;
 
@@ -595,8 +607,46 @@ export const AdminModal: React.FC = () => {
   const approvedCount = reviews.filter((r) => r.status === 'approved').length;
 
   const filteredReviews = reviews.filter((r) => {
-    if (reviewFilter === 'all') return true;
-    return r.status === reviewFilter;
+    // 1. Status filter
+    if (reviewFilter !== 'all' && r.status !== reviewFilter) {
+      return false;
+    }
+
+    // 2. Search keyword filter
+    if (reviewSearchTerm.trim()) {
+      const q = reviewSearchTerm.toLowerCase().trim();
+      const matchName = (r.name || '').toLowerCase().includes(q);
+      const matchContent = (r.content || '').toLowerCase().includes(q);
+      const matchCountry = (r.country || '').toLowerCase().includes(q);
+      if (!matchName && !matchContent && !matchCountry) {
+        return false;
+      }
+    }
+
+    // 3. Date filtering
+    if (r.submittedAt) {
+      const reviewDateStr = r.submittedAt.split('T')[0];
+      const todayStr = new Date().toISOString().split('T')[0];
+
+      if (reviewDateFilterPreset === 'today') {
+        if (reviewDateStr !== todayStr) return false;
+      } else if (reviewDateFilterPreset === '7days') {
+        const d = new Date();
+        d.setDate(d.getDate() - 7);
+        const sevenDaysAgo = d.toISOString().split('T')[0];
+        if (reviewDateStr < sevenDaysAgo) return false;
+      } else if (reviewDateFilterPreset === '30days') {
+        const d = new Date();
+        d.setDate(d.getDate() - 30);
+        const thirtyDaysAgo = d.toISOString().split('T')[0];
+        if (reviewDateStr < thirtyDaysAgo) return false;
+      } else if (reviewDateFilterPreset === 'custom') {
+        if (reviewStartDate && reviewDateStr < reviewStartDate) return false;
+        if (reviewEndDate && reviewDateStr > reviewEndDate) return false;
+      }
+    }
+
+    return true;
   });
 
   return (
@@ -1075,40 +1125,62 @@ export const AdminModal: React.FC = () => {
                     Trader Review Moderation
                   </h3>
                   <p className="text-[12px] sm:text-[13px] text-slate-500 font-inter">
-                    Approve user submissions before they go live, or toggle auto-approval.
+                    Approve user reviews, push reviews to the top of the homepage, or toggle instant auto-approval.
                   </p>
                 </div>
 
-                <button
-                  onClick={() => {
-                    setIsAddingReview(true);
-                    setEditingReviewId(null);
-                    setRevName('');
-                    setRevContent('');
-                    setRevRating(5);
-                    setRevStatus('approved');
-                  }}
-                  className="inline-flex items-center justify-center gap-1.5 bg-[#0053CF] hover:bg-[#0040A2] text-white px-3.5 py-1.5 sm:py-2 rounded-xl text-[12px] sm:text-[13px] font-bold shadow-2xs transition-all active:scale-95 cursor-pointer shrink-0"
-                >
-                  <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                  <span>Add Review</span>
-                </button>
+                <div className="flex items-center gap-2 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => refreshReviews()}
+                    className="inline-flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 sm:py-2 rounded-xl text-[12px] font-bold transition-all cursor-pointer"
+                    title="Refresh latest reviews from server"
+                  >
+                    <RefreshCw className="w-3.5 h-3.5" />
+                    <span className="hidden sm:inline">Refresh</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsAddingReview(true);
+                      setEditingReviewId(null);
+                      setRevName('');
+                      setRevContent('');
+                      setRevRating(5);
+                      setRevStatus('approved');
+                    }}
+                    className="inline-flex items-center justify-center gap-1.5 bg-[#0053CF] hover:bg-[#0040A2] text-white px-3.5 py-1.5 sm:py-2 rounded-xl text-[12px] sm:text-[13px] font-bold shadow-2xs transition-all active:scale-95 cursor-pointer"
+                  >
+                    <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                    <span>Add Review</span>
+                  </button>
+                </div>
               </div>
 
-              {/* Moderation Settings Switch */}
-              <div className="bg-gradient-to-r from-amber-50 to-orange-50/50 border border-amber-200 p-3.5 sm:p-5 rounded-xl sm:rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              {/* Moderation Settings Switch (Instant Auto-Approve vs Require Approval) */}
+              <div className="bg-gradient-to-r from-blue-50/80 via-indigo-50/50 to-sky-50 border border-blue-200/80 p-3.5 sm:p-4 rounded-xl sm:rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
                 <div className="flex items-start gap-2.5">
-                  <div className="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-300 flex items-center justify-center text-amber-800 shrink-0">
-                    <ShieldCheck className="w-4 h-4" />
+                  <div className="w-9 h-9 rounded-xl bg-[#0053CF]/10 border border-[#0053CF]/20 flex items-center justify-center text-[#0053CF] shrink-0">
+                    <ShieldCheck className="w-5 h-5" />
                   </div>
                   <div>
-                    <h4 className="font-manrope font-bold text-[13.5px] sm:text-[14.5px] text-amber-950">
-                      Review Approval Workflow
-                    </h4>
-                    <p className="text-[11.5px] sm:text-[12.5px] text-amber-800 font-inter">
-                      {draft.moderation.requireReviewApproval
-                        ? 'STRICT MODE: Reviews require manual approval.'
-                        : 'INSTANT MODE: User reviews immediately publish live.'}
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h4 className="font-manrope font-extrabold text-[13.5px] sm:text-[14.5px] text-slate-900">
+                        Review Auto-Publish Option
+                      </h4>
+                      <span className={`text-[9.5px] sm:text-[10px] font-black px-2 py-0.5 rounded-full ${
+                        !draft.moderation.requireReviewApproval
+                          ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                          : 'bg-amber-100 text-amber-900 border border-amber-300'
+                      }`}>
+                        {!draft.moderation.requireReviewApproval ? 'INSTANT MODE (Auto-Approve ON)' : 'MODERATED MODE (Approval Required)'}
+                      </span>
+                    </div>
+                    <p className="text-[11.5px] sm:text-[12.5px] text-slate-600 font-inter mt-0.5">
+                      {!draft.moderation.requireReviewApproval
+                        ? 'When a user submits a review, it immediately appears live on the website automatically without manual approval.'
+                        : 'When a user submits a review, it goes to this admin panel for review and manual approval before going live.'}
                     </p>
                   </div>
                 </div>
@@ -1116,33 +1188,34 @@ export const AdminModal: React.FC = () => {
                 {/* Switch Control */}
                 <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0 pt-1 sm:pt-0">
                   <span className="text-[12px] font-bold text-slate-700">
-                    {draft.moderation.requireReviewApproval ? 'Require Approval' : 'Auto-Approve'}
+                    {!draft.moderation.requireReviewApproval ? 'Auto-Approve' : 'Require Approval'}
                   </span>
                   <button
+                    type="button"
                     onClick={() => {
                       const newVal = !draft.moderation.requireReviewApproval;
-                      setDraft((prev紧) => ({
-                        ...prev紧,
-                        moderation: { ...prev紧.moderation, requireReviewApproval: newVal },
+                      setDraft((prev) => ({
+                        ...prev,
+                        moderation: { ...prev.moderation, requireReviewApproval: newVal },
                       }));
                       toggleAutoApproveReviews(newVal);
                     }}
                     className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer ${
-                      draft.moderation.requireReviewApproval ? 'bg-[#0053CF]' : 'bg-slate-300'
+                      !draft.moderation.requireReviewApproval ? 'bg-emerald-500' : 'bg-slate-300'
                     }`}
                   >
                     <span
                       className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                        draft.moderation.requireReviewApproval ? 'translate-x-6' : 'translate-x-1'
+                        !draft.moderation.requireReviewApproval ? 'translate-x-6' : 'translate-x-1'
                       }`}
                     />
                   </button>
                 </div>
               </div>
 
-              {/* Add / Edit Review Modal Form */}
+              {/* Add / Edit Review Form */}
               {isAddingReview && (
-                <form onSubmit={handleSaveNewReview紧} className="bg-slate-50 border-2 border-[#0053CF]/30 p-3.5 sm:p-5 rounded-xl sm:rounded-2xl space-y-3 animate-in fade-in">
+                <form onSubmit={handleSaveReview} className="bg-slate-50 border-2 border-[#0053CF]/30 p-3.5 sm:p-5 rounded-xl sm:rounded-2xl space-y-3 animate-in fade-in shadow-xs">
                   <div className="flex items-center justify-between border-b border-slate-200 pb-2">
                     <h4 className="font-manrope font-bold text-[14px] sm:text-[15px] text-[#0053CF] flex items-center gap-1.5">
                       {editingReviewId ? <Edit3 className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
@@ -1241,13 +1314,13 @@ export const AdminModal: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => setIsAddingReview(false)}
-                      className="px-3.5 py-1.5 rounded-xl border border-slate-300 text-slate-600 text-[12px] font-medium"
+                      className="px-3.5 py-1.5 rounded-xl border border-slate-300 text-slate-600 text-[12px] font-medium cursor-pointer"
                     >
                       Cancel
                     </button>
                     <button
                       type="submit"
-                      className="px-4 py-1.5 rounded-xl bg-[#0053CF] hover:bg-[#0040A2] text-white text-[12px] font-bold shadow-2xs"
+                      className="px-4 py-1.5 rounded-xl bg-[#0053CF] hover:bg-[#0040A2] text-white text-[12px] font-bold shadow-2xs cursor-pointer"
                     >
                       {editingReviewId ? 'Save Edits' : 'Publish Review'}
                     </button>
@@ -1255,116 +1328,275 @@ export const AdminModal: React.FC = () => {
                 </form>
               )}
 
-              {/* Review Filter Tabs */}
-              <div className="flex items-center gap-1 overflow-x-auto pb-1 scrollbar-none">
-                {[
-                  { id: 'all', label: `All (${reviews.length})` },
-                  { id: 'pending', label: `Pending (${pendingCount})` },
-                  { id: 'approved', label: `Approved (${approvedCount})` },
-                  { id: 'rejected', label: `Rejected` },
-                ].map((f) => (
-                  <button
-                    key={f.id}
-                    onClick={() => setReviewFilter(f.id as any)}
-                    className={`px-2.5 py-1 rounded-lg text-[11.5px] font-bold transition-all cursor-pointer shrink-0 ${
-                      reviewFilter === f.id
-                        ? 'bg-slate-900 text-white'
-                        : 'text-slate-600 hover:bg-slate-100'
-                    }`}
-                  >
-                    {f.label}
-                  </button>
-                ))}
+              {/* Filtering & Search Bar (Status, Search Keyword, Date Presets & Custom Range) */}
+              <div className="bg-slate-50 border border-slate-200 p-3 sm:p-4 rounded-xl sm:rounded-2xl space-y-3">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-2.5">
+                  {/* Keyword Search */}
+                  <div className="relative flex-1 min-w-[220px]">
+                    <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                    <input
+                      type="text"
+                      placeholder="Search reviews by name, content, or country..."
+                      value={reviewSearchTerm}
+                      onChange={(e) => setReviewSearchTerm(e.target.value)}
+                      className="w-full bg-white border border-slate-300 rounded-xl pl-9 pr-7 py-1.5 text-[12.5px] text-slate-800 placeholder-slate-400 outline-none focus:border-[#0053CF]"
+                    />
+                    {reviewSearchTerm && (
+                      <button
+                        type="button"
+                        onClick={() => setReviewSearchTerm('')}
+                        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs font-bold cursor-pointer"
+                      >
+                        ✕
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Status Tabs */}
+                  <div className="flex items-center gap-1.5 overflow-x-auto shrink-0 scrollbar-none">
+                    {[
+                      { id: 'all', label: `All (${reviews.length})` },
+                      { id: 'pending', label: `Pending (${pendingCount})` },
+                      { id: 'approved', label: `Approved (${approvedCount})` },
+                    ].map((f) => (
+                      <button
+                        key={f.id}
+                        type="button"
+                        onClick={() => setReviewFilter(f.id as any)}
+                        className={`px-3 py-1.5 rounded-xl text-[12px] font-bold transition-all cursor-pointer ${
+                          reviewFilter === f.id
+                            ? 'bg-slate-900 text-white shadow-2xs'
+                            : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-100'
+                        }`}
+                      >
+                        {f.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Date Filter Presets & Custom Range */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-2 border-t border-slate-200">
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1">
+                      <Calendar className="w-3.5 h-3.5 text-slate-500" />
+                      <span>Date:</span>
+                    </span>
+                    {[
+                      { id: 'all', label: 'All Time' },
+                      { id: 'today', label: 'Today' },
+                      { id: '7days', label: 'Last 7 Days' },
+                      { id: '30days', label: 'This Month' },
+                      { id: 'custom', label: 'Custom Range' },
+                    ].map((p) => (
+                      <button
+                        key={p.id}
+                        type="button"
+                        onClick={() => setReviewDateFilterPreset(p.id as any)}
+                        className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-colors cursor-pointer ${
+                          reviewDateFilterPreset === p.id
+                            ? 'bg-[#0053CF] text-white shadow-2xs'
+                            : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-100'
+                        }`}
+                      >
+                        {p.label}
+                      </button>
+                    ))}
+                  </div>
+
+                  {reviewDateFilterPreset === 'custom' && (
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <div className="flex items-center gap-1">
+                        <span className="text-[11px] font-medium text-slate-500">From:</span>
+                        <input
+                          type="date"
+                          value={reviewStartDate}
+                          onChange={(e) => setReviewStartDate(e.target.value)}
+                          className="bg-white border border-slate-300 rounded-lg px-2 py-1 text-[11.5px] text-slate-700"
+                        />
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <span className="text-[11px] font-medium text-slate-500">To:</span>
+                        <input
+                          type="date"
+                          value={reviewEndDate}
+                          onChange={(e) => setReviewEndDate(e.target.value)}
+                          className="bg-white border border-slate-300 rounded-lg px-2 py-1 text-[11.5px] text-slate-700"
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {(reviewSearchTerm || reviewFilter !== 'all' || reviewDateFilterPreset !== 'all') && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setReviewSearchTerm('');
+                        setReviewFilter('all');
+                        setReviewDateFilterPreset('all');
+                        setReviewStartDate('');
+                        setReviewEndDate('');
+                      }}
+                      className="text-[11.5px] text-[#0053CF] hover:underline font-bold self-end sm:self-auto cursor-pointer"
+                    >
+                      Reset Filters
+                    </button>
+                  )}
+                </div>
               </div>
 
               {/* Reviews List */}
               <div className="space-y-2.5">
                 {filteredReviews.length === 0 ? (
-                  <div className="text-center py-8 bg-slate-50 rounded-xl border border-dashed border-slate-200">
-                    <MessageSquare className="w-7 h-7 text-slate-300 mx-auto mb-1.5" />
-                    <p className="text-[12.5px] font-medium text-slate-500">
-                      No reviews found in this filter.
+                  <div className="text-center py-10 bg-slate-50 rounded-xl border border-dashed border-slate-200">
+                    <MessageSquare className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+                    <p className="text-[13px] font-bold text-slate-700">
+                      No reviews found matching your filter criteria.
+                    </p>
+                    <p className="text-[12px] text-slate-500 mt-0.5">
+                      Try choosing a different date range or resetting search filters.
                     </p>
                   </div>
                 ) : (
-                  filteredReviews.map((item) => (
+                  filteredReviews.map((item, index) => (
                     <div
                       key={item.id}
-                      className={`p-3 sm:p-4 rounded-xl sm:rounded-2xl border transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
+                      className={`p-3.5 sm:p-4 rounded-xl sm:rounded-2xl border transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs ${
                         item.status === 'pending'
                           ? 'bg-amber-50/70 border-amber-300'
                           : item.status === 'rejected'
                           ? 'bg-rose-50/50 border-rose-200 opacity-75'
-                          : 'bg-white border-slate-200'
+                          : 'bg-white border-slate-200 hover:border-slate-300'
                       }`}
                     >
-                      <div className="space-y-1 flex-1 min-w-0">
-                        <div className="flex items-center gap-1.5 flex-wrap">
-                          <span className="font-manrope font-bold text-[13.5px] text-slate-900">
+                      <div className="space-y-1.5 flex-1 min-w-0">
+                        {/* Meta Header: Position badge, Date, Author, Rating, Status */}
+                        <div className="flex items-center gap-2 flex-wrap">
+                          {/* Position in Carousel / Homepage */}
+                          <span className={`text-[10px] sm:text-[10.5px] font-black px-2 py-0.5 rounded-md flex items-center gap-1 ${
+                            index === 0
+                              ? 'bg-amber-100 text-amber-900 border border-amber-300 shadow-2xs font-extrabold'
+                              : 'bg-slate-100 text-slate-700 border border-slate-200'
+                          }`}>
+                            {index === 0 ? '🥇 #1 Shown First on Page' : `#${index + 1} on Page`}
+                          </span>
+
+                          {item.submittedAt && (
+                            <span className="text-[11px] text-slate-500 font-inter flex items-center gap-1">
+                              <Calendar className="w-3 h-3 text-slate-400" />
+                              {item.submittedAt}
+                            </span>
+                          )}
+
+                          <span className="font-manrope font-bold text-[13.5px] text-slate-900 ml-1">
                             {item.name}
                           </span>
+
                           {item.country && (
-                            <span className="text-[10px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded-md font-medium">
+                            <span className="text-[10.5px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded-md font-medium">
                               {item.country}
                             </span>
                           )}
+
                           <div className="flex items-center text-amber-400">
                             {[...Array(item.rating)].map((_, i) => (
                               <Star key={i} className="w-3 h-3 fill-amber-400" />
                             ))}
                           </div>
+
                           <span
-                            className={`text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded-full ${
+                            className={`text-[9.5px] font-extrabold uppercase px-2 py-0.5 rounded-full ${
                               item.status === 'approved'
-                                ? 'bg-emerald-100 text-emerald-800'
+                                ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
                                 : item.status === 'pending'
-                                ? 'bg-amber-200 text-amber-900'
-                                : 'bg-rose-100 text-rose-800'
+                                ? 'bg-amber-200 text-amber-900 border border-amber-300'
+                                : 'bg-rose-100 text-rose-800 border border-rose-300'
                             }`}
                           >
                             {item.status}
                           </span>
                         </div>
-                        <p className="text-[12px] text-slate-600 italic font-inter leading-relaxed line-clamp-2">
+
+                        {/* Feedback Content */}
+                        <p className="text-[12.5px] text-slate-700 italic font-inter leading-relaxed line-clamp-2">
                           "{item.content}"
                         </p>
                       </div>
 
-                      {/* Action buttons */}
+                      {/* Action buttons: Accept (Approve), Push to Top, Move Up/Down, Edit, Delete */}
                       <div className="flex items-center gap-1.5 flex-wrap pt-1 sm:pt-0 sm:shrink-0">
+                        {/* Primary Accept Action for Pending/Rejected */}
                         {item.status !== 'approved' && (
                           <button
+                            type="button"
                             onClick={() => approveReview(item.id)}
-                            className="inline-flex items-center gap-1 bg-emerald-600 hover:bg-emerald-700 text-white px-2.5 py-1 rounded-lg text-[11.5px] font-bold shadow-2xs cursor-pointer"
+                            className="inline-flex items-center gap-1 bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-xl text-[11.5px] font-bold shadow-2xs cursor-pointer transition-all active:scale-95"
+                            title="Accept review & publish live on website"
                           >
-                            <CheckCircle2 className="w-3 h-3" />
-                            <span>Approve</span>
+                            <CheckCircle2 className="w-3.5 h-3.5" />
+                            <span>Accept</span>
                           </button>
                         )}
-                        {item.status === 'approved' && (
-                          <button
-                            onClick={() => rejectReview(item.id)}
-                            className="inline-flex items-center gap-1 bg-amber-500 hover:bg-amber-600 text-white px-2.5 py-1 rounded-lg text-[11.5px] font-bold shadow-2xs cursor-pointer"
-                          >
-                            <XCircle className="w-3 h-3" />
-                            <span>Unpublish</span>
-                          </button>
-                        )}
+
+                        {/* Push to Top Button (Moves review to index 0 so it displays first on page) */}
                         <button
+                          type="button"
+                          onClick={() => pushReviewToTop(item.id)}
+                          disabled={index === 0}
+                          className={`inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-[11px] font-bold border transition-all cursor-pointer ${
+                            index === 0
+                              ? 'bg-amber-50 text-amber-800 border-amber-300 opacity-60 cursor-default'
+                              : 'bg-white hover:bg-amber-50 text-slate-700 hover:text-amber-800 border-slate-200 hover:border-amber-300'
+                          }`}
+                          title={index === 0 ? 'Already shown first on page' : 'Push to Top (Show First on Homepage)'}
+                        >
+                          <ArrowUpToLine className="w-3.5 h-3.5 text-amber-500" />
+                          <span className="hidden sm:inline">Push to Top</span>
+                        </button>
+
+                        {/* Reorder Up / Down Buttons */}
+                        <div className="flex items-center border border-slate-200 rounded-xl overflow-hidden bg-white shadow-2xs">
+                          <button
+                            type="button"
+                            onClick={() => moveReviewPosition(item.id, 'up')}
+                            disabled={index === 0}
+                            className="p-1.5 text-slate-600 hover:bg-slate-100 disabled:opacity-25 disabled:hover:bg-transparent cursor-pointer"
+                            title="Move Up"
+                          >
+                            <ArrowUp className="w-3.5 h-3.5" />
+                          </button>
+                          <div className="w-[1px] h-3.5 bg-slate-200" />
+                          <button
+                            type="button"
+                            onClick={() => moveReviewPosition(item.id, 'down')}
+                            disabled={index === filteredReviews.length - 1}
+                            className="p-1.5 text-slate-600 hover:bg-slate-100 disabled:opacity-25 disabled:hover:bg-transparent cursor-pointer"
+                            title="Move Down"
+                          >
+                            <ArrowDown className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+
+                        {/* Edit Review */}
+                        <button
+                          type="button"
                           onClick={() => startEditReview(item)}
-                          className="p-1 text-slate-600 hover:bg-slate-100 rounded-lg cursor-pointer"
-                          title="Edit"
+                          className="p-1.5 text-slate-600 hover:text-[#0053CF] hover:bg-slate-100 rounded-xl border border-slate-200 bg-white cursor-pointer"
+                          title="Edit review"
                         >
                           <Edit3 className="w-3.5 h-3.5" />
                         </button>
+
+                        {/* Delete Review */}
                         <button
+                          type="button"
                           onClick={() => {
-                            if (window.confirm(`Delete review from "${item.name}"?`)) {
+                            if (window.confirm(`Permanently delete review from "${item.name}"?`)) {
                               deleteReview(item.id);
                             }
                           }}
-                          className="p-1 text-rose-500 hover:bg-rose-50 rounded-lg cursor-pointer"
-                          title="Delete"
+                          className="p-1.5 text-rose-500 hover:text-rose-700 hover:bg-rose-50 rounded-xl border border-rose-200 bg-white cursor-pointer"
+                          title="Delete review"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
@@ -2073,13 +2305,18 @@ export const AdminModal: React.FC = () => {
                           </span>
                         ) : (
                           <span className="bg-amber-100 text-amber-800 text-[10px] font-bold px-2 py-0.5 rounded-full border border-amber-300">
-                            Checking status...
+                            {supabaseStatus?.error ? 'Connection Warning' : 'Checking status...'}
                           </span>
                         )}
                       </h4>
                       <p className="text-[11.5px] text-slate-500 font-mono">
                         {supabaseStatus?.url || 'https://lahyyqzhrnndcdxzcnmn.supabase.co'}
                       </p>
+                      {supabaseStatus?.error && (
+                        <p className="text-[11px] text-amber-700 bg-amber-50 border border-amber-200 px-2 py-1 rounded-md mt-1">
+                          {supabaseStatus.error}
+                        </p>
+                      )}
                     </div>
                   </div>
                   <button
@@ -2093,24 +2330,42 @@ export const AdminModal: React.FC = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1 text-[11.5px]">
                   <div className="bg-white p-2.5 rounded-lg border border-slate-200">
                     <span className="text-slate-500 block text-[10px] uppercase font-bold">Reviews Table</span>
-                    <span className="text-emerald-700 font-semibold flex items-center gap-1 mt-0.5">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                      <span>Connected</span>
-                    </span>
+                    {supabaseStatus?.tableDetails?.reviews !== false && supabaseStatus?.connected ? (
+                      <span className="text-emerald-700 font-semibold flex items-center gap-1 mt-0.5">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                        <span>Connected</span>
+                      </span>
+                    ) : (
+                      <span className="text-amber-700 font-semibold flex items-center gap-1 mt-0.5">
+                        <span>Setup SQL Required</span>
+                      </span>
+                    )}
                   </div>
                   <div className="bg-white p-2.5 rounded-lg border border-slate-200">
                     <span className="text-slate-500 block text-[10px] uppercase font-bold">Messages Table</span>
-                    <span className="text-emerald-700 font-semibold flex items-center gap-1 mt-0.5">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                      <span>Connected</span>
-                    </span>
+                    {supabaseStatus?.tableDetails?.messages !== false && supabaseStatus?.connected ? (
+                      <span className="text-emerald-700 font-semibold flex items-center gap-1 mt-0.5">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                        <span>Connected</span>
+                      </span>
+                    ) : (
+                      <span className="text-slate-500 font-semibold flex items-center gap-1 mt-0.5">
+                        <span>Pending Setup</span>
+                      </span>
+                    )}
                   </div>
                   <div className="bg-white p-2.5 rounded-lg border border-slate-200">
                     <span className="text-slate-500 block text-[10px] uppercase font-bold">Settings Table</span>
-                    <span className="text-emerald-700 font-semibold flex items-center gap-1 mt-0.5">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                      <span>Connected</span>
-                    </span>
+                    {supabaseStatus?.tableDetails?.settings !== false && supabaseStatus?.connected ? (
+                      <span className="text-emerald-700 font-semibold flex items-center gap-1 mt-0.5">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                        <span>Connected</span>
+                      </span>
+                    ) : (
+                      <span className="text-slate-500 font-semibold flex items-center gap-1 mt-0.5">
+                        <span>Pending Setup</span>
+                      </span>
+                    )}
                   </div>
                 </div>
               </div>

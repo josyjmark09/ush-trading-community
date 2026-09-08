@@ -48,6 +48,8 @@ export interface ReviewItem {
   status: 'approved' | 'pending' | 'rejected';
   submittedAt?: string;
   email?: string;
+  orderIndex?: number;
+  isPinned?: boolean;
 }
 
 export type TestimonialItem = ReviewItem;

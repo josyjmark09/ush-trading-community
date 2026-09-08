@@ -1,13 +1,14 @@
 import React from 'react';
-import { NavTab } from '../types';
-import { TESTIMONIALS } from '../data/mockData';
-import { Star, ShieldCheck, Send, Quote } from 'lucide-react';
+import { useSite } from '../context/SiteContext';
+import { Star, ShieldCheck, Send, Quote, MessageSquare } from 'lucide-react';
 
 interface TestimonialsViewProps {
   onOpenTelegram: () => void;
 }
 
 export const TestimonialsView: React.FC<TestimonialsViewProps> = ({ onOpenTelegram }) => {
+  const { approvedReviews } = useSite();
+
   return (
     <div className="w-full flex flex-col gap-8 md:gap-12 pt-2 pb-12">
       {/* Header Section */}
@@ -25,50 +26,66 @@ export const TestimonialsView: React.FC<TestimonialsViewProps> = ({ onOpenTelegr
 
       {/* Testimonials Cards */}
       <section className="px-4 md:px-8 max-w-[1200px] mx-auto w-full">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-          {TESTIMONIALS.map((item) => (
-            <div
-              key={item.id}
-              className="bg-white p-6 rounded-xl border border-slate-300 shadow-xs hover:border-[#0053CF] transition-colors flex flex-col justify-between"
-            >
-              <div>
-                {/* Rating & Quote icon */}
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-1">
-                    {[...Array(item.rating)].map((_, i) => (
-                      <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />
-                    ))}
+        {approvedReviews.length === 0 ? (
+          <div className="bg-white p-8 rounded-xl border border-slate-300 text-center max-w-lg mx-auto">
+            <MessageSquare className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+            <p className="font-manrope font-bold text-slate-900 text-[15px]">No reviews published yet</p>
+            <p className="text-slate-500 text-[13px] mt-1 font-inter">Be the first to share your trading experience.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            {approvedReviews.map((item) => (
+              <div
+                key={item.id}
+                className="bg-white p-6 rounded-xl border border-slate-300 shadow-xs hover:border-[#0053CF] transition-colors flex flex-col justify-between"
+              >
+                <div>
+                  {/* Rating & Quote icon */}
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-1">
+                      {[...Array(item.rating)].map((_, i) => (
+                        <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />
+                      ))}
+                    </div>
+                    <Quote className="w-5 h-5 text-slate-300" />
                   </div>
-                  <Quote className="w-5 h-5 text-slate-300" />
+
+                  <p className="font-inter text-[14px] text-slate-800 leading-relaxed mb-5">
+                    "{item.content}"
+                  </p>
                 </div>
 
-                <p className="font-inter text-[14px] text-slate-800 leading-relaxed mb-5">
-                  "{item.content}"
-                </p>
-              </div>
-
-              <div className="pt-3.5 border-t border-slate-200 flex items-center gap-3">
-                <img
-                  src={item.avatar}
-                  alt={item.name}
-                  className="w-10 h-10 rounded-md object-cover border border-slate-300"
-                />
-                <div className="flex flex-col">
-                  <div className="flex items-center gap-1.5">
-                    <span className="font-manrope text-[14.5px] font-black text-slate-900">{item.name}</span>
-                    <ShieldCheck className="w-3.5 h-3.5 text-[#0053CF]" />
-                  </div>
-                  <span className="font-inter text-[12px] text-slate-500 font-medium">{item.experience}</span>
-                  {item.profitSnippet && (
-                    <span className="text-[11px] font-bold text-slate-800 bg-slate-100 border border-slate-300 px-2 py-0.5 rounded mt-1 w-fit">
-                      {item.profitSnippet}
-                    </span>
+                <div className="pt-3.5 border-t border-slate-200 flex items-center gap-3">
+                  {item.avatar ? (
+                    <img
+                      src={item.avatar}
+                      alt={item.name}
+                      className="w-10 h-10 rounded-md object-cover border border-slate-300"
+                    />
+                  ) : (
+                    <div className="w-10 h-10 rounded-md bg-slate-100 flex items-center justify-center font-bold text-slate-700 text-xs border border-slate-300">
+                      {item.name ? item.name.slice(0, 2).toUpperCase() : 'TR'}
+                    </div>
                   )}
+                  <div className="flex flex-col">
+                    <div className="flex items-center gap-1.5">
+                      <span className="font-manrope text-[14.5px] font-black text-slate-900">{item.name}</span>
+                      <ShieldCheck className="w-3.5 h-3.5 text-[#0053CF]" />
+                    </div>
+                    <span className="font-inter text-[12px] text-slate-500 font-medium">
+                      {item.country || 'Verified Member'}
+                    </span>
+                    {item.profitSnippet && (
+                      <span className="text-[11px] font-bold text-slate-800 bg-slate-100 border border-slate-300 px-2 py-0.5 rounded mt-1 w-fit">
+                        {item.profitSnippet}
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </section>
 
       {/* Community Callout */}

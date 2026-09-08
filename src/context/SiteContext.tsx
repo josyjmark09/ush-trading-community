@@ -16,7 +16,13 @@ import {
   checkSupabaseStatus, 
   fetchCloudReviews, 
   submitCloudReview, 
+  updateCloudReview,
+  deleteCloudReview,
+  pushReviewToTopCloud,
+  reorderCloudReviews,
   submitCloudMessage, 
+  syncCloudSettings,
+  fetchCloudSettings,
   SupabaseStatus 
 } from '../services/supabaseApi';
 
@@ -431,6 +437,9 @@ interface SiteContextType {
   deleteReview: (id: string) => void;
   addReview: (review: Omit<ReviewItem, 'id' | 'status' | 'submittedAt'> & { status?: 'approved' | 'pending' | 'rejected' }) => { success: boolean; requiresApproval: boolean };
   updateReview: (id: string, updated: Partial<ReviewItem>) => void;
+  pushReviewToTop: (id: string) => Promise<void>;
+  moveReviewPosition: (id: string, direction: 'up' | 'down') => Promise<void>;
+  refreshReviews: () => Promise<void>;
   toggleAutoApproveReviews: (val?: boolean) => void;
   addInboxMessage: (messageData: Omit<InboxMessage, 'id' | 'submittedAt' | 'read' | 'status'> & { status?: 'new' | 'in_progress' | 'resolved'; adminNotes?: string }) => void;
   markMessageRead: (id: string, read?: boolean) => void;
@@ -657,19 +666,57 @@ export const SiteProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const refreshReviews = async () => {
+    try {
+      const cloudReviews = await fetchCloudReviews();
+      if (cloudReviews && Array.isArray(cloudReviews)) {
+        if (cloudReviews.length > 0) {
+          setReviews(cloudReviews);
+        } else {
+          // If Supabase table is empty, auto-upload approved local reviews to Supabase
+          setReviews((currentReviews) => {
+            if (currentReviews.length > 0) {
+              currentReviews.forEach((r) => {
+                submitCloudReview({
+                  name: r.name,
+                  country: r.country,
+                  countryCode: r.countryCode,
+                  rating: r.rating,
+                  content: r.content,
+                  avatar: r.avatar,
+                  isApproved: r.status === 'approved',
+                }).catch(() => {});
+              });
+            }
+            return currentReviews;
+          });
+        }
+      }
+    } catch (err) {
+      console.warn('Failed to fetch reviews:', err);
+    }
+  };
+
   useEffect(() => {
     refreshSupabaseStatus();
-    // Fetch initial cloud reviews from Supabase
-    fetchCloudReviews().then((cloudReviews) => {
-      if (cloudReviews && cloudReviews.length > 0) {
-        setReviews((prev) => {
-          const existingIds = new Set(prev.map((r) => r.id));
-          const newOnes = cloudReviews.filter((cr: any) => !existingIds.has(cr.id));
-          return [...newOnes, ...prev];
-        });
+    refreshReviews();
+    fetchCloudSettings().then((cloudSettings) => {
+      if (cloudSettings) {
+        setSettings((prev) => ({
+          ...prev,
+          ...cloudSettings,
+          moderation: { ...prev.moderation, ...(cloudSettings.moderation || {}) },
+        }));
       }
-    });
+    }).catch(() => {});
   }, []);
+
+  // When admin modal opens, immediately refetch reviews so admin gets latest submissions
+  useEffect(() => {
+    if (isAdminOpen) {
+      refreshReviews();
+    }
+  }, [isAdminOpen]);
 
   // Sync to local storage
   useEffect(() => {
@@ -813,22 +860,65 @@ export const SiteProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setReviews((prev) =>
       prev.map((r) => (r.id === id ? { ...r, status: 'approved' } : r))
     );
+    updateCloudReview(id, { status: 'approved' }).catch((err) =>
+      console.warn('Error updating review status:', err)
+    );
   };
 
   const rejectReview = (id: string) => {
     setReviews((prev) =>
       prev.map((r) => (r.id === id ? { ...r, status: 'rejected' } : r))
     );
+    updateCloudReview(id, { status: 'rejected' }).catch((err) =>
+      console.warn('Error updating review status:', err)
+    );
   };
 
   const deleteReview = (id: string) => {
     setReviews((prev) => prev.filter((r) => r.id !== id));
+    deleteCloudReview(id).catch((err) =>
+      console.warn('Error deleting review:', err)
+    );
   };
 
   const updateReview = (id: string, updated: Partial<ReviewItem>) => {
     setReviews((prev) =>
       prev.map((r) => (r.id === id ? { ...r, ...updated } : r))
     );
+    updateCloudReview(id, updated).catch((err) =>
+      console.warn('Error updating review:', err)
+    );
+  };
+
+  const pushReviewToTop = async (id: string) => {
+    setReviews((prev) => {
+      const idx = prev.findIndex((r) => r.id === id);
+      if (idx === -1) return prev;
+      const copy = [...prev];
+      const [item] = copy.splice(idx, 1);
+      return [{ ...item, orderIndex: 0 }, ...copy.map((r, i) => ({ ...r, orderIndex: i + 1 }))];
+    });
+    await pushReviewToTopCloud(id);
+  };
+
+  const moveReviewPosition = async (id: string, direction: 'up' | 'down') => {
+    let newOrder: ReviewItem[] = [];
+    setReviews((prev) => {
+      const idx = prev.findIndex((r) => r.id === id);
+      if (idx === -1) return prev;
+      if (direction === 'up' && idx === 0) return prev;
+      if (direction === 'down' && idx === prev.length - 1) return prev;
+      const targetIdx = direction === 'up' ? idx - 1 : idx + 1;
+      const copy = [...prev];
+      const temp = copy[idx];
+      copy[idx] = copy[targetIdx];
+      copy[targetIdx] = temp;
+      newOrder = copy.map((r, i) => ({ ...r, orderIndex: i }));
+      return newOrder;
+    });
+    if (newOrder.length > 0) {
+      await reorderCloudReviews(newOrder.map((r) => r.id));
+    }
   };
 
   const addReview = (
@@ -836,17 +926,20 @@ export const SiteProvider: React.FC<{ children: React.ReactNode }> = ({ children
   ) => {
     const requiresApproval = settings.moderation.requireReviewApproval;
     const initialStatus = reviewData.status || (requiresApproval ? 'pending' : 'approved');
+    const tempId = `review-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`;
 
     const newReview: ReviewItem = {
       ...reviewData,
-      id: `review-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
+      id: tempId,
       status: initialStatus,
       submittedAt: new Date().toISOString().split('T')[0],
+      orderIndex: 0,
+      isPinned: false,
     };
 
     setReviews((prev) => [newReview, ...prev]);
 
-    // Asynchronous background sync to Supabase database
+    // Asynchronous background sync to server database
     submitCloudReview({
       name: reviewData.name,
       country: reviewData.country,
@@ -854,8 +947,14 @@ export const SiteProvider: React.FC<{ children: React.ReactNode }> = ({ children
       rating: reviewData.rating,
       content: reviewData.content,
       avatar: reviewData.avatar,
-      isApproved: initialStatus === 'approved',
-    }).catch((err) => console.warn('Supabase review sync error:', err));
+      isApproved: reviewData.status ? reviewData.status === 'approved' : undefined,
+    }).then((res) => {
+      if (res.success && res.review) {
+        setReviews((prev) =>
+          prev.map((r) => (r.id === tempId ? res.review : r))
+        );
+      }
+    }).catch((err) => console.warn('Review submit error:', err));
 
     return {
       success: true,
@@ -864,13 +963,20 @@ export const SiteProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const toggleAutoApproveReviews = (val?: boolean) => {
-    setSettings((prev) => ({
-      ...prev,
-      moderation: {
-        ...prev.moderation,
-        requireReviewApproval: val !== undefined ? val : !prev.moderation.requireReviewApproval,
-      },
-    }));
+    const newVal = val !== undefined ? val : !settings.moderation.requireReviewApproval;
+    setSettings((prev) => {
+      const updated = {
+        ...prev,
+        moderation: {
+          ...prev.moderation,
+          requireReviewApproval: newVal,
+        },
+      };
+      syncCloudSettings(updated).catch((err) =>
+        console.warn('Error syncing moderation settings:', err)
+      );
+      return updated;
+    });
   };
 
   const unreadMessagesCount = messages.filter((m) => !m.read).length;
@@ -969,6 +1075,9 @@ export const SiteProvider: React.FC<{ children: React.ReactNode }> = ({ children
         deleteReview,
         addReview,
         updateReview,
+        pushReviewToTop,
+        moveReviewPosition,
+        refreshReviews,
         toggleAutoApproveReviews,
         addInboxMessage,
         markMessageRead,
