@@ -76,6 +76,7 @@ export const TradingCalculator: React.FC = () => {
       case 'GBP': return '£';
       case 'NGN': return '₦';
       case 'ZAR': return 'R';
+      case 'GHS': return '₵';
       default: return '$';
     }
   }, [accountCurrency]);
@@ -373,6 +374,7 @@ Required Margin: ${currencySymbol}${marginResults.requiredMargin.toLocaleString(
                     <option value="GBP">GBP (£)</option>
                     <option value="NGN">NGN (₦)</option>
                     <option value="ZAR">ZAR (R)</option>
+                    <option value="GHS">GHS (₵)</option>
                   </select>
                 </div>
               </div>

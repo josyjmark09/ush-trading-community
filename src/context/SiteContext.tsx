@@ -949,7 +949,11 @@ export const SiteProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }).then((res) => {
       if (res.success && res.review) {
         setReviews((prev) =>
-          prev.map((r) => (r.id === tempId ? { ...res.review, status: 'approved' } : r))
+          prev.map((r) =>
+            r.id === tempId
+              ? { ...res.review, avatar: reviewData.avatar || res.review.avatar, status: 'approved' }
+              : r
+          )
         );
       }
     }).catch((err) => console.warn('Review submit error:', err));

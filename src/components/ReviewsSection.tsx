@@ -79,6 +79,45 @@ const CountryFlag: React.FC<{ code?: string; name?: string; className?: string }
   );
 };
 
+const TraderAvatar: React.FC<{
+  avatar?: string;
+  name: string;
+  size?: 'sm' | 'md' | 'lg';
+}> = ({ avatar, name, size = 'md' }) => {
+  const [imgFailed, setImgFailed] = useState(false);
+
+  // If user uploaded an avatar and it hasn't failed, render the uploaded image
+  if (avatar && typeof avatar === 'string' && avatar.trim().length > 0 && !imgFailed) {
+    const sizeClasses = {
+      sm: 'w-7 h-7 rounded-full',
+      md: 'w-8 h-8 rounded-full',
+      lg: 'w-10 h-10 sm:w-11 sm:h-11 rounded-full',
+    }[size];
+
+    return (
+      <img
+        src={avatar}
+        alt={name}
+        onError={() => setImgFailed(true)}
+        className={`${sizeClasses} object-cover border-2 border-[#0053CF]/30 shadow-2xs shrink-0`}
+      />
+    );
+  }
+
+  // Fallback to initials ONLY when user did not upload an image
+  const fallbackClasses = {
+    sm: 'w-7 h-7 rounded-md text-[11px]',
+    md: 'w-8 h-8 rounded-md text-[11px]',
+    lg: 'w-9 h-9 sm:w-11 sm:h-11 rounded-lg text-[12px] sm:text-[14px]',
+  }[size];
+
+  return (
+    <div className={`${fallbackClasses} bg-slate-100 flex items-center justify-center text-slate-900 font-manrope font-black border border-slate-300 shrink-0`}>
+      {getInitials(name)}
+    </div>
+  );
+};
+
 export const ReviewsSection: React.FC<ReviewsSectionProps> = ({
   title = "Community Reviews & Feedback",
   subtitle = "Real feedback and experiences shared by members of our trading community."
@@ -123,28 +162,43 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({
     }
   }, [isFramingOpen, isAllReviewsOpen]);
 
-  const compressInitialAvatar = (imageSrc: string) => {
+  const processAndSetAvatar = (imageSrc: string, zoomLevel = 1, px = 0, py = 0) => {
+    // 1. Immediately set raw imageSrc as instant fallback so avatar is NEVER empty
+    setAvatar(imageSrc);
+
+    // 2. Compress via offscreen canvas to ~140x140 JPEG for lightweight transmission
     const img = new Image();
-    img.crossOrigin = 'anonymous';
+    // Do not set crossOrigin for data: or blob: URIs to prevent browser security rejection
+    if (!imageSrc.startsWith('data:') && !imageSrc.startsWith('blob:')) {
+      img.crossOrigin = 'anonymous';
+    }
+
     img.onload = () => {
-      const canvas = document.createElement('canvas');
-      canvas.width = 140;
-      canvas.height = 140;
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return;
-
-      const minDim = Math.min(img.width, img.height);
-      const sx = (img.width - minDim) / 2;
-      const sy = (img.height - minDim) / 2;
-
-      ctx.drawImage(img, sx, sy, minDim, minDim, 0, 0, 140, 140);
       try {
+        const canvas = document.createElement('canvas');
+        const targetSize = 140;
+        canvas.width = targetSize;
+        canvas.height = targetSize;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+
+        const minDim = Math.min(img.width, img.height);
+        const scaledDim = minDim / zoomLevel;
+
+        const maxOffsetX = (img.width - scaledDim) / 2;
+        const maxOffsetY = (img.height - scaledDim) / 2;
+
+        const sx = Math.max(0, Math.min(img.width - scaledDim, (img.width - scaledDim) / 2 + (px / 100) * maxOffsetX));
+        const sy = Math.max(0, Math.min(img.height - scaledDim, (img.height - scaledDim) / 2 + (py / 100) * maxOffsetY));
+
+        ctx.drawImage(img, sx, sy, scaledDim, scaledDim, 0, 0, targetSize, targetSize);
         const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.85);
         setAvatar(compressedDataUrl);
       } catch (err) {
-        console.error('Failed to compress avatar:', err);
+        console.warn('Canvas compression note:', err);
       }
     };
+
     img.src = imageSrc;
   };
 
@@ -164,10 +218,7 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({
       setZoom(1);
       setPanX(0);
       setPanY(0);
-      // Pre-set compressed avatar immediately
-      compressInitialAvatar(dataUrl);
-      // Open the interactive framing modal centered in viewport
-      setIsFramingOpen(true);
+      processAndSetAvatar(dataUrl, 1, 0, 0);
     };
     reader.readAsDataURL(file);
     e.target.value = '';
@@ -175,30 +226,8 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({
 
   const handleApplyFraming = () => {
     if (!rawImage) return;
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.onload = () => {
-      const canvas = document.createElement('canvas');
-      canvas.width = 140;
-      canvas.height = 140;
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return;
-
-      const minDim = Math.min(img.width, img.height);
-      const scaledDim = minDim / zoom;
-
-      const maxOffsetX = (img.width - scaledDim) / 2;
-      const maxOffsetY = (img.height - scaledDim) / 2;
-
-      const sx = Math.max(0, Math.min(img.width - scaledDim, (img.width - scaledDim) / 2 + (panX / 100) * maxOffsetX));
-      const sy = Math.max(0, Math.min(img.height - scaledDim, (img.height - scaledDim) / 2 + (panY / 100) * maxOffsetY));
-
-      ctx.drawImage(img, sx, sy, scaledDim, scaledDim, 0, 0, 140, 140);
-      const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.85);
-      setAvatar(compressedDataUrl);
-      setIsFramingOpen(false);
-    };
-    img.src = rawImage;
+    processAndSetAvatar(rawImage, zoom, panX, panY);
+    setIsFramingOpen(false);
   };
 
   const nextReview = () => {
@@ -354,17 +383,7 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({
                   </p>
                 </div>
                 <div className="flex items-center gap-2.5 pt-2 border-t border-slate-200">
-                  {prevItem.avatar ? (
-                    <img 
-                      src={prevItem.avatar} 
-                      alt={prevItem.name} 
-                      className="w-7 h-7 rounded-full object-cover border border-slate-300 shrink-0" 
-                    />
-                  ) : (
-                    <div className="w-7 h-7 rounded-md bg-slate-100 flex items-center justify-center text-slate-800 font-manrope font-black text-[11px] shrink-0 border border-slate-300">
-                      {getInitials(prevItem.name)}
-                    </div>
-                  )}
+                  <TraderAvatar avatar={prevItem.avatar} name={prevItem.name} size="sm" />
                   <div className="flex items-center gap-1.5 truncate">
                     <span className="font-manrope text-[12px] sm:text-[13px] font-bold text-slate-900 truncate">
                       {prevItem.name}
@@ -402,17 +421,7 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({
               {/* Author Footer */}
               <div className="flex items-center justify-between pt-3 sm:pt-4 border-t border-slate-200">
                 <div className="flex items-center gap-2.5 sm:gap-3">
-                  {currentItem.avatar ? (
-                    <img 
-                      src={currentItem.avatar} 
-                      alt={currentItem.name} 
-                      className="w-10 h-10 sm:w-11 sm:h-11 rounded-full object-cover border-2 border-[#0053CF]/30 shadow-2xs shrink-0" 
-                    />
-                  ) : (
-                    <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-lg bg-slate-100 flex items-center justify-center text-slate-900 font-manrope font-black text-[12px] sm:text-[14px] border border-slate-300 shrink-0">
-                      {getInitials(currentItem.name)}
-                    </div>
-                  )}
+                  <TraderAvatar avatar={currentItem.avatar} name={currentItem.name} size="lg" />
 
                   <div>
                     <div className="flex items-center gap-2">
@@ -456,17 +465,7 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({
                   </p>
                 </div>
                 <div className="flex items-center gap-2.5 pt-2 border-t border-slate-200">
-                  {nextItem.avatar ? (
-                    <img 
-                      src={nextItem.avatar} 
-                      alt={nextItem.name} 
-                      className="w-7 h-7 rounded-full object-cover border border-slate-300 shrink-0" 
-                    />
-                  ) : (
-                    <div className="w-7 h-7 rounded-md bg-slate-100 flex items-center justify-center text-slate-800 font-manrope font-black text-[11px] shrink-0 border border-slate-300">
-                      {getInitials(nextItem.name)}
-                    </div>
-                  )}
+                  <TraderAvatar avatar={nextItem.avatar} name={nextItem.name} size="sm" />
                   <div className="flex items-center gap-1.5 truncate">
                     <span className="font-manrope text-[12px] sm:text-[13px] font-bold text-slate-900 truncate">
                       {nextItem.name}
@@ -1012,17 +1011,7 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({
                     </div>
 
                     <div className="flex items-center gap-2.5 pt-2 border-t border-slate-200/80">
-                      {review.avatar ? (
-                        <img
-                          src={review.avatar}
-                          alt={review.name}
-                          className="w-8 h-8 rounded-full object-cover border border-slate-300 shrink-0"
-                        />
-                      ) : (
-                        <div className="w-8 h-8 rounded-md bg-white text-slate-800 font-manrope font-black text-[11px] flex items-center justify-center border border-slate-200 shrink-0">
-                          {getInitials(review.name)}
-                        </div>
-                      )}
+                      <TraderAvatar avatar={review.avatar} name={review.name} size="md" />
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-1.5 truncate">
                           <span className="font-manrope text-[12.5px] font-bold text-slate-900 truncate">

@@ -98,6 +98,7 @@ export async function checkSupabaseStatus(): Promise<SupabaseStatus> {
 }
 
 const DELETED_REVIEWS_KEY = 'ush_deleted_reviews';
+const LOCAL_AVATARS_KEY = 'ush_review_avatars';
 
 function getDeletedReviewIds(): Set<string> {
   try {
@@ -110,6 +111,29 @@ function getDeletedReviewIds(): Set<string> {
     }
   } catch {}
   return new Set();
+}
+
+export function getLocalReviewAvatars(): Record<string, string> {
+  try {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      const raw = localStorage.getItem(LOCAL_AVATARS_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed && typeof parsed === 'object') return parsed;
+      }
+    }
+  } catch {}
+  return {};
+}
+
+export function saveLocalReviewAvatar(id: string, avatarDataUrl: string) {
+  try {
+    if (typeof window !== 'undefined' && window.localStorage && id && avatarDataUrl) {
+      const current = getLocalReviewAvatars();
+      current[id] = avatarDataUrl;
+      localStorage.setItem(LOCAL_AVATARS_KEY, JSON.stringify(current));
+    }
+  } catch {}
 }
 
 export function markReviewAsDeleted(id: string) {
@@ -136,6 +160,7 @@ export async function fetchCloudReviews(): Promise<any[] | null> {
 
       if (!error && Array.isArray(data)) {
         const deletedIds = getDeletedReviewIds();
+        const localAvatars = getLocalReviewAvatars();
         return data
           .filter((r: any) => !deletedIds.has(String(r.id)))
           .map((r: any, idx: number) => ({
@@ -145,7 +170,7 @@ export async function fetchCloudReviews(): Promise<any[] | null> {
             countryCode: r.country_code || 'US',
             rating: Number(r.rating) || 5,
             content: r.content,
-            avatar: r.avatar || undefined,
+            avatar: r.avatar || localAvatars[String(r.id)] || undefined,
             status: 'approved',
             submittedAt: r.created_at ? r.created_at.split('T')[0] : new Date().toISOString().split('T')[0],
             orderIndex: typeof r.order_index === 'number' ? r.order_index : idx,
@@ -215,17 +240,38 @@ export async function submitCloudReview(review: {
         is_approved: true,
       };
 
-      const { data, error } = await sb.from('reviews').insert([payload]).select();
+      if (review.avatar && typeof review.avatar === 'string' && review.avatar.trim().length > 0) {
+        payload.avatar = review.avatar.trim();
+      }
+
+      let { data, error } = await sb.from('reviews').insert([payload]).select();
+
+      // If database reports that column "avatar" does not exist yet (code 42703), retry gracefully without avatar
+      if (error && error.message && error.message.toLowerCase().includes('avatar')) {
+        console.warn('Notice: database reviews table missing avatar column, retrying insert...');
+        const payloadNoAvatar = { ...payload };
+        delete payloadNoAvatar.avatar;
+        const retryRes = await sb.from('reviews').insert([payloadNoAvatar]).select();
+        data = retryRes.data;
+        error = retryRes.error;
+      }
+
       if (!error && Array.isArray(data) && data.length > 0) {
         const saved = data[0];
+        const savedId = String(saved.id);
+
+        if (review.avatar) {
+          saveLocalReviewAvatar(savedId, review.avatar);
+        }
+
         newReviewItem = {
-          id: String(saved.id),
+          id: savedId,
           name: saved.name,
           country: saved.country,
           countryCode: saved.country_code || 'US',
           rating: Number(saved.rating) || 5,
           content: saved.content,
-          avatar: review.avatar,
+          avatar: review.avatar || saved.avatar || undefined,
           status: 'approved',
           submittedAt: saved.created_at ? saved.created_at.split('T')[0] : new Date().toISOString().split('T')[0],
           orderIndex: 0,
@@ -271,6 +317,10 @@ export async function updateCloudReview(id: string, updates: any): Promise<boole
       if (updates.rating !== undefined) sbUpdates.rating = updates.rating;
       if (updates.content !== undefined) sbUpdates.content = updates.content;
       if (updates.orderIndex !== undefined) sbUpdates.order_index = updates.orderIndex;
+      if (updates.avatar !== undefined) {
+        sbUpdates.avatar = updates.avatar;
+        saveLocalReviewAvatar(id, updates.avatar);
+      }
 
       const { error } = await sb.from('reviews').update(sbUpdates).eq('id', id);
       if (!error) directSuccess = true;

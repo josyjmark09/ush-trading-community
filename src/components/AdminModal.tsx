@@ -1488,7 +1488,10 @@ export const AdminModal: React.FC = () => {
                             </span>
                           )}
 
-                          <span className="font-manrope font-bold text-[13.5px] text-slate-900 ml-1">
+                          {item.avatar ? (
+                            <img src={item.avatar} alt={item.name} className="w-5 h-5 rounded-full object-cover border border-[#0053CF]/40 inline-block shrink-0" />
+                          ) : null}
+                          <span className="font-manrope font-bold text-[13.5px] text-slate-900">
                             {item.name}
                           </span>
 
