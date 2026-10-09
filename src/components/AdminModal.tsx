@@ -38,11 +38,14 @@ import {
   ArrowDown,
   ArrowUpToLine,
   Calendar,
-  Search
+  Search,
+  Menu,
+  ChevronRight
 } from 'lucide-react';
 import { ReviewItem, FAQItem } from '../types';
 import { AdminInboxTab } from './AdminInboxTab';
 import { AdminQuotesTab } from './AdminQuotesTab';
+import { AdminNewsletterTab } from './AdminNewsletterTab';
 import { adminLogin, requestAdminPasswordReset } from '../services/supabaseApi';
 
 const COUNTRIES_LIST不易 = [
@@ -88,7 +91,8 @@ export const AdminModal: React.FC = () => {
     refreshSupabaseStatus,
   } = useSite();
 
-  const [activeTab, setActiveTab] = useState<'inbox' | 'branding' | 'hero' | 'reviews' | 'features' | 'community' | 'broker' | 'about' | 'faqs' | 'quotes' | 'social' | 'backup'>('inbox');
+  const [activeTab, setActiveTab] = useState<'newsletter' | 'reviews' | 'inbox' | 'branding' | 'hero' | 'features' | 'community' | 'broker' | 'about' | 'faqs' | 'quotes' | 'social' | 'backup'>('newsletter');
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [saveSuccessToast, setSaveSuccessToast] = useState(false);
 
   // Local draft state for settings to allow fine-grained live editing
@@ -654,71 +658,199 @@ export const AdminModal: React.FC = () => {
       <div className="relative w-full h-full sm:h-auto sm:max-h-[92vh] sm:max-w-5xl bg-white sm:rounded-3xl shadow-2xl border-0 sm:border border-slate-200 overflow-hidden flex flex-col">
         
         {/* 1. Admin Header Bar */}
-        <div className="bg-gradient-to-r from-[#091C35] via-[#003B94] to-[#0053CF] text-white px-3.5 sm:px-8 py-3 sm:py-4 flex items-center justify-between shrink-0 shadow-md">
-          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
-            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-white/10 backdrop-blur-xs flex items-center justify-center border border-white/20 shrink-0">
-              <Sliders className="w-4 h-4 sm:w-5 sm:h-5 text-sky-300" />
+        <div className="bg-gradient-to-r from-[#091C35] via-[#003B94] to-[#0053CF] text-white px-3 sm:px-8 py-2.5 sm:py-3.5 flex items-center justify-between shrink-0 shadow-md">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+            {/* Mobile Slide-Out Drawer Trigger Button */}
+            <button
+              type="button"
+              onClick={() => setIsMobileMenuOpen(true)}
+              className="flex items-center gap-1.5 bg-white/10 hover:bg-white/20 active:scale-95 text-white px-2.5 sm:px-3 py-1.5 rounded-xl text-[12px] font-bold border border-white/20 transition-all cursor-pointer shrink-0"
+              title="Open Navigation Menu"
+            >
+              <Menu className="w-4 h-4 text-sky-300" />
+              <span className="font-bold">Menu</span>
+            </button>
+
+            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-white/10 flex items-center justify-center border border-white/20 shrink-0">
+              <Sliders className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-sky-300" />
             </div>
+
             <div className="min-w-0">
               <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
-                <h2 className="font-manrope text-[14px] sm:text-[18px] font-extrabold tracking-tight truncate">
+                <h2 className="font-manrope text-[13.5px] sm:text-[17px] font-extrabold tracking-tight truncate">
                   USH Management CMS
                 </h2>
-                <span className="bg-sky-400/20 text-sky-200 text-[9px] sm:text-[10px] uppercase font-bold px-1.5 sm:px-2 py-0.5 rounded-full border border-sky-300/30 shrink-0">
-                  Live Admin
-                </span>
                 {supabaseStatus?.connected ? (
                   <span className="bg-emerald-500/20 text-emerald-200 border border-emerald-400/30 text-[9px] sm:text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 shrink-0">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                    Supabase Connected
+                    Live Cloud
                   </span>
                 ) : (
                   <span className="bg-amber-500/20 text-amber-200 border border-amber-400/30 text-[9px] sm:text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0">
-                    Local Storage
+                    Local Sync
                   </span>
                 )}
               </div>
-              <p className="text-slate-300 text-[11px] sm:text-[12px] font-inter hidden sm:block truncate">
-                Edit branding, CTAs, links & moderate trader reviews in real-time.
-              </p>
             </div>
           </div>
 
           <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-            {/* Logged-in Client Admin Indicator */}
-            <div className="hidden md:flex items-center gap-1.5 bg-white/10 px-2.5 py-1.5 rounded-lg sm:rounded-xl border border-white/15 text-[11px] font-bold text-sky-100">
-              <ShieldCheck className="w-3.5 h-3.5 text-sky-300" />
-              <span>ushforex@gmail.com</span>
-            </div>
-
+            {/* Quick Save Action */}
             <button
               onClick={handleSaveAll}
               className="flex items-center gap-1 sm:gap-1.5 bg-emerald-500 hover:bg-emerald-600 text-white px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-[11.5px] sm:text-[13px] font-bold shadow-xs transition-all active:scale-95 cursor-pointer"
             >
               <Save className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-              <span className="hidden sm:inline">Save Changes</span>
-              <span className="sm:hidden">Save</span>
+              <span className="hidden sm:inline">Save</span>
             </button>
 
             {/* Logout Action */}
             <button
               onClick={handleLogout}
-              className="flex items-center gap-1 bg-white/10 hover:bg-red-500/80 hover:border-red-400 text-white px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-[11px] sm:text-[12.5px] font-bold border border-white/20 transition-all cursor-pointer"
+              className="flex items-center gap-1 bg-white/10 hover:bg-red-500/80 hover:border-red-400 text-white px-2 sm:px-2.5 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-[11px] sm:text-[12px] font-bold border border-white/20 transition-all cursor-pointer"
               title="Log Out of Admin Panel"
             >
               <LogOut className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Log Out</span>
             </button>
 
+            {/* Close Modal */}
             <button
               onClick={closeAdmin}
-              className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors cursor-pointer"
+              className="w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors cursor-pointer"
               title="Close Admin Panel"
             >
-              <X className="w-4 h-4 sm:w-5 sm:h-5" />
+              <X className="w-4 h-4" />
             </button>
           </div>
         </div>
+
+        {/* Mobile Slide-Out Navigation Drawer */}
+        {isMobileMenuOpen && (
+          <div 
+            className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex"
+            onClick={() => setIsMobileMenuOpen(false)}
+          >
+            <div 
+              className="w-[285px] sm:w-[320px] bg-white h-full shadow-2xl flex flex-col z-10"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Drawer Header */}
+              <div className="bg-gradient-to-r from-[#091C35] via-[#003B94] to-[#0053CF] text-white p-4 flex items-center justify-between shrink-0 shadow-sm">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-xl bg-white/10 flex items-center justify-center font-black text-xs text-sky-200 border border-white/20">
+                    USH
+                  </div>
+                  <div>
+                    <h3 className="font-extrabold text-[14px] leading-tight">Admin Menu</h3>
+                    <p className="text-[10.5px] text-sky-200 truncate max-w-[150px]">ushforex@gmail.com</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="w-7 h-7 rounded-lg bg-white/10 hover:bg-white/20 text-white flex items-center justify-center cursor-pointer transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              {/* Drawer Links */}
+              <div className="p-3 overflow-y-auto flex-1 space-y-3.5 text-slate-800">
+                {/* Section 1: Email Marketing & Reviews */}
+                <div>
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 px-3 mb-1.5">
+                    Live Operations
+                  </div>
+                  <div className="space-y-1">
+                    <button
+                      onClick={() => { setActiveTab('newsletter'); setIsMobileMenuOpen(false); }}
+                      className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-[13px] font-bold transition-colors cursor-pointer ${
+                        activeTab === 'newsletter' ? 'bg-[#0053CF] text-white shadow-xs' : 'text-slate-700 hover:bg-slate-100'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <Mail className={`w-4 h-4 ${activeTab === 'newsletter' ? 'text-white' : 'text-blue-600'}`} />
+                        <span>Newsletter & Broadcasts</span>
+                      </div>
+                      <span className="text-[9.5px] px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 font-extrabold">EMAIL</span>
+                    </button>
+
+                    <button
+                      onClick={() => { setActiveTab('reviews'); setIsMobileMenuOpen(false); }}
+                      className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-[13px] font-bold transition-colors cursor-pointer ${
+                        activeTab === 'reviews' ? 'bg-[#0053CF] text-white shadow-xs' : 'text-slate-700 hover:bg-slate-100'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <Star className={`w-4 h-4 ${activeTab === 'reviews' ? 'text-white' : 'text-amber-500'}`} />
+                        <span>Reviews Moderation</span>
+                      </div>
+                      {pendingCount > 0 ? (
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500 text-white font-bold">
+                          {pendingCount}
+                        </span>
+                      ) : (
+                        <span className="text-[11px] text-slate-400 font-medium">({approvedCount})</span>
+                      )}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Section 2: Website Customization */}
+                <div>
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 px-3 mb-1.5">
+                    Website Settings
+                  </div>
+                  <div className="space-y-1">
+                    {[
+                      { id: 'branding', label: 'Branding & Logo', icon: Palette },
+                      { id: 'hero', label: 'Hero & Headlines', icon: Sparkles },
+                      { id: 'broker', label: 'Broker Partner Setup', icon: ShieldCheck },
+                      { id: 'social', label: 'Social & Telegram Links', icon: LinkIcon },
+                      { id: 'quotes', label: 'Quote Sliders', icon: Quote },
+                      { id: 'faqs', label: 'FAQs', icon: HelpCircle },
+                      { id: 'features', label: 'What You Get', icon: Layers },
+                      { id: 'community', label: 'Community Section', icon: Users },
+                      { id: 'about', label: 'About & Philosophy', icon: BookOpen },
+                      { id: 'inbox', label: 'Customer Inquiries', icon: Inbox },
+                      { id: 'backup', label: 'Backup & Reset', icon: Database },
+                    ].map((item) => {
+                      const Icon = item.icon;
+                      return (
+                        <button
+                          key={item.id}
+                          onClick={() => { setActiveTab(item.id as any); setIsMobileMenuOpen(false); }}
+                          className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-[12.5px] font-semibold transition-colors cursor-pointer ${
+                            activeTab === item.id ? 'bg-[#0053CF] text-white shadow-xs' : 'text-slate-600 hover:bg-slate-100'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2.5">
+                            <Icon className={`w-4 h-4 ${activeTab === item.id ? 'text-white' : 'text-slate-400'}`} />
+                            <span>{item.label}</span>
+                          </div>
+                          <ChevronRight className="w-3.5 h-3.5 opacity-40" />
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+
+              {/* Drawer Footer */}
+              <div className="p-3 bg-slate-50 border-t border-slate-200 shrink-0 flex items-center justify-between">
+                <div className="text-[11px] text-slate-500 font-medium">
+                  USH Admin CMS
+                </div>
+                <button
+                  onClick={() => { setIsMobileMenuOpen(false); handleLogout(); }}
+                  className="flex items-center gap-1.5 text-rose-600 hover:text-rose-700 text-[12px] font-bold px-2 py-1 rounded-lg hover:bg-rose-50 cursor-pointer"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                  <span>Log Out</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Save Toast */}
         {saveSuccessToast && (
@@ -728,30 +860,36 @@ export const AdminModal: React.FC = () => {
           </div>
         )}
 
-        {/* 2. Admin Navigation Tabs (Responsive Smooth-Scroll) */}
-        <div className="bg-slate-50 border-b border-slate-200 px-2.5 sm:px-6 flex items-center gap-1 sm:gap-1.5 overflow-x-auto shrink-0 py-2 sm:py-2.5 scrollbar-none snap-x">
+        {/* 2. Admin Top Navigation Tabs (Quick Switch Bar) */}
+        <div className="bg-slate-50 border-b border-slate-200 px-2.5 sm:px-6 flex items-center gap-1.5 overflow-x-auto shrink-0 py-2 scrollbar-none snap-x">
           {[
             { 
-              id: 'inbox', 
-              label: `Inbox ${unreadMessagesCount > 0 ? `(${unreadMessagesCount})` : `(${messages.length})`}`, 
-              icon: Inbox, 
-              highlight: unreadMessagesCount > 0 
+              id: 'newsletter', 
+              label: 'Newsletter & Broadcasts', 
+              icon: Mail, 
+              highlight: true 
             },
-            { id: 'branding', label: 'Branding & Logo', icon: Palette },
-            { id: 'hero', label: 'Hero & CTAs', icon: Sparkles },
             { 
               id: 'reviews', 
               label: `Reviews ${pendingCount > 0 ? `(${pendingCount})` : `(${approvedCount})`}`, 
               icon: Star,
               highlight: pendingCount > 0 
             },
+            { id: 'branding', label: 'Branding & Logo', icon: Palette },
+            { id: 'hero', label: 'Hero & CTAs', icon: Sparkles },
+            { id: 'broker', label: 'Broker Setup', icon: ShieldCheck },
+            { id: 'social', label: 'Links & Socials', icon: LinkIcon },
+            { id: 'quotes', label: 'Quote Galleries', icon: Quote },
+            { id: 'faqs', label: 'FAQs', icon: HelpCircle },
             { id: 'features', label: 'What You Get', icon: Layers },
             { id: 'community', label: 'Community', icon: Users },
-            { id: 'broker', label: 'Broker Setup', icon: ShieldCheck },
             { id: 'about', label: 'About & Pillars', icon: BookOpen },
-            { id: 'faqs', label: 'FAQs', icon: HelpCircle },
-            { id: 'quotes', label: 'Quote Galleries', icon: Quote },
-            { id: 'social', label: 'Links & Socials', icon: LinkIcon },
+            { 
+              id: 'inbox', 
+              label: `Inbox ${unreadMessagesCount > 0 ? `(${unreadMessagesCount})` : `(${messages.length})`}`, 
+              icon: Inbox, 
+              highlight: unreadMessagesCount > 0 
+            },
             { id: 'backup', label: 'Backup & Reset', icon: Database },
           ].map((tab) => {
             const Icon = tab.icon;
@@ -759,15 +897,15 @@ export const AdminModal: React.FC = () => {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
-                className={`px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-[11.5px] sm:text-[12.5px] font-semibold whitespace-nowrap transition-all cursor-pointer flex items-center gap-1.5 shrink-0 snap-start select-none ${
+                className={`px-3 py-1.5 rounded-xl text-[12px] font-semibold whitespace-nowrap transition-all cursor-pointer flex items-center gap-1.5 shrink-0 snap-start select-none ${
                   activeTab === tab.id
                     ? 'bg-[#0053CF] text-white shadow-xs'
                     : tab.highlight
-                    ? 'bg-amber-100 text-amber-900 hover:bg-amber-200 border border-amber-300'
+                    ? 'bg-blue-100/70 text-blue-900 hover:bg-blue-200/70 border border-blue-300/50'
                     : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
                 }`}
               >
-                <Icon className={`w-3.5 h-3.5 ${activeTab === tab.id ? 'text-white' : tab.highlight ? 'text-amber-800' : 'text-slate-500'}`} />
+                <Icon className={`w-3.5 h-3.5 ${activeTab === tab.id ? 'text-white' : tab.highlight ? 'text-blue-700' : 'text-slate-500'}`} />
                 <span>{tab.label}</span>
               </button>
             );
@@ -777,6 +915,9 @@ export const AdminModal: React.FC = () => {
         {/* 3. Tab Content Body */}
         <div className="p-3.5 sm:p-6 md:p-8 overflow-y-auto flex-1 space-y-4 sm:space-y-6 text-slate-800">
           
+          {/* TAB: NEWSLETTER & EMAIL BROADCASTS */}
+          {activeTab === 'newsletter' && <AdminNewsletterTab />}
+
           {/* TAB 0: INBOX & MESSAGES */}
           {activeTab === 'inbox' && <AdminInboxTab />}
 

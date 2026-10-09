@@ -10,6 +10,7 @@ import { VipGuideModal } from './components/VipGuideModal';
 import { VipGuideView } from './components/VipGuideView';
 import { ContactModal } from './components/ContactModal';
 import { AdminModal } from './components/AdminModal';
+import { NewsletterPopupModal } from './components/NewsletterPopupModal';
 
 function MainApp() {
   const { settings } = useSite();
@@ -143,6 +144,9 @@ function MainApp() {
 
       {/* Admin Panel Modal (Opened by tapping logo 5 times) */}
       <AdminModal />
+
+      {/* 10-Second Smart Newsletter Subscription Popup */}
+      <NewsletterPopupModal />
     </div>
   );
 }

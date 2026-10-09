@@ -68,6 +68,28 @@ export interface InboxMessage {
   adminNotes?: string;
 }
 
+export interface Subscriber {
+  id: string;
+  email: string;
+  country: string;
+  countryCode: string;
+  source: 'popup' | 'footer' | string;
+  status: 'active' | 'unsubscribed';
+  welcomeEmailSent: boolean;
+  createdAt: string;
+  lastEmailSentAt?: string;
+}
+
+export interface NewsletterSettings {
+  resendApiKey?: string;
+  senderEmail?: string;
+  senderName?: string;
+  welcomeSubject?: string;
+  welcomeHeading?: string;
+  welcomeBody?: string;
+  enablePopup?: boolean;
+}
+
 export interface FeedbackSubmission {
   name: string;
   handle?: string;
@@ -287,6 +309,7 @@ export interface SiteSettings {
   moderation: {
     requireReviewApproval: boolean;
   };
+  newsletter?: NewsletterSettings;
 }
 
 

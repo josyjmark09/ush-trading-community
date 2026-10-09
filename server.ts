@@ -160,6 +160,16 @@ function saveStoredMessages(messages: any[]): boolean {
   return writeJsonFile(MESSAGES_FILE, messages);
 }
 
+const SUBSCRIBERS_FILE = path.join(STORAGE_DIR, 'subscribers.json');
+
+function getStoredSubscribers(): any[] {
+  return readJsonFile<any[]>(SUBSCRIBERS_FILE, []);
+}
+
+function saveStoredSubscribers(subscribers: any[]): boolean {
+  return writeJsonFile(SUBSCRIBERS_FILE, subscribers);
+}
+
 // 3. Reviews: GET reviews
 app.get('/api/reviews', async (req, res) => {
   let reviews = getStoredReviews();
@@ -511,7 +521,513 @@ app.post('/api/settings', async (req, res) => {
   res.json({ success: true, settings: merged });
 });
 
-// 6. Admin Authentication & Password Reset Endpoints
+// 6. Resend Email Sending Helper & HTML Templates
+async function sendResendEmail({
+  to,
+  subject,
+  html,
+  apiKey,
+  from,
+}: {
+  to: string | string[];
+  subject: string;
+  html: string;
+  apiKey?: string;
+  from?: string;
+}): Promise<{ success: boolean; data?: any; error?: string; notConfigured?: boolean }> {
+  const currentSettings = getStoredSettings() || {};
+  const activeKey = apiKey || process.env.RESEND_API_KEY || currentSettings?.newsletter?.resendApiKey;
+
+  if (!activeKey || !activeKey.trim()) {
+    console.warn('Notice: Resend API key is not configured. Email logged to console instead of live dispatch.');
+    return { success: false, notConfigured: true, error: 'Resend API key is not yet configured.' };
+  }
+
+  const senderEmail = from || process.env.RESEND_FROM_EMAIL || currentSettings?.newsletter?.senderEmail || 'USH Community of Traders <onboarding@resend.dev>';
+  const toList = Array.isArray(to) ? to : [to];
+
+  try {
+    const response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${activeKey.trim()}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from: senderEmail,
+        to: toList,
+        subject,
+        html,
+      }),
+    });
+
+    const result = await response.json();
+    if (!response.ok) {
+      return { success: false, error: result?.message || result?.error || 'Failed to dispatch via Resend' };
+    }
+    return { success: true, data: result };
+  } catch (err: any) {
+    return { success: false, error: err?.message || 'Network error while contacting Resend' };
+  }
+}
+
+function generateWelcomeEmailHtml({
+  email,
+  country,
+  telegramUrl = 'https://t.me/+wHFuFFkA2i0xZTA8',
+  brokerUrl = 'https://one.exnesstrack.net/a/c_iun6m90d5o'
+}: {
+  email: string;
+  country?: string;
+  telegramUrl?: string;
+  brokerUrl?: string;
+}): string {
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Welcome to USH Community of Traders</title>
+</head>
+<body style="margin:0;padding:0;background-color:#0f172a;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#e2e8f0;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color:#0f172a;padding:36px 12px;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="100%" style="max-width:580px;background-color:#1e293b;border-radius:16px;overflow:hidden;border:1px solid #334155;box-shadow:0 10px 30px rgba(0,0,0,0.5);">
+          <!-- Header -->
+          <tr>
+            <td style="background:linear-gradient(135deg,#0a192f 0%,#0053CF 100%);padding:36px 28px;text-align:center;">
+              <h1 style="margin:0;color:#ffffff;font-size:22px;font-weight:800;letter-spacing:-0.5px;">USH Community of Traders</h1>
+              <p style="margin:6px 0 0;color:#93c5fd;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:1px;">Official Market Updates & Newsletter</p>
+            </td>
+          </tr>
+          <!-- Body Content -->
+          <tr>
+            <td style="padding:32px 28px;">
+              <h2 style="margin:0 0 16px;color:#ffffff;font-size:18px;font-weight:700;">Registration Confirmed</h2>
+              <p style="margin:0 0 18px;color:#cbd5e1;font-size:14px;line-height:1.6;">
+                Hello Trader,
+              </p>
+              <p style="margin:0 0 20px;color:#cbd5e1;font-size:14px;line-height:1.6;">
+                Thank you for subscribing to the <strong>USH Community of Traders</strong> newsletter. Your registration for <span style="color:#60a5fa;">${email}</span>${country ? ` (${country})` : ''} is now active.
+              </p>
+              
+              <div style="background-color:#0f172a;border-left:4px solid #0053CF;padding:16px 20px;border-radius:8px;margin:24px 0;">
+                <p style="margin:0 0 10px;color:#ffffff;font-size:14px;font-weight:700;">What you will receive:</p>
+                <ul style="margin:0;padding-left:18px;color:#94a3b8;font-size:13px;line-height:1.7;">
+                  <li>Systematic market structure updates and daily key levels</li>
+                  <li>High-probability liquidity breakdowns on major FX pairs & Gold</li>
+                  <li>Disciplined risk management frameworks</li>
+                  <li>Important community announcements and educational releases</li>
+                </ul>
+              </div>
+
+              <p style="margin:0 0 24px;color:#cbd5e1;font-size:14px;line-height:1.6;">
+                To join our active trader discussions and access real-time session updates, connect directly to our official Telegram channel:
+              </p>
+
+              <!-- Telegram CTA -->
+              <table role="presentation" cellspacing="0" cellpadding="0" style="margin:0 auto 24px;">
+                <tr>
+                  <td align="center" style="border-radius:8px;background-color:#0053CF;">
+                    <a href="${telegramUrl}" target="_blank" style="display:inline-block;padding:13px 26px;color:#ffffff;text-decoration:none;font-size:14px;font-weight:700;border-radius:8px;">
+                      Open Telegram Community →
+                    </a>
+                  </td>
+                </tr>
+              </table>
+
+              <p style="margin:0;color:#64748b;font-size:12px;line-height:1.5;text-align:center;">
+                No hype. No unrealistic promises. Pure market structure and risk discipline.
+              </p>
+            </td>
+          </tr>
+          <!-- Footer -->
+          <tr>
+            <td style="background-color:#0f172a;padding:20px 24px;text-align:center;border-top:1px solid #334155;">
+              <p style="margin:0 0 4px;color:#94a3b8;font-size:12px;font-weight:600;">
+                USH Community of Traders • Global Forex & Market Analysis
+              </p>
+              <p style="margin:0;color:#64748b;font-size:11px;">
+                You received this email because you subscribed on our official website.
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+}
+
+function generateBroadcastEmailHtml({
+  headline,
+  message,
+  ctaText,
+  ctaUrl,
+}: {
+  headline: string;
+  message: string;
+  ctaText?: string;
+  ctaUrl?: string;
+}): string {
+  const formattedMessage = message
+    .split('\n')
+    .filter(p => p.trim().length > 0)
+    .map(p => `<p style="margin:0 0 14px;color:#cbd5e1;font-size:14px;line-height:1.65;">${p}</p>`)
+    .join('');
+
+  const ctaBlock = ctaText && ctaUrl ? `
+    <table role="presentation" cellspacing="0" cellpadding="0" style="margin:26px auto 14px;">
+      <tr>
+        <td align="center" style="border-radius:8px;background-color:#0053CF;">
+          <a href="${ctaUrl}" target="_blank" style="display:inline-block;padding:13px 28px;color:#ffffff;text-decoration:none;font-size:14px;font-weight:700;border-radius:8px;">
+            ${ctaText} →
+          </a>
+        </td>
+      </tr>
+    </table>
+  ` : '';
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${headline}</title>
+</head>
+<body style="margin:0;padding:0;background-color:#0f172a;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#e2e8f0;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color:#0f172a;padding:36px 12px;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="100%" style="max-width:580px;background-color:#1e293b;border-radius:16px;overflow:hidden;border:1px solid #334155;box-shadow:0 10px 30px rgba(0,0,0,0.5);">
+          <tr>
+            <td style="background:linear-gradient(135deg,#0a192f 0%,#0053CF 100%);padding:32px 28px;text-align:center;">
+              <h1 style="margin:0;color:#ffffff;font-size:22px;font-weight:800;letter-spacing:-0.5px;">USH Community of Traders</h1>
+              <p style="margin:6px 0 0;color:#93c5fd;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:1px;">Market Updates & Newsletter</p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:32px 28px;">
+              <h2 style="margin:0 0 18px;color:#ffffff;font-size:19px;font-weight:700;">${headline}</h2>
+              ${formattedMessage}
+              ${ctaBlock}
+            </td>
+          </tr>
+          <tr>
+            <td style="background-color:#0f172a;padding:20px 24px;text-align:center;border-top:1px solid #334155;">
+              <p style="margin:0 0 4px;color:#94a3b8;font-size:12px;font-weight:600;">
+                USH Community of Traders • Global Forex & Market Analysis
+              </p>
+              <p style="margin:0;color:#64748b;font-size:11px;">
+                You received this newsletter as a registered community member.
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+}
+
+// 7. Newsletter API Endpoints
+app.get('/api/newsletter/subscribers', async (_req, res) => {
+  let subscribers = getStoredSubscribers();
+
+  // Try syncing from Supabase if connected
+  const client = getSupabase();
+  if (client) {
+    try {
+      const { data, error } = await client
+        .from('subscribers')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (!error && Array.isArray(data) && data.length > 0) {
+        // Map supabase snake_case to camelCase
+        const cloudSubs = data.map((d: any) => ({
+          id: String(d.id),
+          email: d.email,
+          country: d.country || 'United States',
+          countryCode: d.country_code || 'US',
+          source: d.source || 'popup',
+          status: d.status || 'active',
+          welcomeEmailSent: Boolean(d.welcome_email_sent),
+          createdAt: d.created_at || new Date().toISOString(),
+          lastEmailSentAt: d.last_email_sent_at || null,
+        }));
+
+        // Merge keeping unique emails
+        const map = new Map<string, any>();
+        cloudSubs.forEach(s => map.set(s.email.toLowerCase(), s));
+        subscribers.forEach(s => {
+          if (!map.has(s.email.toLowerCase())) {
+            map.set(s.email.toLowerCase(), s);
+          }
+        });
+        subscribers = Array.from(map.values());
+        saveStoredSubscribers(subscribers);
+      }
+    } catch (err) {
+      console.warn('Supabase subscribers fetch note:', err);
+    }
+  }
+
+  const now = Date.now();
+  const sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
+  const thirtyDaysMs = 30 * 24 * 60 * 60 * 1000;
+
+  const newcomers7Days = subscribers.filter(s => {
+    const age = now - new Date(s.createdAt).getTime();
+    return age <= sevenDaysMs;
+  }).length;
+
+  const newcomers30Days = subscribers.filter(s => {
+    const age = now - new Date(s.createdAt).getTime();
+    return age <= thirtyDaysMs;
+  }).length;
+
+  // Build unique countries count map
+  const countriesMap: Record<string, { country: string; code: string; count: number }> = {};
+  subscribers.forEach(s => {
+    const countryName = s.country || 'United States';
+    const countryCode = s.countryCode || 'US';
+    if (!countriesMap[countryName]) {
+      countriesMap[countryName] = { country: countryName, code: countryCode, count: 0 };
+    }
+    countriesMap[countryName].count += 1;
+  });
+
+  const countriesList = Object.values(countriesMap).sort((a, b) => b.count - a.count);
+
+  res.json({
+    success: true,
+    subscribers,
+    total: subscribers.length,
+    newcomers7Days,
+    newcomers30Days,
+    countries: countriesList,
+  });
+});
+
+app.post('/api/newsletter/subscribe', async (req, res) => {
+  const { email, country, countryCode, source } = req.body || {};
+
+  if (!email || typeof email !== 'string' || !email.includes('@') || !email.includes('.')) {
+    return res.status(400).json({ success: false, error: 'Please enter a valid email address.' });
+  }
+
+  const cleanEmail = email.trim().toLowerCase();
+  const cleanCountry = (country || 'United States').trim();
+  const cleanCountryCode = (countryCode || 'US').trim().toUpperCase();
+  const cleanSource = source === 'footer' ? 'footer' : 'popup';
+
+  const subscribers = getStoredSubscribers();
+  const existingIndex = subscribers.findIndex(s => s.email.toLowerCase() === cleanEmail);
+
+  if (existingIndex !== -1) {
+    return res.json({ 
+      success: true, 
+      alreadySubscribed: true, 
+      message: 'You are already registered for our newsletter.' 
+    });
+  }
+
+  const newSub = {
+    id: `sub-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+    email: cleanEmail,
+    country: cleanCountry,
+    countryCode: cleanCountryCode,
+    source: cleanSource,
+    status: 'active',
+    welcomeEmailSent: false,
+    createdAt: new Date().toISOString(),
+  };
+
+  subscribers.unshift(newSub);
+  saveStoredSubscribers(subscribers);
+
+  // Sync to Supabase in background
+  const client = getSupabase();
+  if (client) {
+    client.from('subscribers').insert([{
+      id: newSub.id,
+      email: newSub.email,
+      country: newSub.country,
+      country_code: newSub.countryCode,
+      source: newSub.source,
+      status: newSub.status,
+      welcome_email_sent: false,
+      created_at: newSub.createdAt
+    }]).catch((err: any) => {
+      console.warn('Supabase subscriber insert note:', err?.message);
+    });
+  }
+
+  // Send automated Welcome Email via Resend
+  let emailDispatched = false;
+  try {
+    const welcomeHtml = generateWelcomeEmailHtml({
+      email: cleanEmail,
+      country: cleanCountry,
+    });
+
+    const sendResult = await sendResendEmail({
+      to: cleanEmail,
+      subject: 'Welcome to USH Community of Traders • Market Updates',
+      html: welcomeHtml,
+    });
+
+    if (sendResult.success) {
+      emailDispatched = true;
+      newSub.welcomeEmailSent = true;
+      saveStoredSubscribers(subscribers);
+
+      if (client) {
+        client.from('subscribers').update({ welcome_email_sent: true }).eq('id', newSub.id).catch(() => {});
+      }
+    }
+  } catch (emailErr) {
+    console.warn('Welcome email dispatch note:', emailErr);
+  }
+
+  res.json({
+    success: true,
+    message: 'Thank you! You have been successfully registered for updates.',
+    emailSent: emailDispatched,
+    subscriber: newSub,
+  });
+});
+
+app.post('/api/newsletter/broadcast', async (req, res) => {
+  const { subject, headline, message, ctaText, ctaUrl, filters } = req.body || {};
+
+  if (!subject || !headline || !message) {
+    return res.status(400).json({ success: false, error: 'Subject, headline, and message are required.' });
+  }
+
+  const subscribers = getStoredSubscribers().filter(s => s.status !== 'unsubscribed');
+  const now = Date.now();
+  const sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
+  const thirtyDaysMs = 30 * 24 * 60 * 60 * 1000;
+
+  // Filter subscribers according to selection
+  const filtered = subscribers.filter(s => {
+    // Country filter
+    if (filters?.country && filters.country !== 'all') {
+      if ((s.country || '').toLowerCase() !== filters.country.toLowerCase()) {
+        return false;
+      }
+    }
+
+    // Timeframe filter
+    const createdTime = new Date(s.createdAt).getTime();
+    if (filters?.timeframe === 'newcomers_7d') {
+      if (now - createdTime > sevenDaysMs) return false;
+    } else if (filters?.timeframe === 'newcomers_30d') {
+      if (now - createdTime > thirtyDaysMs) return false;
+    } else if (filters?.timeframe === 'custom_date' && filters?.startDate) {
+      const start = new Date(filters.startDate).getTime();
+      const end = filters?.endDate ? new Date(filters.endDate).getTime() : now;
+      if (createdTime < start || createdTime > end) return false;
+    }
+
+    return true;
+  });
+
+  if (filtered.length === 0) {
+    return res.status(400).json({ success: false, error: 'No subscribers match the selected filter criteria.' });
+  }
+
+  const broadcastHtml = generateBroadcastEmailHtml({
+    headline,
+    message,
+    ctaText,
+    ctaUrl,
+  });
+
+  // Collect emails
+  const recipients = filtered.map(s => s.email);
+
+  // Send via Resend
+  const sendResult = await sendResendEmail({
+    to: recipients,
+    subject,
+    html: broadcastHtml,
+  });
+
+  if (!sendResult.success) {
+    return res.status(500).json({ 
+      success: false, 
+      error: sendResult.error,
+      notConfigured: sendResult.notConfigured,
+      recipientsCount: recipients.length 
+    });
+  }
+
+  // Update last email sent timestamp
+  const nowIso = new Date().toISOString();
+  filtered.forEach(s => { s.lastEmailSentAt = nowIso; });
+  saveStoredSubscribers(subscribers);
+
+  res.json({
+    success: true,
+    message: `Broadcast successfully dispatched to ${recipients.length} subscriber(s).`,
+    recipientsCount: recipients.length,
+  });
+});
+
+app.post('/api/newsletter/test', async (req, res) => {
+  const { testEmail, subject, headline, message, ctaText, ctaUrl } = req.body || {};
+
+  if (!testEmail || !testEmail.includes('@')) {
+    return res.status(400).json({ success: false, error: 'A valid test email address is required.' });
+  }
+
+  const broadcastHtml = generateBroadcastEmailHtml({
+    headline: headline || 'Test Broadcast Preview',
+    message: message || 'This is a test preview of your newsletter broadcast.',
+    ctaText,
+    ctaUrl,
+  });
+
+  const sendResult = await sendResendEmail({
+    to: testEmail.trim(),
+    subject: `[TEST] ${subject || 'Newsletter Preview'}`,
+    html: broadcastHtml,
+  });
+
+  if (!sendResult.success) {
+    return res.status(500).json({ 
+      success: false, 
+      error: sendResult.error, 
+      notConfigured: sendResult.notConfigured 
+    });
+  }
+
+  res.json({
+    success: true,
+    message: `Test email successfully sent to ${testEmail}. Check your inbox!`,
+  });
+});
+
+app.delete('/api/newsletter/subscribers/:id', async (req, res) => {
+  const { id } = req.params;
+  const subscribers = getStoredSubscribers().filter(s => s.id !== id);
+  saveStoredSubscribers(subscribers);
+
+  const client = getSupabase();
+  if (client) {
+    client.from('subscribers').delete().eq('id', id).catch(() => {});
+  }
+
+  res.json({ success: true, message: 'Subscriber removed successfully.' });
+});
+
+// 8. Admin Authentication & Password Reset Endpoints
 app.post('/api/admin/login', (req, res) => {
   const { email, password } = req.body || {};
   const cleanEmail = (email || '').trim().toLowerCase();

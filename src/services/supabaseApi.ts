@@ -552,3 +552,119 @@ export async function requestAdminPasswordReset(email: string): Promise<{ succes
     return { success: false, error: err.message || 'Error requesting password reset' };
   }
 }
+
+export interface SubscribePayload {
+  email: string;
+  country?: string;
+  countryCode?: string;
+  source?: 'popup' | 'footer';
+}
+
+export async function subscribeToNewsletter(payload: SubscribePayload): Promise<{
+  success: boolean;
+  message?: string;
+  error?: string;
+  emailSent?: boolean;
+  alreadySubscribed?: boolean;
+}> {
+  try {
+    const res = await fetch('/api/newsletter/subscribe', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+    return data;
+  } catch (err: any) {
+    return { success: false, error: err?.message || 'Network error while subscribing' };
+  }
+}
+
+export async function fetchNewsletterSubscribers(): Promise<{
+  success: boolean;
+  subscribers: any[];
+  total: number;
+  newcomers7Days: number;
+  newcomers30Days: number;
+  countries: Array<{ country: string; code: string; count: number }>;
+  error?: string;
+}> {
+  try {
+    const res = await fetch('/api/newsletter/subscribers');
+    const data = await res.json();
+    return data;
+  } catch (err: any) {
+    return {
+      success: false,
+      subscribers: [],
+      total: 0,
+      newcomers7Days: 0,
+      newcomers30Days: 0,
+      countries: [],
+      error: err?.message || 'Failed to fetch subscribers',
+    };
+  }
+}
+
+export async function sendNewsletterBroadcast(payload: {
+  subject: string;
+  headline: string;
+  message: string;
+  ctaText?: string;
+  ctaUrl?: string;
+  filters?: {
+    country?: string;
+    timeframe?: 'all' | 'newcomers_7d' | 'newcomers_30d' | 'custom_date';
+    startDate?: string;
+    endDate?: string;
+  };
+}): Promise<{
+  success: boolean;
+  message?: string;
+  error?: string;
+  recipientsCount?: number;
+  notConfigured?: boolean;
+}> {
+  try {
+    const res = await fetch('/api/newsletter/broadcast', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+    return data;
+  } catch (err: any) {
+    return { success: false, error: err?.message || 'Failed to send broadcast' };
+  }
+}
+
+export async function sendNewsletterTest(payload: {
+  testEmail: string;
+  subject?: string;
+  headline?: string;
+  message?: string;
+  ctaText?: string;
+  ctaUrl?: string;
+}): Promise<{ success: boolean; message?: string; error?: string; notConfigured?: boolean }> {
+  try {
+    const res = await fetch('/api/newsletter/test', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+    return data;
+  } catch (err: any) {
+    return { success: false, error: err?.message || 'Failed to send test email' };
+  }
+}
+
+export async function deleteNewsletterSubscriber(id: string): Promise<boolean> {
+  try {
+    const res = await fetch(`/api/newsletter/subscribers/${id}`, { method: 'DELETE' });
+    const data = await res.json();
+    return Boolean(data.success);
+  } catch {
+    return false;
+  }
+}
