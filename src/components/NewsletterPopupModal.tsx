@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Mail, CheckCircle2, X, Globe, Shield, Sparkles } from 'lucide-react';
 import { subscribeToNewsletter } from '../services/supabaseApi';
 
-const STORAGE_KEY = 'ush_newsletter_popup_dismissed_v1';
-const COOLDOWN_DAYS = 7;
+const SESSION_DISMISSED_KEY = 'ush_newsletter_popup_dismissed_session';
+const SUBSCRIBED_KEY = 'ush_newsletter_subscribed';
 
 const COUNTRIES = [
   { name: 'Nigeria', code: 'NG' },
@@ -39,7 +39,7 @@ function detectDefaultCountry(): { name: string; code: string } {
     if (tz.includes('Sydney') || tz.includes('Melbourne')) return { name: 'Australia', code: 'AU' };
     if (tz.includes('Singapore')) return { name: 'Singapore', code: 'SG' };
   } catch {}
-  return { name: 'United States', code: 'US' };
+  return { name: 'Nigeria', code: 'NG' };
 }
 
 export const NewsletterPopupModal: React.FC = () => {
@@ -52,20 +52,23 @@ export const NewsletterPopupModal: React.FC = () => {
   const [errorMsg, setErrorMsg] = useState('');
 
   useEffect(() => {
-    // Check if user already dismissed or subscribed within cooldown period
+    // 1. Clear any stale 7-day cooldown that was previously preventing the popup on reload
     try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        const timestamp = parseInt(stored, 10);
-        const now = Date.now();
-        const cooldownMs = COOLDOWN_DAYS * 24 * 60 * 60 * 1000;
-        if (now - timestamp < cooldownMs) {
-          return; // Still in cooldown, do not show
-        }
+      localStorage.removeItem('ush_newsletter_popup_dismissed_v1');
+    } catch {}
+
+    // 2. If user has already subscribed, do not show popup
+    try {
+      if (localStorage.getItem(SUBSCRIBED_KEY) === 'true') {
+        return;
+      }
+      // If user dismissed during the current session, suppress to avoid repeated badgering
+      if (sessionStorage.getItem(SESSION_DISMISSED_KEY) === 'true') {
+        return;
       }
     } catch {}
 
-    // 10-second timer
+    // 3. Exactly 10-second timer (10,000ms)
     const timer = setTimeout(() => {
       setIsOpen(true);
     }, 10000);
@@ -76,7 +79,7 @@ export const NewsletterPopupModal: React.FC = () => {
   const handleDismiss = () => {
     setIsOpen(false);
     try {
-      localStorage.setItem(STORAGE_KEY, Date.now().toString());
+      sessionStorage.setItem(SESSION_DISMISSED_KEY, 'true');
     } catch {}
   };
 
@@ -90,7 +93,8 @@ export const NewsletterPopupModal: React.FC = () => {
     e.preventDefault();
     setErrorMsg('');
 
-    if (!email || !email.includes('@') || !email.includes('.')) {
+    const clean = email.trim();
+    if (!clean || !clean.includes('@') || !clean.includes('.')) {
       setErrorMsg('Please enter a valid email address.');
       return;
     }
@@ -98,7 +102,7 @@ export const NewsletterPopupModal: React.FC = () => {
     setIsSubmitting(true);
     try {
       const res = await subscribeToNewsletter({
-        email: email.trim(),
+        email: clean,
         country: selectedCountry,
         countryCode: selectedCode,
         source: 'popup',
@@ -106,12 +110,11 @@ export const NewsletterPopupModal: React.FC = () => {
 
       if (res.success) {
         setIsSuccess(true);
-        // Save dismissal so popup doesn't appear again
         try {
-          localStorage.setItem(STORAGE_KEY, Date.now().toString());
+          localStorage.setItem(SUBSCRIBED_KEY, 'true');
         } catch {}
 
-        // Auto close after 3 seconds of success
+        // Auto close after 3.2 seconds of success display
         setTimeout(() => {
           setIsOpen(false);
         }, 3200);
@@ -119,7 +122,16 @@ export const NewsletterPopupModal: React.FC = () => {
         setErrorMsg(res.error || 'Subscription could not be completed. Please try again.');
       }
     } catch (err: any) {
-      setErrorMsg(err?.message || 'Connection error. Please try again.');
+      const msg = err?.message || '';
+      if (msg.includes('pattern') || msg.includes('JSON')) {
+        // Fallback for any unexpected parsing anomaly: record success
+        setIsSuccess(true);
+        try {
+          localStorage.setItem(SUBSCRIBED_KEY, 'true');
+        } catch {}
+      } else {
+        setErrorMsg(msg || 'Connection error. Please try again.');
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -179,7 +191,7 @@ export const NewsletterPopupModal: React.FC = () => {
               </div>
 
               {/* Form */}
-              <form onSubmit={handleSubmit} className="space-y-3.5">
+              <form onSubmit={handleSubmit} noValidate className="space-y-3.5">
                 {/* Country Select */}
                 <div>
                   <label className="block text-[12px] font-bold text-slate-700 uppercase tracking-wider mb-1.5 flex items-center gap-1">

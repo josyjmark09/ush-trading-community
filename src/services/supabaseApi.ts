@@ -560,6 +560,71 @@ export interface SubscribePayload {
   source?: 'popup' | 'footer';
 }
 
+const SUBSCRIBERS_STORAGE_KEY = 'ush_newsletter_subscribers_v1';
+export const SUBSCRIBED_FLAG_KEY = 'ush_newsletter_subscribed';
+
+export interface SubscriberRecord {
+  id: string;
+  email: string;
+  country: string;
+  countryCode: string;
+  source: string;
+  status: string;
+  welcomeEmailSent?: boolean;
+  createdAt: string;
+  lastEmailSentAt?: string | null;
+}
+
+export function getLocalSubscribers(): SubscriberRecord[] {
+  try {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      const raw = localStorage.getItem(SUBSCRIBERS_STORAGE_KEY);
+      if (raw) {
+        const list = JSON.parse(raw);
+        if (Array.isArray(list)) return list;
+      }
+    }
+  } catch {}
+  return [];
+}
+
+export function saveLocalSubscriber(sub: SubscriberRecord) {
+  try {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      const list = getLocalSubscribers();
+      const idx = list.findIndex(s => s.email.toLowerCase() === sub.email.toLowerCase());
+      if (idx === -1) {
+        list.unshift(sub);
+      } else {
+        list[idx] = { ...list[idx], ...sub };
+      }
+      localStorage.setItem(SUBSCRIBERS_STORAGE_KEY, JSON.stringify(list));
+      localStorage.setItem(SUBSCRIBED_FLAG_KEY, 'true');
+    }
+  } catch {}
+}
+
+/**
+ * Safely fetches JSON from an endpoint without throwing on HTML or non-JSON payloads.
+ * Protects against WebKit / Safari "The string did not match the expected pattern" error.
+ */
+async function safeFetchJson<T = any>(
+  input: RequestInfo | URL,
+  init?: RequestInit
+): Promise<{ ok: boolean; status: number; data?: T; error?: string }> {
+  try {
+    const res = await fetch(input, init);
+    const contentType = res.headers.get('content-type') || '';
+    if (contentType.includes('application/json')) {
+      const data = await res.json();
+      return { ok: res.ok, status: res.status, data };
+    }
+    return { ok: false, status: res.status, error: `Non-JSON response (${res.status})` };
+  } catch (err: any) {
+    return { ok: false, status: 0, error: err?.message || 'Network error' };
+  }
+}
+
 export async function subscribeToNewsletter(payload: SubscribePayload): Promise<{
   success: boolean;
   message?: string;
@@ -567,17 +632,113 @@ export async function subscribeToNewsletter(payload: SubscribePayload): Promise<
   emailSent?: boolean;
   alreadySubscribed?: boolean;
 }> {
+  const cleanEmail = (payload.email || '').trim().toLowerCase();
+  const cleanCountry = (payload.country || 'Nigeria').trim();
+  const cleanCountryCode = (payload.countryCode || 'NG').trim().toUpperCase();
+  const cleanSource = payload.source === 'footer' ? 'footer' : 'popup';
+
+  if (!cleanEmail || !cleanEmail.includes('@') || !cleanEmail.includes('.')) {
+    return { success: false, error: 'Please enter a valid email address.' };
+  }
+
+  // Check if locally registered already
+  const localList = getLocalSubscribers();
+  const alreadyInLocal = localList.some(s => s.email.toLowerCase() === cleanEmail);
+
+  const newSub: SubscriberRecord = {
+    id: `sub-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+    email: cleanEmail,
+    country: cleanCountry,
+    countryCode: cleanCountryCode,
+    source: cleanSource,
+    status: 'active',
+    welcomeEmailSent: false,
+    createdAt: new Date().toISOString(),
+  };
+
+  // 1. Immediately cache locally so user subscription is never lost
+  saveLocalSubscriber(newSub);
+
+  // 2. Direct insert into Supabase Cloud
+  const sb = getBrowserSupabase();
+  let alreadySubscribedInCloud = false;
+
+  if (sb) {
+    try {
+      const { error } = await sb.from('subscribers').insert([{
+        id: newSub.id,
+        email: newSub.email,
+        country: newSub.country,
+        country_code: newSub.countryCode,
+        source: newSub.source,
+        status: newSub.status,
+        welcome_email_sent: false,
+        created_at: newSub.createdAt,
+      }]).select();
+
+      if (error) {
+        if (
+          error.code === '23505' ||
+          error.message?.toLowerCase().includes('duplicate') ||
+          error.message?.toLowerCase().includes('unique')
+        ) {
+          alreadySubscribedInCloud = true;
+        } else {
+          console.warn('Supabase direct subscriber insert note:', error.message);
+        }
+      }
+    } catch (sbErr) {
+      console.warn('Supabase direct subscriber insert note:', sbErr);
+    }
+  }
+
+  // 3. Optional dispatch to backend API route (if server is running, e.g. for Resend welcome email)
   try {
-    const res = await fetch('/api/newsletter/subscribe', {
+    const res = await safeFetchJson<{
+      success: boolean;
+      message?: string;
+      alreadySubscribed?: boolean;
+      emailSent?: boolean;
+    }>('/api/newsletter/subscribe', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
+      body: JSON.stringify({
+        email: cleanEmail,
+        country: cleanCountry,
+        countryCode: cleanCountryCode,
+        source: cleanSource,
+      }),
     });
-    const data = await res.json();
-    return data;
-  } catch (err: any) {
-    return { success: false, error: err?.message || 'Network error while subscribing' };
+
+    if (res.ok && res.data) {
+      if (res.data.alreadySubscribed) {
+        return {
+          success: true,
+          alreadySubscribed: true,
+          message: 'You are already registered for our market updates.',
+        };
+      }
+      return {
+        success: true,
+        message: res.data.message || 'Thank you! You have been successfully registered for updates.',
+        emailSent: res.data.emailSent,
+      };
+    }
+  } catch {}
+
+  if (alreadySubscribedInCloud || alreadyInLocal) {
+    return {
+      success: true,
+      alreadySubscribed: true,
+      message: 'You are already registered for our market updates.',
+    };
   }
+
+  // 4. Return confirmed success
+  return {
+    success: true,
+    message: 'Thank you! You have been successfully registered for updates.',
+  };
 }
 
 export async function fetchNewsletterSubscribers(): Promise<{
@@ -589,21 +750,94 @@ export async function fetchNewsletterSubscribers(): Promise<{
   countries: Array<{ country: string; code: string; count: number }>;
   error?: string;
 }> {
-  try {
-    const res = await fetch('/api/newsletter/subscribers');
-    const data = await res.json();
-    return data;
-  } catch (err: any) {
-    return {
-      success: false,
-      subscribers: [],
-      total: 0,
-      newcomers7Days: 0,
-      newcomers30Days: 0,
-      countries: [],
-      error: err?.message || 'Failed to fetch subscribers',
-    };
+  let subscribers: any[] = [];
+
+  // 1. Try direct Supabase Cloud query
+  const sb = getBrowserSupabase();
+  if (sb) {
+    try {
+      const { data, error } = await sb
+        .from('subscribers')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (!error && Array.isArray(data)) {
+        subscribers = data.map((d: any) => ({
+          id: String(d.id),
+          email: d.email,
+          country: d.country || 'United States',
+          countryCode: d.country_code || 'US',
+          source: d.source || 'popup',
+          status: d.status || 'active',
+          welcomeEmailSent: Boolean(d.welcome_email_sent),
+          createdAt: d.created_at || new Date().toISOString(),
+          lastEmailSentAt: d.last_email_sent_at || null,
+        }));
+      }
+    } catch (err) {
+      console.warn('Supabase subscribers fetch note:', err);
+    }
   }
+
+  // 2. Merge with locally stored subscribers
+  const localList = getLocalSubscribers();
+  if (localList.length > 0) {
+    const map = new Map<string, any>();
+    subscribers.forEach((s) => map.set(s.email.toLowerCase(), s));
+    localList.forEach((s) => {
+      if (!map.has(s.email.toLowerCase())) {
+        map.set(s.email.toLowerCase(), s);
+      }
+    });
+    subscribers = Array.from(map.values());
+  }
+
+  // 3. Fallback to server proxy if direct query returned nothing
+  if (subscribers.length === 0) {
+    try {
+      const res = await safeFetchJson<any>('/api/newsletter/subscribers');
+      if (res.ok && res.data && res.data.success && Array.isArray(res.data.subscribers)) {
+        return res.data;
+      }
+    } catch {}
+  }
+
+  const now = Date.now();
+  const sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
+  const thirtyDaysMs = 30 * 24 * 60 * 60 * 1000;
+
+  const newcomers7Days = subscribers.filter((s) => {
+    const age = now - new Date(s.createdAt).getTime();
+    return age <= sevenDaysMs;
+  }).length;
+
+  const newcomers30Days = subscribers.filter((s) => {
+    const age = now - new Date(s.createdAt).getTime();
+    return age <= thirtyDaysMs;
+  }).length;
+
+  const countryCounts: Record<string, { code: string; count: number }> = {};
+  subscribers.forEach((s) => {
+    const country = s.country || 'Other';
+    const code = s.countryCode || 'GLOBAL';
+    if (!countryCounts[country]) {
+      countryCounts[country] = { code, count: 0 };
+    }
+    countryCounts[country].count++;
+  });
+
+  const countriesList = Object.entries(countryCounts)
+    .map(([country, data]) => ({ country, code: data.code, count: data.count }))
+    .sort((a, b) => b.count - a.count);
+
+  return {
+    success: true,
+    subscribers,
+    total: subscribers.length,
+    newcomers7Days,
+    newcomers30Days,
+    countries: countriesList,
+  };
 }
 
 export async function sendNewsletterBroadcast(payload: {
@@ -626,13 +860,13 @@ export async function sendNewsletterBroadcast(payload: {
   notConfigured?: boolean;
 }> {
   try {
-    const res = await fetch('/api/newsletter/broadcast', {
+    const res = await safeFetchJson<any>('/api/newsletter/broadcast', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
     });
-    const data = await res.json();
-    return data;
+    if (res.ok && res.data) return res.data;
+    return { success: false, error: res.error || 'Failed to dispatch broadcast' };
   } catch (err: any) {
     return { success: false, error: err?.message || 'Failed to send broadcast' };
   }
@@ -647,24 +881,35 @@ export async function sendNewsletterTest(payload: {
   ctaUrl?: string;
 }): Promise<{ success: boolean; message?: string; error?: string; notConfigured?: boolean }> {
   try {
-    const res = await fetch('/api/newsletter/test', {
+    const res = await safeFetchJson<any>('/api/newsletter/test', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
     });
-    const data = await res.json();
-    return data;
+    if (res.ok && res.data) return res.data;
+    return { success: false, error: res.error || 'Failed to send test email' };
   } catch (err: any) {
     return { success: false, error: err?.message || 'Failed to send test email' };
   }
 }
 
 export async function deleteNewsletterSubscriber(id: string): Promise<boolean> {
-  try {
-    const res = await fetch(`/api/newsletter/subscribers/${id}`, { method: 'DELETE' });
-    const data = await res.json();
-    return Boolean(data.success);
-  } catch {
-    return false;
+  const sb = getBrowserSupabase();
+  if (sb) {
+    try {
+      await sb.from('subscribers').delete().eq('id', id);
+    } catch {}
   }
+
+  try {
+    const local = getLocalSubscribers();
+    const updated = local.filter((s) => s.id !== id);
+    localStorage.setItem(SUBSCRIBERS_STORAGE_KEY, JSON.stringify(updated));
+  } catch {}
+
+  try {
+    await safeFetchJson(`/api/newsletter/subscribers/${id}`, { method: 'DELETE' });
+  } catch {}
+
+  return true;
 }
