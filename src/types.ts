@@ -84,6 +84,7 @@ export interface NewsletterSettings {
   resendApiKey?: string;
   senderEmail?: string;
   replyToEmail?: string;
+  templateId?: 'institutional_navy' | 'obsidian_gold' | 'editorial_light' | 'cyber_quant' | 'royal_gradient';
   senderName?: string;
   welcomeSubject?: string;
   welcomeHeading?: string;

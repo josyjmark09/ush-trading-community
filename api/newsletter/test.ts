@@ -1,3 +1,5 @@
+import { generateNewsletterHtml, EmailTemplateId } from './templates';
+
 export default async function handler(req: any, res: any) {
   // CORS Headers
   res.setHeader('Access-Control-Allow-Credentials', 'true');
@@ -16,7 +18,7 @@ export default async function handler(req: any, res: any) {
     return res.status(405).json({ success: false, error: 'Method not allowed' });
   }
 
-  const { testEmail, subject, headline, message, ctaText, ctaUrl, resendApiKey, senderEmail, replyToEmail } = req.body || {};
+  const { testEmail, subject, headline, message, ctaText, ctaUrl, resendApiKey, senderEmail, replyToEmail, templateId } = req.body || {};
 
   if (!testEmail || typeof testEmail !== 'string' || !testEmail.includes('@')) {
     return res.status(200).json({ success: false, error: 'A valid test email address is required.' });
@@ -35,70 +37,15 @@ export default async function handler(req: any, res: any) {
   const fromAddress = (senderEmail || process.env.RESEND_FROM_EMAIL || 'USH Community of Traders <onboarding@resend.dev>').trim();
   const replyAddress = (replyToEmail || process.env.RESEND_REPLY_TO || 'ushforex@gmail.com').trim();
 
-  // HTML Email Template
-  const formattedMessage = (message || 'This is a test preview from USH Community CMS.')
-    .split('\n\n')
-    .map((para: string) => `<p style="margin:0 0 16px;color:#cbd5e1;font-size:14px;line-height:1.7;">${para.replace(/\n/g, '<br/>')}</p>`)
-    .join('');
-
-  const ctaBlock = ctaText && ctaUrl ? `
-    <table role="presentation" cellspacing="0" cellpadding="0" style="margin:26px auto 14px;">
-      <tr>
-        <td align="center" style="border-radius:8px;background-color:#0053CF;">
-          <a href="${ctaUrl}" target="_blank" style="display:inline-block;padding:13px 28px;color:#ffffff;text-decoration:none;font-size:14px;font-weight:700;border-radius:8px;">
-            ${ctaText} →
-          </a>
-        </td>
-      </tr>
-    </table>
-  ` : '';
-
-  const html = `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <title>${headline || 'Test Broadcast'}</title>
-</head>
-<body style="margin:0;padding:0;background-color:#0f172a;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#e2e8f0;">
-  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color:#0f172a;padding:36px 12px;">
-    <tr>
-      <td align="center">
-        <table role="presentation" width="100%" style="max-width:580px;background-color:#1e293b;border-radius:16px;overflow:hidden;border:1px solid #334155;box-shadow:0 10px 30px rgba(0,0,0,0.5);">
-          <tr>
-            <td style="background:linear-gradient(135deg,#0a192f 0%,#0053CF 100%);padding:32px 28px;text-align:center;">
-              <h1 style="margin:0;color:#ffffff;font-size:22px;font-weight:800;letter-spacing:-0.5px;">USH Community of Traders</h1>
-              <p style="margin:6px 0 0;color:#93c5fd;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:1px;">Official Market Updates & Newsletter [PREVIEW]</p>
-            </td>
-          </tr>
-          <tr>
-            <td style="padding:32px 28px;">
-              <div style="background-color:#1e3a5f;border-left:4px solid #38bdf8;padding:10px 14px;border-radius:6px;margin-bottom:20px;font-size:12px;color:#93c5fd;font-weight:600;">
-                ✉️ This is a preview test email dispatched from USH CMS
-              </div>
-              <h2 style="margin:0 0 18px;color:#ffffff;font-size:19px;font-weight:700;">${headline || 'Weekly Market Analysis'}</h2>
-              ${formattedMessage}
-              ${ctaBlock}
-            </td>
-          </tr>
-          <tr>
-            <td style="background-color:#0f172a;padding:20px 24px;text-align:center;border-top:1px solid #334155;">
-              <p style="margin:0 0 4px;color:#94a3b8;font-size:12px;font-weight:600;">
-                USH Community of Traders • Global Forex & Market Analysis
-              </p>
-              <p style="margin:0;color:#64748b;font-size:11px;">
-                You received this test email because it was requested in the USH Admin Console.
-              </p>
-              <p style="margin:8px 0 0;color:#94a3b8;font-size:11.5px;">
-                Direct inquiries or feedback? Hit reply to this email or write to <a href="mailto:${replyAddress}" style="color:#38bdf8;text-decoration:underline;">${replyAddress}</a>
-              </p>
-            </td>
-          </tr>
-        </table>
-      </td>
-    </tr>
-  </table>
-</body>
-</html>`;
+  const html = generateNewsletterHtml({
+    templateId: (templateId || 'institutional_navy') as EmailTemplateId,
+    headline: headline || 'Systematic Market Updates',
+    message: message || 'This is a preview broadcast test from the USH Trading Community administration panel.',
+    ctaText,
+    ctaUrl,
+    replyAddress,
+    isTestPreview: true,
+  });
 
   try {
     const resendRes = await fetch('https://api.resend.com/emails', {

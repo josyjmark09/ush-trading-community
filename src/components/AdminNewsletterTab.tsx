@@ -17,7 +17,11 @@ import {
   Sparkles,
   Search,
   Clock,
-  ArrowRight
+  ArrowRight,
+  Palette,
+  Check,
+  Target,
+  UserCheck
 } from 'lucide-react';
 import { 
   fetchNewsletterSubscribers, 
@@ -25,6 +29,7 @@ import {
   sendNewsletterTest, 
   deleteNewsletterSubscriber 
 } from '../services/supabaseApi';
+import { EMAIL_TEMPLATES, EmailTemplateId } from '../services/emailTemplates';
 import { useSite } from '../context/SiteContext';
 
 export const AdminNewsletterTab: React.FC = () => {
@@ -41,12 +46,20 @@ export const AdminNewsletterTab: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
-  // Filters State
-  const [timeFilter, setTimeFilter] = useState<'all' | 'newcomers_7d' | 'newcomers_30d' | 'custom_date'>('all');
+  // Filters & Targeting State
+  const RESEND_SETUP_DATE = '2026-10-10';
+  const [targetType, setTargetType] = useState<'all' | 'specific'>('all');
+  const [specificRecipientEmail, setSpecificRecipientEmail] = useState('');
+  const [timeFilter, setTimeFilter] = useState<'all' | 'since_resend' | 'newcomers_7d' | 'newcomers_30d' | 'custom_date'>('all');
   const [countryFilter, setCountryFilter] = useState<string>('all');
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
+  const [startDate, setStartDate] = useState(RESEND_SETUP_DATE);
+  const [endDate, setEndDate] = useState(() => new Date().toISOString().split('T')[0]);
   const [searchQuery, setSearchQuery] = useState('');
+
+  // Style Template State (5 Options with Default)
+  const [selectedTemplate, setSelectedTemplate] = useState<EmailTemplateId>(
+    settings?.newsletter?.templateId || 'institutional_navy'
+  );
 
   // Composer State
   const [subject, setSubject] = useState('');
@@ -102,11 +115,33 @@ export const AdminNewsletterTab: React.FC = () => {
     loadSubscribers();
   }, []);
 
-  // Filtered subscribers list based on active filters
+  // Filtered subscribers list based on active filters & targeting mode
   const filteredSubscribers = useMemo(() => {
+    // 1. Direct Specific Recipient Targeting Mode
+    if (targetType === 'specific') {
+      const target = specificRecipientEmail.trim().toLowerCase();
+      if (!target) return [];
+      const matched = subscribers.find((s) => (s.email || '').toLowerCase() === target);
+      if (matched) return [matched];
+      // If manually entered email with valid syntax
+      if (target.includes('@') && target.includes('.')) {
+        return [{
+          id: 'manual-direct-recipient',
+          email: specificRecipientEmail.trim(),
+          country: 'Direct Specific Recipient',
+          createdAt: new Date().toISOString(),
+          source: 'manual',
+          welcomeEmailSent: false,
+        }];
+      }
+      return [];
+    }
+
+    // 2. Filtered Audience Mode
     const now = Date.now();
     const sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
     const thirtyDaysMs = 30 * 24 * 60 * 60 * 1000;
+    const resendSetupMs = new Date('2026-10-10T00:00:00Z').getTime();
 
     return subscribers.filter((s) => {
       // Search query
@@ -126,19 +161,21 @@ export const AdminNewsletterTab: React.FC = () => {
 
       // Timeframe filter
       const createdTime = new Date(s.createdAt).getTime();
-      if (timeFilter === 'newcomers_7d') {
+      if (timeFilter === 'since_resend') {
+        if (createdTime < resendSetupMs) return false;
+      } else if (timeFilter === 'newcomers_7d') {
         if (now - createdTime > sevenDaysMs) return false;
       } else if (timeFilter === 'newcomers_30d') {
         if (now - createdTime > thirtyDaysMs) return false;
-      } else if (timeFilter === 'custom_date' && startDate) {
-        const start = new Date(startDate).getTime();
+      } else if (timeFilter === 'custom_date') {
+        const start = startDate ? new Date(startDate).getTime() : resendSetupMs;
         const end = endDate ? new Date(endDate).getTime() + (24 * 60 * 60 * 1000) : now;
         if (createdTime < start || createdTime > end) return false;
       }
 
       return true;
     });
-  }, [subscribers, searchQuery, countryFilter, timeFilter, startDate, endDate]);
+  }, [subscribers, searchQuery, countryFilter, timeFilter, startDate, endDate, targetType, specificRecipientEmail]);
 
   const handleSaveResendSettings = (e: React.FormEvent) => {
     e.preventDefault();
@@ -151,6 +188,7 @@ export const AdminNewsletterTab: React.FC = () => {
         resendApiKey: resendApiKey.trim(),
         senderEmail: senderEmail.trim(),
         replyToEmail: replyToEmail.trim(),
+        templateId: selectedTemplate,
       },
     }));
 
@@ -181,6 +219,7 @@ export const AdminNewsletterTab: React.FC = () => {
         resendApiKey: resendApiKey.trim() || settings?.newsletter?.resendApiKey,
         senderEmail: senderEmail.trim() || settings?.newsletter?.senderEmail,
         replyToEmail: replyToEmail.trim() || settings?.newsletter?.replyToEmail || 'ushforex@gmail.com',
+        templateId: selectedTemplate,
       });
 
       if (res.success) {
@@ -223,7 +262,9 @@ export const AdminNewsletterTab: React.FC = () => {
       return;
     }
 
-    const confirmMsg = `Are you sure you want to send this broadcast to ${filteredSubscribers.length} subscriber(s)?`;
+    const confirmMsg = targetType === 'specific'
+      ? `Are you sure you want to send this broadcast directly to ${filteredSubscribers[0]?.email}?`
+      : `Are you sure you want to send this broadcast to ${filteredSubscribers.length} subscriber(s)?`;
     if (!window.confirm(confirmMsg)) return;
 
     setIsSendingBroadcast(true);
@@ -239,6 +280,7 @@ export const AdminNewsletterTab: React.FC = () => {
         resendApiKey: resendApiKey.trim() || settings?.newsletter?.resendApiKey,
         senderEmail: senderEmail.trim() || settings?.newsletter?.senderEmail,
         replyToEmail: replyToEmail.trim() || settings?.newsletter?.replyToEmail || 'ushforex@gmail.com',
+        templateId: selectedTemplate,
         recipientEmails: filteredSubscribers.map((s) => s.email),
         filters: {
           country: countryFilter,
@@ -348,7 +390,7 @@ export const AdminNewsletterTab: React.FC = () => {
       )}
 
       {/* 3. Campaign Broadcast Composer */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-xs p-5 sm:p-6 space-y-5">
+      <div id="composer-section" className="bg-white rounded-2xl border border-slate-200 shadow-xs p-5 sm:p-6 space-y-5">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
           <div>
             <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-blue-50 text-[#0053CF] rounded-full text-[11px] font-bold uppercase tracking-wider mb-1">
@@ -359,7 +401,7 @@ export const AdminNewsletterTab: React.FC = () => {
               Compose Newsletter Campaign
             </h3>
             <p className="text-[13px] text-slate-500">
-              Send updates and analysis to all subscribers or targeted newcomer segments.
+              Send updates, market analysis, or exclusive signals to your audience.
             </p>
           </div>
 
@@ -370,70 +412,155 @@ export const AdminNewsletterTab: React.FC = () => {
           </div>
         </div>
 
-        {/* Dynamic Audience Filters */}
-        <div className="p-4 bg-slate-50/80 rounded-xl border border-slate-200 space-y-3">
-          <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700 uppercase tracking-wider">
-            <Filter className="w-3.5 h-3.5 text-slate-500" />
-            <span>Audience Filter Criteria</span>
+        {/* Audience Targeting Mode Switcher */}
+        <div className="space-y-3">
+          <div className="flex items-center gap-2 p-1 bg-slate-100 rounded-xl w-fit">
+            <button
+              type="button"
+              onClick={() => setTargetType('all')}
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                targetType === 'all'
+                  ? 'bg-white text-slate-900 shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              Audience Segment Filters ({subscribers.length})
+            </button>
+            <button
+              type="button"
+              onClick={() => setTargetType('specific')}
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                targetType === 'specific'
+                  ? 'bg-[#0053CF] text-white shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              <Target className="w-3.5 h-3.5" />
+              <span>Target Specific Email</span>
+            </button>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-            {/* Timeframe Filter */}
-            <div>
-              <label className="block text-[11px] font-bold text-slate-600 mb-1">Registration Timeframe</label>
-              <select
-                value={timeFilter}
-                onChange={(e: any) => setTimeFilter(e.target.value)}
-                className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-800 text-[13px] font-medium focus:ring-2 focus:ring-[#0053CF]/20 focus:border-[#0053CF] outline-none"
-              >
-                <option value="all">All Time (Everyone)</option>
-                <option value="newcomers_7d">Newcomers (&lt; 7 Days / 1 Week)</option>
-                <option value="newcomers_30d">Past 30 Days (1 Month)</option>
-                <option value="custom_date">Custom Date Range...</option>
-              </select>
-            </div>
-
-            {/* Country Filter */}
-            <div>
-              <label className="block text-[11px] font-bold text-slate-600 mb-1">Country</label>
-              <select
-                value={countryFilter}
-                onChange={(e) => setCountryFilter(e.target.value)}
-                className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-800 text-[13px] font-medium focus:ring-2 focus:ring-[#0053CF]/20 focus:border-[#0053CF] outline-none"
-              >
-                <option value="all">All Countries ({stats.total})</option>
-                {stats.countries.map((c) => (
-                  <option key={c.country} value={c.country}>
-                    {c.country} ({c.count})
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Custom Dates if selected */}
-            {timeFilter === 'custom_date' && (
-              <>
-                <div>
-                  <label className="block text-[11px] font-bold text-slate-600 mb-1">Start Date</label>
+          {/* Specific Recipient Box */}
+          {targetType === 'specific' ? (
+            <div className="p-4 bg-blue-50/70 rounded-xl border border-blue-200/90 space-y-2.5 animate-in fade-in">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                  <Target className="w-3.5 h-3.5 text-[#0053CF]" />
+                  <span>Specific Recipient Target</span>
+                </label>
+                {specificRecipientEmail && (
+                  <span className="text-[11px] font-bold text-blue-700">
+                    Active Target: {specificRecipientEmail}
+                  </span>
+                )}
+              </div>
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                <div className="relative flex-1">
+                  <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
                   <input
-                    type="date"
-                    value={startDate}
-                    onChange={(e) => setStartDate(e.target.value)}
-                    className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-800 text-[13px] font-medium focus:ring-2 focus:ring-[#0053CF]/20 focus:border-[#0053CF] outline-none"
+                    type="email"
+                    value={specificRecipientEmail}
+                    onChange={(e) => setSpecificRecipientEmail(e.target.value)}
+                    placeholder="Type or paste recipient email (e.g. subscriber@gmail.com)..."
+                    className="w-full pl-8 pr-3 py-2 bg-white border border-blue-300 rounded-xl text-slate-900 text-[13px] font-medium outline-none focus:ring-2 focus:ring-[#0053CF]/20"
                   />
                 </div>
-                <div>
-                  <label className="block text-[11px] font-bold text-slate-600 mb-1">End Date</label>
-                  <input
-                    type="date"
-                    value={endDate}
-                    onChange={(e) => setEndDate(e.target.value)}
-                    className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-800 text-[13px] font-medium focus:ring-2 focus:ring-[#0053CF]/20 focus:border-[#0053CF] outline-none"
-                  />
+                {subscribers.length > 0 && (
+                  <select
+                    value=""
+                    onChange={(e) => {
+                      if (e.target.value) setSpecificRecipientEmail(e.target.value);
+                    }}
+                    className="px-3 py-2 bg-white border border-blue-300 rounded-xl text-slate-700 text-xs font-bold outline-none cursor-pointer"
+                  >
+                    <option value="">Select from subscribers ({subscribers.length})...</option>
+                    {subscribers.map((s) => (
+                      <option key={s.id} value={s.email}>
+                        {s.email} ({s.country || 'Global'})
+                      </option>
+                    ))}
+                  </select>
+                )}
+              </div>
+              <p className="text-[11px] text-slate-500">
+                This broadcast will be sent exclusively to this single address instead of your general subscriber list.
+              </p>
+            </div>
+          ) : (
+            /* Dynamic Audience Filters */
+            <div className="p-4 bg-slate-50/80 rounded-xl border border-slate-200 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700 uppercase tracking-wider">
+                  <Filter className="w-3.5 h-3.5 text-slate-500" />
+                  <span>Audience Filter Criteria</span>
                 </div>
-              </>
-            )}
-          </div>
+                <span className="text-[11px] font-semibold text-slate-400">
+                  Resend Setup: Oct 10, 2026
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                {/* Timeframe Filter */}
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-600 mb-1">Registration Timeframe</label>
+                  <select
+                    value={timeFilter}
+                    onChange={(e: any) => setTimeFilter(e.target.value)}
+                    className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-800 text-[13px] font-medium focus:ring-2 focus:ring-[#0053CF]/20 focus:border-[#0053CF] outline-none"
+                  >
+                    <option value="all">All Time (Everyone)</option>
+                    <option value="since_resend">Since Resend Setup (From Oct 10, 2026)</option>
+                    <option value="newcomers_7d">Newcomers (&lt; 7 Days / 1 Week)</option>
+                    <option value="newcomers_30d">Past 30 Days (1 Month)</option>
+                    <option value="custom_date">Custom Date Range (From Oct 10, 2026)...</option>
+                  </select>
+                </div>
+
+                {/* Country Filter */}
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-600 mb-1">Country</label>
+                  <select
+                    value={countryFilter}
+                    onChange={(e) => setCountryFilter(e.target.value)}
+                    className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-800 text-[13px] font-medium focus:ring-2 focus:ring-[#0053CF]/20 focus:border-[#0053CF] outline-none"
+                  >
+                    <option value="all">All Countries ({stats.total})</option>
+                    {stats.countries.map((c) => (
+                      <option key={c.country} value={c.country}>
+                        {c.country} ({c.count})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Custom Dates if selected */}
+                {timeFilter === 'custom_date' && (
+                  <>
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-600 mb-1">Start Date (From Setup)</label>
+                      <input
+                        type="date"
+                        value={startDate}
+                        min={RESEND_SETUP_DATE}
+                        onChange={(e) => setStartDate(e.target.value)}
+                        className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-800 text-[13px] font-medium focus:ring-2 focus:ring-[#0053CF]/20 focus:border-[#0053CF] outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-600 mb-1">End Date</label>
+                      <input
+                        type="date"
+                        value={endDate}
+                        min={startDate || RESEND_SETUP_DATE}
+                        onChange={(e) => setEndDate(e.target.value)}
+                        className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-800 text-[13px] font-medium focus:ring-2 focus:ring-[#0053CF]/20 focus:border-[#0053CF] outline-none"
+                      />
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Campaign Input Fields */}
@@ -502,6 +629,91 @@ export const AdminNewsletterTab: React.FC = () => {
                 placeholder="https://t.me/..."
                 className="w-full px-3.5 py-2 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 text-[13px] font-medium focus:ring-2 focus:ring-[#0053CF]/20 focus:border-[#0053CF] outline-none"
               />
+            </div>
+          </div>
+
+          {/* Email Layout & Design Styles (5 Options with Default) */}
+          <div className="pt-2">
+            <div className="flex items-center justify-between mb-2">
+              <label className="text-[12px] font-bold text-slate-800 flex items-center gap-1.5">
+                <Palette className="w-4 h-4 text-[#0053CF]" />
+                <span>Email Layout & Design Theme (5 Professional Layouts)</span>
+              </label>
+              <span className="text-[11px] font-semibold text-slate-400">
+                Default: Institutional Navy
+              </span>
+            </div>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+              {EMAIL_TEMPLATES.map((tmpl) => {
+                const isSelected = selectedTemplate === tmpl.id;
+                return (
+                  <button
+                    key={tmpl.id}
+                    type="button"
+                    onClick={() => setSelectedTemplate(tmpl.id)}
+                    className={`relative text-left p-3.5 rounded-xl border transition-all cursor-pointer flex flex-col justify-between ${
+                      isSelected
+                        ? 'border-[#0053CF] bg-blue-50/40 ring-2 ring-[#0053CF]/20 shadow-xs'
+                        : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/50'
+                    }`}
+                  >
+                    <div>
+                      {/* Swatch & Badges */}
+                      <div className="flex items-center justify-between gap-1 mb-2">
+                        <div className="flex items-center gap-1.5">
+                          <span
+                            className="w-3.5 h-3.5 rounded-full border border-black/10 shrink-0 shadow-2xs"
+                            style={{ backgroundColor: tmpl.themeColor }}
+                          />
+                          {tmpl.id === 'institutional_navy' && (
+                            <span className="px-1.5 py-0.2 bg-blue-600 text-white text-[9px] font-black rounded uppercase tracking-wider">
+                              Default
+                            </span>
+                          )}
+                        </div>
+                        {isSelected ? (
+                          <div className="w-4 h-4 rounded-full bg-[#0053CF] text-white flex items-center justify-center shrink-0">
+                            <Check className="w-2.5 h-2.5 stroke-[3]" />
+                          </div>
+                        ) : (
+                          <div className="w-4 h-4 rounded-full border border-slate-300 shrink-0" />
+                        )}
+                      </div>
+
+                      {/* Mock Header Preview */}
+                      <div
+                        className="w-full h-8 rounded-lg mb-2 p-1.5 flex items-center justify-between overflow-hidden border border-slate-200/50"
+                        style={{ backgroundColor: tmpl.previewCardBg }}
+                      >
+                        <div className="flex items-center gap-1">
+                          <div className="w-2 h-2 rounded-full" style={{ backgroundColor: tmpl.themeColor }} />
+                          <span className="text-[8px] font-bold tracking-wider" style={{ color: tmpl.id === 'editorial_light' ? '#0f172a' : '#ffffff' }}>
+                            USH
+                          </span>
+                        </div>
+                        <span
+                          className="text-[7px] font-bold px-1 py-0.5 rounded"
+                          style={{ backgroundColor: tmpl.badgeBg, color: tmpl.badgeText }}
+                        >
+                          BRIEF
+                        </span>
+                      </div>
+
+                      <h4 className="font-black text-slate-900 text-[12.5px] leading-tight">
+                        {tmpl.name}
+                      </h4>
+                      <p className="text-[10.5px] font-medium text-slate-500 mt-0.5 line-clamp-1">
+                        {tmpl.tagline}
+                      </p>
+                    </div>
+
+                    <p className="text-[10px] text-slate-400 mt-2 line-clamp-2 leading-relaxed">
+                      {tmpl.description}
+                    </p>
+                  </button>
+                );
+              })}
             </div>
           </div>
         </div>
@@ -679,13 +891,29 @@ export const AdminNewsletterTab: React.FC = () => {
                   </div>
                 </div>
 
-                <button
-                  onClick={() => handleDeleteSubscriber(sub.id, sub.email)}
-                  className="p-2 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-rose-50 transition-colors cursor-pointer shrink-0"
-                  title="Remove subscriber"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setTargetType('specific');
+                      setSpecificRecipientEmail(sub.email);
+                      const composerEl = document.getElementById('composer-section');
+                      if (composerEl) composerEl.scrollIntoView({ behavior: 'smooth' });
+                    }}
+                    className="px-2.5 py-1.5 text-[11px] font-bold text-[#0053CF] bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors cursor-pointer flex items-center gap-1 border border-blue-200"
+                    title="Send a broadcast specifically to this user"
+                  >
+                    <Target className="w-3 h-3" />
+                    <span>Send Direct</span>
+                  </button>
+                  <button
+                    onClick={() => handleDeleteSubscriber(sub.id, sub.email)}
+                    className="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-rose-50 transition-colors cursor-pointer"
+                    title="Remove subscriber"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
             ))}
           </div>
