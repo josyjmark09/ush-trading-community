@@ -83,6 +83,7 @@ export interface Subscriber {
 export interface NewsletterSettings {
   resendApiKey?: string;
   senderEmail?: string;
+  replyToEmail?: string;
   senderName?: string;
   welcomeSubject?: string;
   welcomeHeading?: string;

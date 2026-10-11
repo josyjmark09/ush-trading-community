@@ -16,7 +16,7 @@ export default async function handler(req: any, res: any) {
     return res.status(405).json({ success: false, error: 'Method not allowed' });
   }
 
-  const { testEmail, subject, headline, message, ctaText, ctaUrl, resendApiKey, senderEmail } = req.body || {};
+  const { testEmail, subject, headline, message, ctaText, ctaUrl, resendApiKey, senderEmail, replyToEmail } = req.body || {};
 
   if (!testEmail || typeof testEmail !== 'string' || !testEmail.includes('@')) {
     return res.status(200).json({ success: false, error: 'A valid test email address is required.' });
@@ -33,6 +33,7 @@ export default async function handler(req: any, res: any) {
   }
 
   const fromAddress = (senderEmail || process.env.RESEND_FROM_EMAIL || 'USH Community of Traders <onboarding@resend.dev>').trim();
+  const replyAddress = (replyToEmail || process.env.RESEND_REPLY_TO || 'ushforex@gmail.com').trim();
 
   // HTML Email Template
   const formattedMessage = (message || 'This is a test preview from USH Community CMS.')
@@ -87,6 +88,9 @@ export default async function handler(req: any, res: any) {
               <p style="margin:0;color:#64748b;font-size:11px;">
                 You received this test email because it was requested in the USH Admin Console.
               </p>
+              <p style="margin:8px 0 0;color:#94a3b8;font-size:11.5px;">
+                Direct inquiries or feedback? Hit reply to this email or write to <a href="mailto:${replyAddress}" style="color:#38bdf8;text-decoration:underline;">${replyAddress}</a>
+              </p>
             </td>
           </tr>
         </table>
@@ -106,6 +110,7 @@ export default async function handler(req: any, res: any) {
       body: JSON.stringify({
         from: fromAddress,
         to: [testEmail.trim()],
+        reply_to: replyAddress,
         subject: `[TEST] ${subject || 'Market Overview & Structure Analysis'}`,
         html,
       }),

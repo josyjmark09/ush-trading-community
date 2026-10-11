@@ -20,7 +20,7 @@ export default async function handler(req: any, res: any) {
     return res.status(405).json({ success: false, error: 'Method not allowed' });
   }
 
-  const { subject, headline, message, ctaText, ctaUrl, resendApiKey, senderEmail, recipientEmails } = req.body || {};
+  const { subject, headline, message, ctaText, ctaUrl, resendApiKey, senderEmail, replyToEmail, recipientEmails } = req.body || {};
 
   const activeKey = (resendApiKey || process.env.RESEND_API_KEY || '').trim();
   if (!activeKey) {
@@ -54,6 +54,7 @@ export default async function handler(req: any, res: any) {
   }
 
   const fromAddress = (senderEmail || process.env.RESEND_FROM_EMAIL || 'USH Community of Traders <onboarding@resend.dev>').trim();
+  const replyAddress = (replyToEmail || process.env.RESEND_REPLY_TO || 'ushforex@gmail.com').trim();
 
   const formattedMessage = (message || '')
     .split('\n\n')
@@ -104,6 +105,9 @@ export default async function handler(req: any, res: any) {
               <p style="margin:0;color:#64748b;font-size:11px;">
                 You received this newsletter as a registered community member.
               </p>
+              <p style="margin:8px 0 0;color:#94a3b8;font-size:11.5px;">
+                Direct inquiries or feedback? Hit reply to this email or write to <a href="mailto:${replyAddress}" style="color:#38bdf8;text-decoration:underline;">${replyAddress}</a>
+              </p>
             </td>
           </tr>
         </table>
@@ -129,6 +133,7 @@ export default async function handler(req: any, res: any) {
         body: JSON.stringify({
           from: fromAddress,
           to: slice,
+          reply_to: replyAddress,
           subject,
           html,
         }),

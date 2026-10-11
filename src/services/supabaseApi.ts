@@ -848,6 +848,7 @@ export async function sendNewsletterBroadcast(payload: {
   ctaUrl?: string;
   resendApiKey?: string;
   senderEmail?: string;
+  replyToEmail?: string;
   recipientEmails?: string[];
   filters?: {
     country?: string;
@@ -884,6 +885,7 @@ export async function sendNewsletterTest(payload: {
   ctaUrl?: string;
   resendApiKey?: string;
   senderEmail?: string;
+  replyToEmail?: string;
 }): Promise<{ success: boolean; message?: string; error?: string; notConfigured?: boolean }> {
   try {
     const res = await safeFetchJson<any>('/api/newsletter/test', {

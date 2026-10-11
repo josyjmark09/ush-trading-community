@@ -71,6 +71,7 @@ export const AdminNewsletterTab: React.FC = () => {
   // Resend Settings State
   const [resendApiKey, setResendApiKey] = useState(settings?.newsletter?.resendApiKey || '');
   const [senderEmail, setSenderEmail] = useState(settings?.newsletter?.senderEmail || 'USH Community <onboarding@resend.dev>');
+  const [replyToEmail, setReplyToEmail] = useState(settings?.newsletter?.replyToEmail || settings?.social?.supportEmail || 'ushforex@gmail.com');
   const [showApiKey, setShowApiKey] = useState(false);
   const [isSavingResend, setIsSavingResend] = useState(false);
   const [resendSavedToast, setResendSavedToast] = useState(false);
@@ -149,6 +150,7 @@ export const AdminNewsletterTab: React.FC = () => {
         ...prev.newsletter,
         resendApiKey: resendApiKey.trim(),
         senderEmail: senderEmail.trim(),
+        replyToEmail: replyToEmail.trim(),
       },
     }));
 
@@ -178,6 +180,7 @@ export const AdminNewsletterTab: React.FC = () => {
         ctaUrl,
         resendApiKey: resendApiKey.trim() || settings?.newsletter?.resendApiKey,
         senderEmail: senderEmail.trim() || settings?.newsletter?.senderEmail,
+        replyToEmail: replyToEmail.trim() || settings?.newsletter?.replyToEmail || 'ushforex@gmail.com',
       });
 
       if (res.success) {
@@ -235,6 +238,7 @@ export const AdminNewsletterTab: React.FC = () => {
         ctaUrl: ctaUrl.trim() || undefined,
         resendApiKey: resendApiKey.trim() || settings?.newsletter?.resendApiKey,
         senderEmail: senderEmail.trim() || settings?.newsletter?.senderEmail,
+        replyToEmail: replyToEmail.trim() || settings?.newsletter?.replyToEmail || 'ushforex@gmail.com',
         recipientEmails: filteredSubscribers.map((s) => s.email),
         filters: {
           country: countryFilter,
@@ -758,6 +762,22 @@ export const AdminNewsletterTab: React.FC = () => {
                 Default is <code className="bg-slate-100 px-1 py-0.5 rounded text-[11px]">USH Community &lt;onboarding@resend.dev&gt;</code> for instant testing without domain verification. (Public domains like <code>@gmail.com</code> are rejected by Resend).
               </p>
             )}
+          </div>
+
+          <div>
+            <label className="block text-[12px] font-bold text-slate-700 mb-1">
+              Reply-To Email Address
+            </label>
+            <input
+              type="email"
+              value={replyToEmail}
+              onChange={(e) => setReplyToEmail(e.target.value)}
+              placeholder="ushforex@gmail.com"
+              className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 text-[13.5px] font-medium focus:ring-2 focus:ring-[#0053CF]/20 focus:border-[#0053CF] outline-none"
+            />
+            <p className="text-[11.5px] text-slate-500 mt-1">
+              When subscribers hit <strong>"Reply"</strong> in their email app (Gmail, Apple Mail, Outlook), their message will be delivered directly to this address (e.g. <code>ushforex@gmail.com</code>).
+            </p>
           </div>
 
           <div className="pt-2">
