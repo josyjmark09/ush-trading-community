@@ -599,6 +599,7 @@ export const AdminNewsletterTab: React.FC = () => {
             )}
           </div>
         )}
+        </div>
       </div>
 
       {/* 4. Subscribers Directory */}
