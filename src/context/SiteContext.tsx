@@ -654,7 +654,17 @@ export const SiteProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return INITIAL_SAMPLE_MESSAGES;
   });
 
-  const [isAdminOpen, setIsAdminOpen] = useState(false);
+  const ADMIN_OPEN_KEY = 'ush_admin_open_v1';
+  const [isAdminOpen, setIsAdminOpen] = useState<boolean>(() => {
+    try {
+      return (
+        sessionStorage.getItem(ADMIN_OPEN_KEY) === 'true' ||
+        localStorage.getItem(ADMIN_OPEN_KEY) === 'true'
+      );
+    } catch {
+      return false;
+    }
+  });
   const [supabaseStatus, setSupabaseStatus] = useState<SupabaseStatus | null>(null);
 
   const refreshSupabaseStatus = async () => {
@@ -743,8 +753,21 @@ export const SiteProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [messages]);
 
-  const openAdmin = () => setIsAdminOpen(true);
-  const closeAdmin = () => setIsAdminOpen(false);
+  const openAdmin = () => {
+    setIsAdminOpen(true);
+    try {
+      sessionStorage.setItem(ADMIN_OPEN_KEY, 'true');
+      localStorage.setItem(ADMIN_OPEN_KEY, 'true');
+    } catch {}
+  };
+
+  const closeAdmin = () => {
+    setIsAdminOpen(false);
+    try {
+      sessionStorage.removeItem(ADMIN_OPEN_KEY);
+      localStorage.removeItem(ADMIN_OPEN_KEY);
+    } catch {}
+  };
 
   const updateSettings = (newSettings: Partial<SiteSettings> | ((prev: SiteSettings) => SiteSettings)) => {
     setSettings((prev) => {

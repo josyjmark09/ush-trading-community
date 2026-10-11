@@ -132,19 +132,44 @@ export const AdminModal: React.FC = () => {
   const [importSuccess, setImportSuccess] = useState(false);
 
   // Authentication State (Strictly ushforex@gmail.com / BullsMark500$$)
+  const AUTH_STORAGE_KEY = 'ush_admin_auth_v2';
+  const ADMIN_OPEN_KEY = 'ush_admin_open_v1';
+
+  // Authentication State: persistent across browser reloads
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
-    return sessionStorage.getItem('ush_admin_auth') === 'true';
+    try {
+      return (
+        sessionStorage.getItem(AUTH_STORAGE_KEY) === 'true' ||
+        localStorage.getItem(AUTH_STORAGE_KEY) === 'true' ||
+        sessionStorage.getItem('ush_admin_auth') === 'true'
+      );
+    } catch {
+      return false;
+    }
   });
   const [authMode, setAuthMode] = useState<'login' | 'forgot'>('login');
-  const [loginEmail, setLoginEmail] = useState('ushforex@gmail.com');
+  const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [authError, setAuthError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDataRefreshing, setIsDataRefreshing] = useState(false);
   
   // Forgot Password State
-  const [forgotEmail, setForgotEmail] = useState('ushforex@gmail.com');
+  const [forgotEmail, setForgotEmail] = useState('');
   const [forgotSuccess, setForgotSuccess] = useState('');
+
+  const handleRefreshAllData = async () => {
+    setIsDataRefreshing(true);
+    try {
+      await Promise.all([
+        refreshReviews(),
+        refreshSupabaseStatus(),
+      ]);
+    } finally {
+      setTimeout(() => setIsDataRefreshing(false), 500);
+    }
+  };
 
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -156,7 +181,7 @@ export const AdminModal: React.FC = () => {
     // Strict requirement: Only ushforex@gmail.com is permitted
     if (cleanEmail !== 'ushforex@gmail.com') {
       setIsSubmitting(false);
-      setAuthError('Access Denied: Only the authorized client email (ushforex@gmail.com) is permitted to access this panel.');
+      setAuthError('Access Denied: Invalid administrator email.');
       return;
     }
 
@@ -172,7 +197,13 @@ export const AdminModal: React.FC = () => {
       // Ignored
     }
 
-    sessionStorage.setItem('ush_admin_auth', 'true');
+    try {
+      sessionStorage.setItem(AUTH_STORAGE_KEY, 'true');
+      localStorage.setItem(AUTH_STORAGE_KEY, 'true');
+      sessionStorage.setItem(ADMIN_OPEN_KEY, 'true');
+      localStorage.setItem(ADMIN_OPEN_KEY, 'true');
+    } catch {}
+
     setIsAuthenticated(true);
     setIsSubmitting(false);
   };
@@ -185,27 +216,34 @@ export const AdminModal: React.FC = () => {
 
     const cleanEmail = forgotEmail.trim().toLowerCase();
 
-    // Strict requirement: Verification must only be done for ushforex@gmail.com
     if (cleanEmail !== 'ushforex@gmail.com') {
       setIsSubmitting(false);
-      setAuthError('Access Denied: Password reset verification can only be dispatched to the verified client email: ushforex@gmail.com.');
+      setAuthError('Access Denied: Only the verified administrator email is supported.');
       return;
     }
 
     try {
       const res = await requestAdminPasswordReset(cleanEmail);
       setIsSubmitting(false);
-      setForgotSuccess(res.message || 'Password reset verification has been securely dispatched to ushforex@gmail.com. Please check your inbox and spam folder.');
+      setForgotSuccess(res.message || 'Password reset verification has been securely dispatched. Please check your inbox and spam folder.');
     } catch {
       setIsSubmitting(false);
-      setForgotSuccess('Password reset verification has been securely dispatched to ushforex@gmail.com. Please check your inbox and spam folder.');
+      setForgotSuccess('Password reset verification has been securely dispatched. Please check your inbox and spam folder.');
     }
   };
 
   const handleLogout = () => {
-    sessionStorage.removeItem('ush_admin_auth');
+    try {
+      sessionStorage.removeItem(AUTH_STORAGE_KEY);
+      localStorage.removeItem(AUTH_STORAGE_KEY);
+      sessionStorage.removeItem('ush_admin_auth');
+      sessionStorage.removeItem(ADMIN_OPEN_KEY);
+      localStorage.removeItem(ADMIN_OPEN_KEY);
+    } catch {}
     setIsAuthenticated(false);
+    closeAdmin();
     setLoginPassword('');
+    setLoginEmail('');
     setAuthError('');
     setAuthMode('login');
   };
@@ -292,12 +330,12 @@ export const AdminModal: React.FC = () => {
                         setLoginEmail(e.target.value);
                         setAuthError('');
                       }}
-                      placeholder="ushforex@gmail.com"
+                      placeholder="Enter admin email address"
                       className="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-[13.5px] text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0053CF]/20 focus:border-[#0053CF] transition-all font-medium"
                     />
                   </div>
                   <p className="text-[11px] text-slate-500 mt-1">
-                    Strictly restricted to: <span className="font-semibold text-slate-700">ushforex@gmail.com</span>
+                    Authorized administrator access only.
                   </p>
                 </div>
 
@@ -421,12 +459,12 @@ export const AdminModal: React.FC = () => {
                             setForgotEmail(e.target.value);
                             setAuthError('');
                           }}
-                          placeholder="ushforex@gmail.com"
+                          placeholder="Enter admin email address"
                           className="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-[13.5px] text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0053CF]/20 focus:border-[#0053CF] transition-all font-medium"
                         />
                       </div>
                       <p className="text-[11px] text-slate-500 mt-1">
-                        Must match the client admin email: <span className="font-semibold text-slate-700">ushforex@gmail.com</span>
+                        Enter your verified administrator email.
                       </p>
                     </div>
 
@@ -695,6 +733,17 @@ export const AdminModal: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+            {/* Live Refresh Cloud Data Action */}
+            <button
+              type="button"
+              onClick={handleRefreshAllData}
+              className="flex items-center gap-1 sm:gap-1.5 bg-white/10 hover:bg-white/20 text-white px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-[11px] sm:text-[12.5px] font-bold border border-white/20 transition-all active:scale-95 cursor-pointer"
+              title="Refresh Cloud Data"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${isDataRefreshing ? 'animate-spin' : ''}`} />
+              <span className="hidden sm:inline">Refresh Data</span>
+            </button>
+
             {/* Quick Save Action */}
             <button
               onClick={handleSaveAll}

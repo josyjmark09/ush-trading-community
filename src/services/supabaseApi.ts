@@ -846,6 +846,9 @@ export async function sendNewsletterBroadcast(payload: {
   message: string;
   ctaText?: string;
   ctaUrl?: string;
+  resendApiKey?: string;
+  senderEmail?: string;
+  recipientEmails?: string[];
   filters?: {
     country?: string;
     timeframe?: 'all' | 'newcomers_7d' | 'newcomers_30d' | 'custom_date';
@@ -865,7 +868,7 @@ export async function sendNewsletterBroadcast(payload: {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
     });
-    if (res.ok && res.data) return res.data;
+    if (res.data) return res.data;
     return { success: false, error: res.error || 'Failed to dispatch broadcast' };
   } catch (err: any) {
     return { success: false, error: err?.message || 'Failed to send broadcast' };
@@ -879,6 +882,8 @@ export async function sendNewsletterTest(payload: {
   message?: string;
   ctaText?: string;
   ctaUrl?: string;
+  resendApiKey?: string;
+  senderEmail?: string;
 }): Promise<{ success: boolean; message?: string; error?: string; notConfigured?: boolean }> {
   try {
     const res = await safeFetchJson<any>('/api/newsletter/test', {
@@ -886,7 +891,7 @@ export async function sendNewsletterTest(payload: {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
     });
-    if (res.ok && res.data) return res.data;
+    if (res.data) return res.data;
     return { success: false, error: res.error || 'Failed to send test email' };
   } catch (err: any) {
     return { success: false, error: err?.message || 'Failed to send test email' };

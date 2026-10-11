@@ -54,7 +54,11 @@ export const AdminNewsletterTab: React.FC = () => {
   const [message, setMessage] = useState('');
   const [ctaText, setCtaText] = useState('Open Telegram VIP Channel');
   const [ctaUrl, setCtaUrl] = useState(settings?.social?.telegramUrl || 'https://t.me/+wHFuFFkA2i0xZTA8');
-  const [testEmail, setTestEmail] = useState('ushforex@gmail.com');
+  const [testEmail, setTestEmail] = useState('');
+  const [testFeedback, setTestFeedback] = useState<{
+    type: 'success' | 'error' | 'warning';
+    message: string;
+  } | null>(null);
 
   // Action States
   const [isSendingBroadcast, setIsSendingBroadcast] = useState(false);
@@ -156,13 +160,13 @@ export const AdminNewsletterTab: React.FC = () => {
   };
 
   const handleSendTest = async () => {
-    if (!testEmail || !testEmail.includes('@')) {
-      setActionFeedback({ type: 'error', message: 'Please enter a valid test email address.' });
+    if (!testEmail || !testEmail.includes('@') || !testEmail.includes('.')) {
+      setTestFeedback({ type: 'error', message: 'Please enter a valid test email address.' });
       return;
     }
 
     setIsSendingTest(true);
-    setActionFeedback(null);
+    setTestFeedback(null);
 
     try {
       const res = await sendNewsletterTest({
@@ -172,19 +176,34 @@ export const AdminNewsletterTab: React.FC = () => {
         message: message || 'This is a preview broadcast test from the USH Trading Community administration panel.',
         ctaText,
         ctaUrl,
+        resendApiKey: resendApiKey.trim() || settings?.newsletter?.resendApiKey,
+        senderEmail: senderEmail.trim() || settings?.newsletter?.senderEmail,
       });
 
       if (res.success) {
-        setActionFeedback({ type: 'success', message: res.message || 'Test email dispatched successfully! Check your inbox.' });
+        setTestFeedback({ 
+          type: 'success', 
+          message: res.message || `Test email dispatched to ${testEmail}! Check your inbox.` 
+        });
+        setActionFeedback({ 
+          type: 'success', 
+          message: res.message || `Test email dispatched to ${testEmail}! Check your inbox.` 
+        });
       } else {
         if (res.notConfigured) {
-          setActionFeedback({ type: 'error', message: 'Resend API key is not configured. Please paste your Resend key in the settings box below.' });
+          const msg = 'Resend API key is not configured. Please paste your Resend API key in Email Delivery Settings below.';
+          setTestFeedback({ type: 'warning', message: msg });
+          setActionFeedback({ type: 'error', message: msg });
         } else {
-          setActionFeedback({ type: 'error', message: res.error || 'Failed to dispatch test email.' });
+          const msg = res.error || 'Failed to dispatch test email.';
+          setTestFeedback({ type: 'error', message: msg });
+          setActionFeedback({ type: 'error', message: msg });
         }
       }
     } catch (err: any) {
-      setActionFeedback({ type: 'error', message: err?.message || 'Error communicating with server.' });
+      const msg = err?.message || 'Error communicating with email service.';
+      setTestFeedback({ type: 'error', message: msg });
+      setActionFeedback({ type: 'error', message: msg });
     } finally {
       setIsSendingTest(false);
     }
@@ -214,6 +233,9 @@ export const AdminNewsletterTab: React.FC = () => {
         message: message.trim(),
         ctaText: ctaText.trim() || undefined,
         ctaUrl: ctaUrl.trim() || undefined,
+        resendApiKey: resendApiKey.trim() || settings?.newsletter?.resendApiKey,
+        senderEmail: senderEmail.trim() || settings?.newsletter?.senderEmail,
+        recipientEmails: filteredSubscribers.map((s) => s.email),
         filters: {
           country: countryFilter,
           timeframe: timeFilter,
@@ -481,31 +503,47 @@ export const AdminNewsletterTab: React.FC = () => {
         </div>
 
         {/* Actions & Test Send */}
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-3 border-t border-slate-100">
-          <div className="flex items-center gap-2">
-            <input
-              type="email"
-              value={testEmail}
-              onChange={(e) => setTestEmail(e.target.value)}
-              placeholder="admin@example.com"
-              className="px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-slate-800 text-[13px] font-medium w-48 sm:w-56 focus:outline-none"
-            />
+        <div className="pt-3 border-t border-slate-100">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+            <div>
+              <div className="flex items-center gap-2">
+                <input
+                  type="email"
+                  value={testEmail}
+                  onChange={(e) => {
+                    setTestEmail(e.target.value);
+                    if (testFeedback) setTestFeedback(null);
+                  }}
+                  placeholder="Enter test email..."
+                  className="px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-slate-800 text-[13px] font-medium w-48 sm:w-56 focus:outline-none"
+                />
+                <button
+                  type="button"
+                  onClick={handleSendTest}
+                  disabled={isSendingTest || isSendingBroadcast}
+                  className="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-[12.5px] rounded-xl transition-colors cursor-pointer disabled:opacity-60 shrink-0 flex items-center gap-1.5"
+                >
+                  {isSendingTest ? (
+                    <>
+                      <div className="w-3.5 h-3.5 border-2 border-slate-400 border-t-slate-800 rounded-full animate-spin" />
+                      <span>Sending Test...</span>
+                    </>
+                  ) : (
+                    <span>Send Test</span>
+                  )}
+                </button>
+              </div>
+              <p className="text-[11px] text-slate-400 mt-1">
+                Dispatches a single preview to this address to verify layout before sending to all subscribers.
+              </p>
+            </div>
+
             <button
               type="button"
-              onClick={handleSendTest}
-              disabled={isSendingTest || isSendingBroadcast}
-              className="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-[12.5px] rounded-xl transition-colors cursor-pointer disabled:opacity-60 shrink-0"
+              onClick={handleSendBroadcast}
+              disabled={isSendingBroadcast || filteredSubscribers.length === 0}
+              className="px-6 py-2.5 bg-[#0053CF] hover:bg-[#0042a6] active:scale-[0.99] text-white font-bold text-[14px] rounded-xl shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
             >
-              {isSendingTest ? 'Sending Test...' : 'Send Test'}
-            </button>
-          </div>
-
-          <button
-            type="button"
-            onClick={handleSendBroadcast}
-            disabled={isSendingBroadcast || filteredSubscribers.length === 0}
-            className="px-6 py-2.5 bg-[#0053CF] hover:bg-[#0042a6] active:scale-[0.99] text-white font-bold text-[14px] rounded-xl shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
-          >
             {isSendingBroadcast ? (
               <>
                 <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -519,6 +557,48 @@ export const AdminNewsletterTab: React.FC = () => {
             )}
           </button>
         </div>
+
+        {/* Real-time Inline Feedback for Test Send */}
+        {testFeedback && (
+          <div className={`mt-3 p-3.5 rounded-xl border flex items-center justify-between gap-3 text-[13px] font-medium animate-in fade-in ${
+            testFeedback.type === 'success'
+              ? 'bg-emerald-50 border-emerald-200 text-emerald-900'
+              : testFeedback.type === 'warning'
+              ? 'bg-amber-50 border-amber-200 text-amber-900'
+              : 'bg-rose-50 border-rose-200 text-rose-900'
+          }`}>
+            <div className="flex items-center gap-2">
+              {testFeedback.type === 'success' ? (
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+              ) : testFeedback.type === 'warning' ? (
+                <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
+              ) : (
+                <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+              )}
+              <span>{testFeedback.message}</span>
+            </div>
+            {testFeedback.type === 'warning' ? (
+              <button
+                type="button"
+                onClick={() => {
+                  const el = document.getElementById('resend-settings-section');
+                  if (el) el.scrollIntoView({ behavior: 'smooth' });
+                }}
+                className="text-amber-800 underline font-bold text-xs shrink-0 cursor-pointer"
+              >
+                Configure Resend Key ↓
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setTestFeedback(null)}
+                className="text-slate-400 hover:text-slate-600 text-xs font-bold cursor-pointer"
+              >
+                ✕
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
       {/* 4. Subscribers Directory */}
@@ -608,7 +688,7 @@ export const AdminNewsletterTab: React.FC = () => {
       </div>
 
       {/* 5. Resend API Key Configuration */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-xs p-5 sm:p-6 space-y-4">
+      <div id="resend-settings-section" className="bg-white rounded-2xl border border-slate-200 shadow-xs p-5 sm:p-6 space-y-4">
         <div className="flex items-center justify-between border-b border-slate-100 pb-3">
           <div className="flex items-center gap-2">
             <Key className="w-4 h-4 text-slate-700" />
@@ -660,9 +740,23 @@ export const AdminNewsletterTab: React.FC = () => {
               placeholder="USH Community <onboarding@resend.dev> or custom domain"
               className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 text-[13.5px] font-medium focus:ring-2 focus:ring-[#0053CF]/20 focus:border-[#0053CF] outline-none"
             />
-            <p className="text-[11.5px] text-slate-500 mt-1">
-              Default is <code className="bg-slate-100 px-1 py-0.5 rounded text-[11px]">USH Community &lt;onboarding@resend.dev&gt;</code> for instant testing without domain verification.
-            </p>
+            {senderEmail.toLowerCase().includes('@gmail.com') || senderEmail.toLowerCase().includes('@yahoo.com') || senderEmail.toLowerCase().includes('@outlook.com') ? (
+              <div className="mt-2 p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-[12px] leading-relaxed flex items-start gap-2.5">
+                <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                <div>
+                  <strong className="font-bold">Cannot send from @gmail.com:</strong> Resend and email servers reject emails pretending to be sent from public domains like Gmail because of anti-phishing security (DMARC).
+                  <div className="mt-1 text-amber-800">
+                    • For testing: keep <code className="bg-amber-100 px-1 py-0.5 rounded font-mono font-bold">USH Community &lt;onboarding@resend.dev&gt;</code>
+                    <br />
+                    • For production with your brand: verify <code className="bg-amber-100 px-1 py-0.5 rounded font-mono font-bold">ushcommunity.com</code> at <a href="https://resend.com/domains" target="_blank" rel="noreferrer" className="underline font-bold">resend.com/domains</a>, then set <code className="bg-amber-100 px-1 py-0.5 rounded font-mono">USH Community &lt;updates@ushcommunity.com&gt;</code>.
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <p className="text-[11.5px] text-slate-500 mt-1">
+                Default is <code className="bg-slate-100 px-1 py-0.5 rounded text-[11px]">USH Community &lt;onboarding@resend.dev&gt;</code> for instant testing without domain verification. (Public domains like <code>@gmail.com</code> are rejected by Resend).
+              </p>
+            )}
           </div>
 
           <div className="pt-2">
