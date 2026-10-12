@@ -419,7 +419,19 @@ export default async function handler(req: any, res: any) {
       });
     }
 
-    const fromAddress = (senderEmail || process.env.RESEND_FROM_EMAIL || 'USH Community <updates@ushcommunity.com>').trim();
+    let fromAddress = (senderEmail || process.env.RESEND_FROM_EMAIL || 'USH Community <updates@ushcommunity.com>').trim();
+    // Safety auto-fix: If fromAddress still has onboarding@resend.dev or public domains like @gmail.com,
+    // automatically rewrite to the verified ushcommunity.com domain!
+    if (
+      fromAddress.toLowerCase().includes('onboarding@resend.dev') ||
+      fromAddress.toLowerCase().includes('@gmail.com') ||
+      fromAddress.toLowerCase().includes('@yahoo.com') ||
+      fromAddress.toLowerCase().includes('@outlook.com') ||
+      fromAddress.toLowerCase().includes('@hotmail.com')
+    ) {
+      fromAddress = 'USH Community <updates@ushcommunity.com>';
+    }
+
     const replyAddress = (replyToEmail || process.env.RESEND_REPLY_TO || 'ushforex@gmail.com').trim();
 
     const html = generateNewsletterHtml({
@@ -432,7 +444,49 @@ export default async function handler(req: any, res: any) {
       isTestPreview: false,
     });
 
-    // Send via Resend Batch API (up to 100 per batch) so each subscriber receives a private individual email
+    console.log(`[Broadcast] Sending to ${recipients.length} recipient(s) from: ${fromAddress}`);
+
+    // If sending to a single recipient (e.g. testing with specific email), use direct /emails endpoint
+    if (recipients.length === 1) {
+      const emailAddr = recipients[0];
+      const resendRes = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${activeKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          from: fromAddress,
+          to: [emailAddr],
+          reply_to: replyAddress,
+          subject,
+          html,
+        }),
+      });
+
+      const data = await resendRes.json();
+      console.log('[Broadcast Single Result]:', resendRes.status, data);
+
+      if (!resendRes.ok) {
+        let errorMsg = data?.message || data?.error || `Resend rejected email to ${emailAddr}`;
+        if (typeof errorMsg === 'string' && (errorMsg.toLowerCase().includes('domain') || errorMsg.toLowerCase().includes('verify'))) {
+          errorMsg += ' (Note: Resend requires sending from your verified domain like ushcommunity.com).';
+        }
+        return res.status(200).json({
+          success: false,
+          error: errorMsg,
+          details: data,
+        });
+      }
+
+      return res.status(200).json({
+        success: true,
+        message: `Broadcast successfully dispatched to ${emailAddr}! (Resend ID: ${data?.id || 'ok'})`,
+        recipientsCount: 1,
+      });
+    }
+
+    // For multiple recipients, send via Resend Batch API (up to 100 per batch)
     const batchSize = 100;
     let sentCount = 0;
 
@@ -456,14 +510,17 @@ export default async function handler(req: any, res: any) {
       });
 
       const data = await resendRes.json();
+      console.log('[Broadcast Batch Result]:', resendRes.status, data);
+
       if (!resendRes.ok) {
-        let errorMsg = data?.message || data?.error || 'Resend rejected broadcast.';
+        let errorMsg = data?.message || data?.error || 'Resend rejected batch broadcast.';
         if (typeof errorMsg === 'string' && (errorMsg.toLowerCase().includes('domain') || errorMsg.toLowerCase().includes('verify'))) {
-          errorMsg += ' (Note: To send to public audiences, Resend requires a verified domain like ushcommunity.com. Public domains like @gmail.com are not permitted as sender).';
+          errorMsg += ' (Note: To send to public audiences, Resend requires a verified domain like ushcommunity.com).';
         }
         return res.status(200).json({
           success: false,
           error: errorMsg,
+          details: data,
         });
       }
       sentCount += slice.length;

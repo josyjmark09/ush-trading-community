@@ -398,7 +398,19 @@ export default async function handler(req: any, res: any) {
       });
     }
 
-    const fromAddress = (senderEmail || process.env.RESEND_FROM_EMAIL || 'USH Community <updates@ushcommunity.com>').trim();
+    let fromAddress = (senderEmail || process.env.RESEND_FROM_EMAIL || 'USH Community <updates@ushcommunity.com>').trim();
+    // Safety auto-fix: If fromAddress still has onboarding@resend.dev or public domains like @gmail.com,
+    // automatically rewrite to the verified ushcommunity.com domain!
+    if (
+      fromAddress.toLowerCase().includes('onboarding@resend.dev') ||
+      fromAddress.toLowerCase().includes('@gmail.com') ||
+      fromAddress.toLowerCase().includes('@yahoo.com') ||
+      fromAddress.toLowerCase().includes('@outlook.com') ||
+      fromAddress.toLowerCase().includes('@hotmail.com')
+    ) {
+      fromAddress = 'USH Community <updates@ushcommunity.com>';
+    }
+
     const replyAddress = (replyToEmail || process.env.RESEND_REPLY_TO || 'ushforex@gmail.com').trim();
 
     const html = generateNewsletterHtml({

@@ -136,14 +136,27 @@ export const AdminNewsletterTab: React.FC = () => {
 
   useEffect(() => {
     loadSubscribers();
+    // Safety auto-upgrade: If stored sender still uses onboarding@resend.dev or public Gmail, upgrade to verified domain
+    if (
+      senderEmail.toLowerCase().includes('onboarding@resend.dev') ||
+      senderEmail.toLowerCase().includes('@gmail.com') ||
+      senderEmail.toLowerCase().includes('@yahoo.com')
+    ) {
+      setSenderEmail('USH Community <updates@ushcommunity.com>');
+    }
   }, []);
 
   // Filtered subscribers list based on active filters & targeting mode
   const filteredSubscribers = useMemo(() => {
     // 1. Direct Specific Recipient Targeting Mode (Supports Multiple Emails)
     if (targetType === 'specific') {
-      if (specificRecipients.length === 0) return [];
-      return specificRecipients.map((target, idx) => {
+      const allTargets = [...specificRecipients];
+      const pending = specificEmailInput.trim().toLowerCase();
+      if (pending && validateEmail(pending).isValid && !allTargets.includes(pending)) {
+        allTargets.push(pending);
+      }
+      if (allTargets.length === 0) return [];
+      return allTargets.map((target, idx) => {
         const matched = subscribers.find((s) => (s.email || '').toLowerCase() === target.toLowerCase());
         if (matched) return matched;
         return {
@@ -272,13 +285,28 @@ export const AdminNewsletterTab: React.FC = () => {
   };
 
   const handleSendBroadcast = async () => {
+    // If targeting specific recipients and there is a valid email still in specificEmailInput, auto-commit it
+    if (targetType === 'specific' && specificEmailInput.trim()) {
+      const val = validateEmail(specificEmailInput.trim());
+      if (val.isValid && !specificRecipients.includes(specificEmailInput.trim().toLowerCase())) {
+        const updated = [...specificRecipients, specificEmailInput.trim().toLowerCase()];
+        setSpecificRecipients(updated);
+        setSpecificEmailInput('');
+      }
+    }
+
     if (!subject.trim() || !headline.trim() || !message.trim()) {
       setActionFeedback({ type: 'error', message: 'Please provide a Subject, Headline, and Message body for the broadcast.' });
       return;
     }
 
     if (filteredSubscribers.length === 0) {
-      setActionFeedback({ type: 'error', message: 'No subscribers match the current filter selection.' });
+      setActionFeedback({ 
+        type: 'error', 
+        message: targetType === 'specific'
+          ? 'Please enter at least one valid recipient email address above.'
+          : 'No subscribers match the current filter selection.' 
+      });
       return;
     }
 
@@ -920,6 +948,36 @@ export const AdminNewsletterTab: React.FC = () => {
                 ✕
               </button>
             )}
+          </div>
+        )}
+
+        {/* Real-time Inline Feedback for Broadcast Dispatch */}
+        {actionFeedback && (
+          <div className={`mt-3 p-4 rounded-xl border flex items-center justify-between gap-3 text-[13px] font-medium animate-in fade-in ${
+            actionFeedback.type === 'success'
+              ? 'bg-emerald-50 border-emerald-300 text-emerald-950 shadow-xs'
+              : 'bg-rose-50 border-rose-300 text-rose-950 shadow-xs'
+          }`}>
+            <div className="flex items-start gap-2.5">
+              {actionFeedback.type === 'success' ? (
+                <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
+              ) : (
+                <AlertCircle className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
+              )}
+              <div>
+                <p className="font-bold text-[13.5px]">
+                  {actionFeedback.type === 'success' ? 'Broadcast Dispatched Successfully' : 'Broadcast Dispatch Notice'}
+                </p>
+                <p className="text-[12px] opacity-90 mt-0.5 leading-relaxed">{actionFeedback.message}</p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setActionFeedback(null)}
+              className="text-slate-400 hover:text-slate-700 text-sm font-bold p-1 cursor-pointer"
+            >
+              ✕
+            </button>
           </div>
         )}
         </div>
