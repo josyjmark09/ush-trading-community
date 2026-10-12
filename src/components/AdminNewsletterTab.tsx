@@ -1159,6 +1159,7 @@ export const AdminNewsletterTab: React.FC = () => {
             <div className="mt-2 flex items-center gap-1.5 flex-wrap">
               <span className="text-[11px] text-slate-500 font-medium">Quick Presets:</span>
               {[
+                'USH | USH Community <updates@ushcommunity.com>',
                 'USH Community <updates@ushcommunity.com>',
                 'USH Community <newsletter@ushcommunity.com>',
                 'USH Community <team@ushcommunity.com>',
@@ -1173,7 +1174,7 @@ export const AdminNewsletterTab: React.FC = () => {
                       : 'bg-white text-slate-700 border-slate-200 hover:border-slate-300 hover:bg-slate-50'
                   }`}
                 >
-                  {preset.replace('USH Community <', '').replace('>', '')}
+                  {preset.replace('USH Community <', '').replace('USH | USH Community <', 'USH | ').replace('>', '')}
                 </button>
               ))}
             </div>
