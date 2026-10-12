@@ -106,7 +106,7 @@ export const AdminNewsletterTab: React.FC = () => {
 
   // Resend Settings State
   const [resendApiKey, setResendApiKey] = useState(settings?.newsletter?.resendApiKey || '');
-  const [senderEmail, setSenderEmail] = useState(settings?.newsletter?.senderEmail || 'USH Community <onboarding@resend.dev>');
+  const [senderEmail, setSenderEmail] = useState(settings?.newsletter?.senderEmail || 'USH Community <updates@ushcommunity.com>');
   const [replyToEmail, setReplyToEmail] = useState(settings?.newsletter?.replyToEmail || settings?.social?.supportEmail || 'ushforex@gmail.com');
   const [showApiKey, setShowApiKey] = useState(false);
   const [isSavingResend, setIsSavingResend] = useState(false);
@@ -1070,31 +1070,68 @@ export const AdminNewsletterTab: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-[12px] font-bold text-slate-700 mb-1">
-              Sender Email ("From" Field)
-            </label>
+            <div className="flex items-center justify-between mb-1.5 flex-wrap gap-2">
+              <label className="block text-[12px] font-bold text-slate-700">
+                Sender Email ("From" Field)
+              </label>
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-[11px] font-bold">
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                <span>ushcommunity.com Verified</span>
+              </div>
+            </div>
+
             <input
               type="text"
               value={senderEmail}
               onChange={(e) => setSenderEmail(e.target.value)}
-              placeholder="USH Community <onboarding@resend.dev> or custom domain"
-              className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 text-[13.5px] font-medium focus:ring-2 focus:ring-[#0053CF]/20 focus:border-[#0053CF] outline-none"
+              placeholder="USH Community <updates@ushcommunity.com>"
+              className={`w-full px-3.5 py-2.5 bg-slate-50 border rounded-xl text-slate-900 text-[13.5px] font-medium focus:ring-2 focus:ring-[#0053CF]/20 outline-none transition-all ${
+                senderEmail.toLowerCase().includes('@ushcommunity.com')
+                  ? 'border-emerald-500 focus:border-emerald-600'
+                  : 'border-slate-300 focus:border-[#0053CF]'
+              }`}
             />
-            {senderEmail.toLowerCase().includes('@gmail.com') || senderEmail.toLowerCase().includes('@yahoo.com') || senderEmail.toLowerCase().includes('@outlook.com') ? (
+
+            {/* Quick Domain Presets */}
+            <div className="mt-2 flex items-center gap-1.5 flex-wrap">
+              <span className="text-[11px] text-slate-500 font-medium">Quick Presets:</span>
+              {[
+                'USH Community <updates@ushcommunity.com>',
+                'USH Community <newsletter@ushcommunity.com>',
+                'USH Community <team@ushcommunity.com>',
+              ].map((preset) => (
+                <button
+                  key={preset}
+                  type="button"
+                  onClick={() => setSenderEmail(preset)}
+                  className={`px-2 py-0.5 text-[11px] font-bold rounded-md border transition-colors cursor-pointer ${
+                    senderEmail === preset
+                      ? 'bg-blue-50 text-[#0053CF] border-blue-200 ring-1 ring-blue-300'
+                      : 'bg-white text-slate-700 border-slate-200 hover:border-slate-300 hover:bg-slate-50'
+                  }`}
+                >
+                  {preset.replace('USH Community <', '').replace('>', '')}
+                </button>
+              ))}
+            </div>
+
+            {senderEmail.toLowerCase().includes('@ushcommunity.com') ? (
+              <div className="mt-2 p-3 rounded-xl bg-emerald-50/80 border border-emerald-200 text-emerald-900 text-[12px] leading-relaxed flex items-start gap-2.5 animate-in fade-in">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                <div>
+                  <strong className="font-bold">Verified Domain Active:</strong> Emails will be delivered to any email inbox worldwide with high deliverability via your verified Hostinger DNS records.
+                </div>
+              </div>
+            ) : senderEmail.toLowerCase().includes('@gmail.com') || senderEmail.toLowerCase().includes('@yahoo.com') || senderEmail.toLowerCase().includes('@outlook.com') ? (
               <div className="mt-2 p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-[12px] leading-relaxed flex items-start gap-2.5">
                 <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
                 <div>
-                  <strong className="font-bold">Cannot send from @gmail.com:</strong> Resend and email servers reject emails pretending to be sent from public domains like Gmail because of anti-phishing security (DMARC).
-                  <div className="mt-1 text-amber-800">
-                    • For testing: keep <code className="bg-amber-100 px-1 py-0.5 rounded font-mono font-bold">USH Community &lt;onboarding@resend.dev&gt;</code>
-                    <br />
-                    • For production with your brand: verify <code className="bg-amber-100 px-1 py-0.5 rounded font-mono font-bold">ushcommunity.com</code> at <a href="https://resend.com/domains" target="_blank" rel="noreferrer" className="underline font-bold">resend.com/domains</a>, then set <code className="bg-amber-100 px-1 py-0.5 rounded font-mono">USH Community &lt;updates@ushcommunity.com&gt;</code>.
-                  </div>
+                  <strong className="font-bold">Cannot send from public domains:</strong> Email servers reject emails pretending to come from @gmail.com. Since your domain <code className="bg-amber-100 px-1 py-0.5 rounded font-mono font-bold">ushcommunity.com</code> is verified on Resend, use <code className="bg-amber-100 px-1 py-0.5 rounded font-mono font-bold">USH Community &lt;updates@ushcommunity.com&gt;</code> instead!
                 </div>
               </div>
             ) : (
               <p className="text-[11.5px] text-slate-500 mt-1">
-                Default is <code className="bg-slate-100 px-1 py-0.5 rounded text-[11px]">USH Community &lt;onboarding@resend.dev&gt;</code> for instant testing without domain verification. (Public domains like <code>@gmail.com</code> are rejected by Resend).
+                Your domain <strong className="text-slate-800">ushcommunity.com</strong> is verified. Recommended: <code className="bg-slate-100 px-1 py-0.5 rounded text-[11px] font-bold">USH Community &lt;updates@ushcommunity.com&gt;</code>.
               </p>
             )}
           </div>

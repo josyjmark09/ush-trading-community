@@ -398,7 +398,7 @@ export default async function handler(req: any, res: any) {
       });
     }
 
-    const fromAddress = (senderEmail || process.env.RESEND_FROM_EMAIL || 'USH Community of Traders <onboarding@resend.dev>').trim();
+    const fromAddress = (senderEmail || process.env.RESEND_FROM_EMAIL || 'USH Community <updates@ushcommunity.com>').trim();
     const replyAddress = (replyToEmail || process.env.RESEND_REPLY_TO || 'ushforex@gmail.com').trim();
 
     const html = generateNewsletterHtml({
