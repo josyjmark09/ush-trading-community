@@ -619,7 +619,17 @@ async function safeFetchJson<T = any>(
       const data = await res.json();
       return { ok: res.ok, status: res.status, data };
     }
-    return { ok: false, status: res.status, error: `Non-JSON response (${res.status})` };
+    if (res.status === 500) {
+      return { ok: false, status: 500, error: 'Server error (500). Please check your Resend API configuration or try again.' };
+    }
+    if (res.status === 404) {
+      return { ok: false, status: 404, error: 'Email service endpoint not found (404).' };
+    }
+    return { 
+      ok: false, 
+      status: res.status, 
+      error: res.statusText ? `Request failed: ${res.statusText} (${res.status})` : `Server error (${res.status})` 
+    };
   } catch (err: any) {
     return { ok: false, status: 0, error: err?.message || 'Network error' };
   }
