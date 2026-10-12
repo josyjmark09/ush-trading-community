@@ -969,6 +969,11 @@ export const AdminNewsletterTab: React.FC = () => {
                   {actionFeedback.type === 'success' ? 'Broadcast Dispatched Successfully' : 'Broadcast Dispatch Notice'}
                 </p>
                 <p className="text-[12px] opacity-90 mt-0.5 leading-relaxed">{actionFeedback.message}</p>
+                {actionFeedback.type === 'success' && (
+                  <p className="text-[11px] text-emerald-800 font-medium mt-1">
+                    💡 <strong>Tip for Gmail:</strong> If you don't see it in your Primary inbox, check the <strong>Promotions</strong> tab or <strong>Spam</strong> folder (Gmail often puts first-time emails from newly verified domains there). Mark as "Not Spam" or drag to Primary!
+                  </p>
+                )}
               </div>
             </div>
             <button

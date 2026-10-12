@@ -423,6 +423,8 @@ export default async function handler(req: any, res: any) {
       isTestPreview: true,
     });
 
+    const textContent = `${headline || 'Systematic Market Updates'}\n\n${message || 'This is a preview broadcast test from the USH Trading Community administration panel.'}\n\n${ctaText && ctaUrl ? `${ctaText}: ${ctaUrl}\n\n` : ''}---\nUSH Community of Traders\nQuestions? Reply to ${replyAddress}`;
+
     const resendRes = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
@@ -435,6 +437,7 @@ export default async function handler(req: any, res: any) {
         reply_to: replyAddress,
         subject: `[TEST] ${subject || 'Market Overview & Structure Analysis'}`,
         html,
+        text: textContent,
       }),
     });
 

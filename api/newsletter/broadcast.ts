@@ -444,6 +444,8 @@ export default async function handler(req: any, res: any) {
       isTestPreview: false,
     });
 
+    const textContent = `${headline || 'USH Community Update'}\n\n${message || ''}\n\n${ctaText && ctaUrl ? `${ctaText}: ${ctaUrl}\n\n` : ''}---\nUSH Community of Traders • Global Market Analysis\nQuestions or inquiries? Reply to ${replyAddress}`;
+
     console.log(`[Broadcast] Sending to ${recipients.length} recipient(s) from: ${fromAddress}`);
 
     // If sending to a single recipient (e.g. testing with specific email), use direct /emails endpoint
@@ -461,6 +463,7 @@ export default async function handler(req: any, res: any) {
           reply_to: replyAddress,
           subject,
           html,
+          text: textContent,
         }),
       });
 
@@ -498,6 +501,7 @@ export default async function handler(req: any, res: any) {
         reply_to: replyAddress,
         subject,
         html,
+        text: textContent,
       }));
 
       const resendRes = await fetch('https://api.resend.com/emails/batch', {
