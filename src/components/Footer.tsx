@@ -19,6 +19,7 @@ import {
 import { SocialLinksModal, SocialPlatformType } from './SocialLinksModal';
 import { openTelegram } from '../utils/telegramLink';
 import { subscribeToNewsletter } from '../services/supabaseApi';
+import { validateEmail } from '../utils/emailValidation';
 import logoSvg from './ush-logo-opt.png';
 
 interface FooterProps {
@@ -133,7 +134,13 @@ export const Footer: React.FC<FooterProps> = ({
                         if (subscribeError) setSubscribeError('');
                       }}
                       placeholder="Enter your email address..."
-                      className="flex-1 px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 text-[13.5px] font-medium placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#0053CF]/20 focus:border-[#0053CF] transition-colors"
+                      className={`flex-1 px-4 py-3 bg-slate-50 border rounded-xl text-slate-900 text-[13.5px] font-medium placeholder-slate-400 focus:outline-none focus:ring-2 transition-all ${
+                        validateEmail(footerEmail).status === 'valid'
+                          ? 'border-emerald-500 focus:ring-emerald-500/20 focus:border-emerald-600'
+                          : validateEmail(footerEmail).status === 'invalid'
+                          ? 'border-amber-400 focus:ring-amber-500/20 focus:border-amber-500'
+                          : 'border-slate-300 focus:ring-[#0053CF]/20 focus:border-[#0053CF]'
+                      }`}
                     />
                     <button
                       type="submit"
@@ -153,6 +160,19 @@ export const Footer: React.FC<FooterProps> = ({
                       )}
                     </button>
                   </div>
+                  {/* Real-time Email Feedback */}
+                  {validateEmail(footerEmail).status === 'valid' && (
+                    <p className="text-[11.5px] font-bold text-emerald-600 pl-1 flex items-center gap-1 animate-in fade-in">
+                      <CheckCircle2 className="w-3.5 h-3.5" />
+                      <span>Valid email address</span>
+                    </p>
+                  )}
+                  {validateEmail(footerEmail).status === 'invalid' && (
+                    <p className="text-[11.5px] font-bold text-amber-600 pl-1 flex items-center gap-1 animate-in fade-in">
+                      <span>⚠️</span>
+                      <span>{validateEmail(footerEmail).message}</span>
+                    </p>
+                  )}
                   {subscribeError && (
                     <p className="text-rose-600 text-[12px] font-medium pl-1">{subscribeError}</p>
                   )}

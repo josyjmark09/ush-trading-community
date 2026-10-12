@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { useSite } from '../context/SiteContext';
 import { openTelegram } from '../utils/telegramLink';
+import { validateEmail } from '../utils/emailValidation';
 import ushLogoPng from './ush-logo-opt.png';
 import logoSvg from './ush-logo-opt.png';
 
@@ -425,8 +426,26 @@ Target: ${targetEmail}
                         value={emailFormData.email}
                         onChange={(e) => setEmailFormData({ ...emailFormData, email: e.target.value })}
                         placeholder="trader@example.com"
-                        className="w-full bg-white border border-slate-300 focus:border-[#0053CF] rounded-lg px-3 py-1.5 text-[13.5px] text-slate-900 outline-hidden font-inter"
+                        className={`w-full bg-white border rounded-lg px-3 py-1.5 text-[13.5px] text-slate-900 outline-hidden font-inter transition-all ${
+                          validateEmail(emailFormData.email).status === 'valid'
+                            ? 'border-emerald-500 focus:border-emerald-600'
+                            : validateEmail(emailFormData.email).status === 'invalid'
+                            ? 'border-amber-400 focus:border-amber-500'
+                            : 'border-slate-300 focus:border-[#0053CF]'
+                        }`}
                       />
+                      {validateEmail(emailFormData.email).status === 'valid' && (
+                        <p className="text-[11px] font-bold text-emerald-600 mt-1 flex items-center gap-1">
+                          <CheckCircle className="w-3 h-3" />
+                          <span>Valid email address</span>
+                        </p>
+                      )}
+                      {validateEmail(emailFormData.email).status === 'invalid' && (
+                        <p className="text-[11px] font-bold text-amber-600 mt-1 flex items-center gap-1">
+                          <span>⚠️</span>
+                          <span>{validateEmail(emailFormData.email).message}</span>
+                        </p>
+                      )}
                     </div>
 
                     <div>
@@ -550,8 +569,26 @@ Target: ${targetEmail}
                         value={webFormData.email}
                         onChange={(e) => setWebFormData({ ...webFormData, email: e.target.value })}
                         placeholder="trader@example.com"
-                        className="w-full bg-white border border-slate-300 focus:border-[#0053CF] rounded-lg px-3 py-1.5 text-[13.5px] text-slate-900 outline-hidden font-inter"
+                        className={`w-full bg-white border rounded-lg px-3 py-1.5 text-[13.5px] text-slate-900 outline-hidden font-inter transition-all ${
+                          validateEmail(webFormData.email).status === 'valid'
+                            ? 'border-emerald-500 focus:border-emerald-600'
+                            : validateEmail(webFormData.email).status === 'invalid'
+                            ? 'border-amber-400 focus:border-amber-500'
+                            : 'border-slate-300 focus:border-[#0053CF]'
+                        }`}
                       />
+                      {validateEmail(webFormData.email).status === 'valid' && (
+                        <p className="text-[11px] font-bold text-emerald-600 mt-1 flex items-center gap-1">
+                          <CheckCircle className="w-3 h-3" />
+                          <span>Valid email address</span>
+                        </p>
+                      )}
+                      {validateEmail(webFormData.email).status === 'invalid' && (
+                        <p className="text-[11px] font-bold text-amber-600 mt-1 flex items-center gap-1">
+                          <span>⚠️</span>
+                          <span>{validateEmail(webFormData.email).message}</span>
+                        </p>
+                      )}
                     </div>
 
                     <div>

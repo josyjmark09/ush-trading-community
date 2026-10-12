@@ -30,6 +30,7 @@ import {
   deleteNewsletterSubscriber 
 } from '../services/supabaseApi';
 import { EMAIL_TEMPLATES, EmailTemplateId } from '../services/emailTemplates';
+import { validateEmail } from '../utils/emailValidation';
 import { useSite } from '../context/SiteContext';
 
 export const AdminNewsletterTab: React.FC = () => {
@@ -49,12 +50,34 @@ export const AdminNewsletterTab: React.FC = () => {
   // Filters & Targeting State
   const RESEND_SETUP_DATE = '2026-10-10';
   const [targetType, setTargetType] = useState<'all' | 'specific'>('all');
-  const [specificRecipientEmail, setSpecificRecipientEmail] = useState('');
+  const [specificRecipients, setSpecificRecipients] = useState<string[]>([]);
+  const [specificEmailInput, setSpecificEmailInput] = useState('');
   const [timeFilter, setTimeFilter] = useState<'all' | 'since_resend' | 'newcomers_7d' | 'newcomers_30d' | 'custom_date'>('all');
   const [countryFilter, setCountryFilter] = useState<string>('all');
   const [startDate, setStartDate] = useState(RESEND_SETUP_DATE);
   const [endDate, setEndDate] = useState(() => new Date().toISOString().split('T')[0]);
   const [searchQuery, setSearchQuery] = useState('');
+
+  // Specific Recipients Handlers
+  const handleAddSpecificRecipient = (emailToAdd?: string) => {
+    const raw = (emailToAdd || specificEmailInput).trim().toLowerCase();
+    if (!raw) return;
+    const validation = validateEmail(raw);
+    if (!validation.isValid) return;
+    if (!specificRecipients.includes(raw)) {
+      setSpecificRecipients((prev) => [...prev, raw]);
+    }
+    setSpecificEmailInput('');
+  };
+
+  const handleRemoveSpecificRecipient = (emailToRemove: string) => {
+    setSpecificRecipients((prev) => prev.filter((e) => e.toLowerCase() !== emailToRemove.toLowerCase()));
+  };
+
+  const handleClearSpecificRecipients = () => {
+    setSpecificRecipients([]);
+    setSpecificEmailInput('');
+  };
 
   // Style Template State (5 Options with Default)
   const [selectedTemplate, setSelectedTemplate] = useState<EmailTemplateId>(
@@ -117,24 +140,21 @@ export const AdminNewsletterTab: React.FC = () => {
 
   // Filtered subscribers list based on active filters & targeting mode
   const filteredSubscribers = useMemo(() => {
-    // 1. Direct Specific Recipient Targeting Mode
+    // 1. Direct Specific Recipient Targeting Mode (Supports Multiple Emails)
     if (targetType === 'specific') {
-      const target = specificRecipientEmail.trim().toLowerCase();
-      if (!target) return [];
-      const matched = subscribers.find((s) => (s.email || '').toLowerCase() === target);
-      if (matched) return [matched];
-      // If manually entered email with valid syntax
-      if (target.includes('@') && target.includes('.')) {
-        return [{
-          id: 'manual-direct-recipient',
-          email: specificRecipientEmail.trim(),
-          country: 'Direct Specific Recipient',
+      if (specificRecipients.length === 0) return [];
+      return specificRecipients.map((target, idx) => {
+        const matched = subscribers.find((s) => (s.email || '').toLowerCase() === target.toLowerCase());
+        if (matched) return matched;
+        return {
+          id: `specific-${idx}-${target}`,
+          email: target,
+          country: 'Specific Target',
           createdAt: new Date().toISOString(),
           source: 'manual',
           welcomeEmailSent: false,
-        }];
-      }
-      return [];
+        };
+      });
     }
 
     // 2. Filtered Audience Mode
@@ -175,7 +195,7 @@ export const AdminNewsletterTab: React.FC = () => {
 
       return true;
     });
-  }, [subscribers, searchQuery, countryFilter, timeFilter, startDate, endDate, targetType, specificRecipientEmail]);
+  }, [subscribers, searchQuery, countryFilter, timeFilter, startDate, endDate, targetType, specificRecipients]);
 
   const handleSaveResendSettings = (e: React.FormEvent) => {
     e.preventDefault();
@@ -263,7 +283,7 @@ export const AdminNewsletterTab: React.FC = () => {
     }
 
     const confirmMsg = targetType === 'specific'
-      ? `Are you sure you want to send this broadcast directly to ${filteredSubscribers[0]?.email}?`
+      ? `Are you sure you want to send this broadcast directly to the ${filteredSubscribers.length} specific recipient(s) (${filteredSubscribers.map(s => s.email).slice(0, 3).join(', ')}${filteredSubscribers.length > 3 ? '...' : ''})?`
       : `Are you sure you want to send this broadcast to ${filteredSubscribers.length} subscriber(s)?`;
     if (!window.confirm(confirmMsg)) return;
 
@@ -442,38 +462,90 @@ export const AdminNewsletterTab: React.FC = () => {
 
           {/* Specific Recipient Box */}
           {targetType === 'specific' ? (
-            <div className="p-4 bg-blue-50/70 rounded-xl border border-blue-200/90 space-y-2.5 animate-in fade-in">
+            <div className="p-4 bg-blue-50/70 rounded-xl border border-blue-200/90 space-y-3 animate-in fade-in">
               <div className="flex items-center justify-between">
                 <label className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
                   <Target className="w-3.5 h-3.5 text-[#0053CF]" />
-                  <span>Specific Recipient Target</span>
+                  <span>Specific Recipient Targets ({specificRecipients.length})</span>
                 </label>
-                {specificRecipientEmail && (
-                  <span className="text-[11px] font-bold text-blue-700">
-                    Active Target: {specificRecipientEmail}
-                  </span>
+                {specificRecipients.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={handleClearSpecificRecipients}
+                    className="text-[11px] font-bold text-rose-600 hover:text-rose-800 transition-colors cursor-pointer"
+                  >
+                    Clear All
+                  </button>
                 )}
               </div>
+
+              {/* Tag / Chip Badges List */}
+              {specificRecipients.length > 0 ? (
+                <div className="flex flex-wrap gap-1.5 p-2 bg-white/90 rounded-xl border border-blue-200 max-h-32 overflow-y-auto">
+                  {specificRecipients.map((emailAddr) => (
+                    <span
+                      key={emailAddr}
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-blue-100/80 text-blue-900 border border-blue-200 rounded-lg text-xs font-bold"
+                    >
+                      <span className="truncate max-w-[200px]">{emailAddr}</span>
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveSpecificRecipient(emailAddr)}
+                        className="w-3.5 h-3.5 rounded-full hover:bg-rose-200 hover:text-rose-800 flex items-center justify-center transition-colors cursor-pointer text-[10px]"
+                        title={`Remove ${emailAddr}`}
+                      >
+                        ✕
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              ) : (
+                <div className="p-2.5 bg-white/60 border border-blue-200/60 rounded-xl text-center text-xs text-slate-500 font-medium">
+                  No specific recipients added yet. Type an email below and press <kbd className="px-1.5 py-0.5 bg-slate-100 rounded border border-slate-300 font-mono text-[10px] font-bold">Enter</kbd>, or pick from the directory.
+                </div>
+              )}
+
+              {/* Type or Pick email */}
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
                 <div className="relative flex-1">
                   <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
                   <input
                     type="email"
-                    value={specificRecipientEmail}
-                    onChange={(e) => setSpecificRecipientEmail(e.target.value)}
-                    placeholder="Type or paste recipient email (e.g. subscriber@gmail.com)..."
-                    className="w-full pl-8 pr-3 py-2 bg-white border border-blue-300 rounded-xl text-slate-900 text-[13px] font-medium outline-none focus:ring-2 focus:ring-[#0053CF]/20"
+                    value={specificEmailInput}
+                    onChange={(e) => setSpecificEmailInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ',') {
+                        e.preventDefault();
+                        handleAddSpecificRecipient();
+                      }
+                    }}
+                    placeholder="Type recipient email and press Enter (e.g. trader@gmail.com)..."
+                    className={`w-full pl-8 pr-3 py-2 bg-white border rounded-xl text-slate-900 text-[13px] font-medium outline-none focus:ring-2 transition-all ${
+                      validateEmail(specificEmailInput).status === 'valid'
+                        ? 'border-emerald-500 focus:ring-emerald-500/20'
+                        : validateEmail(specificEmailInput).status === 'invalid'
+                        ? 'border-amber-400 focus:ring-amber-500/20'
+                        : 'border-blue-300 focus:ring-[#0053CF]/20'
+                    }`}
                   />
                 </div>
+                <button
+                  type="button"
+                  onClick={() => handleAddSpecificRecipient()}
+                  disabled={!validateEmail(specificEmailInput).isValid}
+                  className="px-3.5 py-2 bg-[#0053CF] hover:bg-[#0042a6] disabled:opacity-40 text-white font-bold text-xs rounded-xl transition-all cursor-pointer shrink-0 flex items-center justify-center gap-1"
+                >
+                  <span>+ Add</span>
+                </button>
                 {subscribers.length > 0 && (
                   <select
                     value=""
                     onChange={(e) => {
-                      if (e.target.value) setSpecificRecipientEmail(e.target.value);
+                      if (e.target.value) handleAddSpecificRecipient(e.target.value);
                     }}
                     className="px-3 py-2 bg-white border border-blue-300 rounded-xl text-slate-700 text-xs font-bold outline-none cursor-pointer"
                   >
-                    <option value="">Select from subscribers ({subscribers.length})...</option>
+                    <option value="">+ Add from registered ({subscribers.length})...</option>
                     {subscribers.map((s) => (
                       <option key={s.id} value={s.email}>
                         {s.email} ({s.country || 'Global'})
@@ -482,8 +554,23 @@ export const AdminNewsletterTab: React.FC = () => {
                   </select>
                 )}
               </div>
+
+              {/* Real-time Validation Note while typing */}
+              {validateEmail(specificEmailInput).status === 'valid' && (
+                <p className="text-[11px] font-bold text-emerald-600 flex items-center gap-1 animate-in fade-in">
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  <span>Valid email address. Press Enter or click + Add to log this recipient.</span>
+                </p>
+              )}
+              {validateEmail(specificEmailInput).status === 'invalid' && (
+                <p className="text-[11px] font-bold text-amber-600 flex items-center gap-1 animate-in fade-in">
+                  <span>⚠️</span>
+                  <span>{validateEmail(specificEmailInput).message}</span>
+                </p>
+              )}
+
               <p className="text-[11px] text-slate-500">
-                This broadcast will be sent exclusively to this single address instead of your general subscriber list.
+                This broadcast will be sent exclusively to the {specificRecipients.length} logged recipient(s) above instead of your general list.
               </p>
             </div>
           ) : (
@@ -722,17 +809,37 @@ export const AdminNewsletterTab: React.FC = () => {
         <div className="pt-3 border-t border-slate-100">
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
             <div>
-              <div className="flex items-center gap-2">
-                <input
-                  type="email"
-                  value={testEmail}
-                  onChange={(e) => {
-                    setTestEmail(e.target.value);
-                    if (testFeedback) setTestFeedback(null);
-                  }}
-                  placeholder="Enter test email..."
-                  className="px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-slate-800 text-[13px] font-medium w-48 sm:w-56 focus:outline-none"
-                />
+              <div className="flex items-start gap-2">
+                <div className="flex-1 max-w-[260px]">
+                  <input
+                    type="email"
+                    value={testEmail}
+                    onChange={(e) => {
+                      setTestEmail(e.target.value);
+                      if (testFeedback) setTestFeedback(null);
+                    }}
+                    placeholder="Enter test email..."
+                    className={`w-full px-3 py-2 bg-slate-50 border rounded-xl text-slate-800 text-[13px] font-medium focus:outline-none transition-all ${
+                      validateEmail(testEmail).status === 'valid'
+                        ? 'border-emerald-500 focus:border-emerald-600'
+                        : validateEmail(testEmail).status === 'invalid'
+                        ? 'border-amber-400 focus:border-amber-500'
+                        : 'border-slate-300 focus:border-[#0053CF]'
+                    }`}
+                  />
+                  {validateEmail(testEmail).status === 'valid' && (
+                    <p className="text-[11px] font-bold text-emerald-600 mt-1 flex items-center gap-1 animate-in fade-in">
+                      <Check className="w-3 h-3 stroke-[3]" />
+                      <span>Valid email format</span>
+                    </p>
+                  )}
+                  {validateEmail(testEmail).status === 'invalid' && (
+                    <p className="text-[11px] font-bold text-amber-600 mt-1 flex items-center gap-1 animate-in fade-in">
+                      <span>⚠️</span>
+                      <span>{validateEmail(testEmail).message}</span>
+                    </p>
+                  )}
+                </div>
                 <button
                   type="button"
                   onClick={handleSendTest}
@@ -896,12 +1003,12 @@ export const AdminNewsletterTab: React.FC = () => {
                     type="button"
                     onClick={() => {
                       setTargetType('specific');
-                      setSpecificRecipientEmail(sub.email);
+                      handleAddSpecificRecipient(sub.email);
                       const composerEl = document.getElementById('composer-section');
                       if (composerEl) composerEl.scrollIntoView({ behavior: 'smooth' });
                     }}
                     className="px-2.5 py-1.5 text-[11px] font-bold text-[#0053CF] bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors cursor-pointer flex items-center gap-1 border border-blue-200"
-                    title="Send a broadcast specifically to this user"
+                    title="Add to specific recipients broadcast"
                   >
                     <Target className="w-3 h-3" />
                     <span>Send Direct</span>
@@ -1001,8 +1108,26 @@ export const AdminNewsletterTab: React.FC = () => {
               value={replyToEmail}
               onChange={(e) => setReplyToEmail(e.target.value)}
               placeholder="ushforex@gmail.com"
-              className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 text-[13.5px] font-medium focus:ring-2 focus:ring-[#0053CF]/20 focus:border-[#0053CF] outline-none"
+              className={`w-full px-3.5 py-2.5 bg-slate-50 border rounded-xl text-slate-900 text-[13.5px] font-medium focus:ring-2 focus:ring-[#0053CF]/20 outline-none transition-all ${
+                validateEmail(replyToEmail).status === 'valid'
+                  ? 'border-emerald-500 focus:border-emerald-600'
+                  : validateEmail(replyToEmail).status === 'invalid'
+                  ? 'border-amber-400 focus:border-amber-500'
+                  : 'border-slate-300 focus:border-[#0053CF]'
+              }`}
             />
+            {validateEmail(replyToEmail).status === 'valid' && (
+              <p className="text-[11.5px] font-bold text-emerald-600 mt-1 flex items-center gap-1 animate-in fade-in">
+                <Check className="w-3 h-3 stroke-[3]" />
+                <span>Valid inbox address</span>
+              </p>
+            )}
+            {validateEmail(replyToEmail).status === 'invalid' && (
+              <p className="text-[11.5px] font-bold text-amber-600 mt-1 flex items-center gap-1 animate-in fade-in">
+                <span>⚠️</span>
+                <span>{validateEmail(replyToEmail).message}</span>
+              </p>
+            )}
             <p className="text-[11.5px] text-slate-500 mt-1">
               When subscribers hit <strong>"Reply"</strong> in their email app (Gmail, Apple Mail, Outlook), their message will be delivered directly to this address (e.g. <code>ushforex@gmail.com</code>).
             </p>

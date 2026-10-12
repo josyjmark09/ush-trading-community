@@ -432,25 +432,27 @@ export default async function handler(req: any, res: any) {
       isTestPreview: false,
     });
 
-    // Send in batches of 50 to respect Resend limits
-    const batchSize = 50;
+    // Send via Resend Batch API (up to 100 per batch) so each subscriber receives a private individual email
+    const batchSize = 100;
     let sentCount = 0;
 
     for (let i = 0; i < recipients.length; i += batchSize) {
       const slice = recipients.slice(i, i + batchSize);
-      const resendRes = await fetch('https://api.resend.com/emails', {
+      const batchPayload = slice.map((emailAddr) => ({
+        from: fromAddress,
+        to: [emailAddr],
+        reply_to: replyAddress,
+        subject,
+        html,
+      }));
+
+      const resendRes = await fetch('https://api.resend.com/emails/batch', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${activeKey}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          from: fromAddress,
-          to: slice,
-          reply_to: replyAddress,
-          subject,
-          html,
-        }),
+        body: JSON.stringify(batchPayload),
       });
 
       const data = await resendRes.json();
